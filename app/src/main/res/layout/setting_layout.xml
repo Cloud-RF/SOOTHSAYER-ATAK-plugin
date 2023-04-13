@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/dp_20">
+
+    <LinearLayout
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:padding="@dimen/dp_4"
+            android:src="@drawable/back_arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/app_name" />
+
+        <TextView
+            android:id="@+id/tvSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_18" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:layout_margin="3dp"
+        android:background="@android:color/white" />
+
+    <TextView
+        android:id="@+id/tvServerUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/server"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/etServerUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/et_background"
+        android:inputType="textUri"
+        android:labelFor="@id/etServerUrl"
+        android:padding="8dp"
+        android:textColor="@color/darker_gray"
+        android:textCursorDrawable="@null"
+        android:textSize="16sp"
+        tools:text="https://" />
+
+    <TextView
+        android:id="@+id/tvApiKey"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/api_key"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/etApiKey"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/et_background"
+        android:inputType="textUri"
+        android:labelFor="@id/etServerUrl"
+        android:padding="8dp"
+        android:textColor="@color/darker_gray"
+        android:textCursorDrawable="@null"
+        android:textSize="16sp"
+        tools:text="ghhjdjshjshdjjhdskjashdjh" />
+
+    <TextView
+        android:id="@+id/tvOption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/option_a"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+    <!-- For all usages of Spinners in plugins one must make
+                use of the PluginSpinner class supplied with the SDK -->
+<!--        <com.atakmap.android.gui.PluginSpinner-->
+<!--            android:id="@+id/spinner1"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:padding="6dp"-->
+<!--            android:background="@drawable/et_background"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:entries="@array/tbc_option_arrays"-->
+<!--            android:prompt="@string/option_prompt" />-->
+
+    <Button
+        android:id="@+id/btnSave"
+        style="@style/darkButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:text="@string/save" />
+
+</LinearLayout>

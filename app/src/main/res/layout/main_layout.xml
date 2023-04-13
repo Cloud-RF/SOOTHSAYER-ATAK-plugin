@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:id="@+id/llMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/TextStyle"
+            android:drawableEnd="@drawable/marker_icon"
+            android:drawablePadding="@dimen/dp_4"
+            android:gravity="center"
+            android:text="@string/draggable_marker_plugin" />
+
+        <Button
+            android:id="@+id/btnOpenSettings"
+            style="@style/darkButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_8"
+            android:paddingHorizontal="@dimen/dp_8"
+            android:paddingVertical="@dimen/dp_14"
+            android:text="@string/open_settings_txt" />
+
+        <Button
+            android:id="@+id/btnAddMarker"
+            style="@style/darkButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_8"
+            android:drawableEnd="@drawable/marker_icon"
+            android:drawablePadding="@dimen/dp_2"
+            android:paddingHorizontal="@dimen/dp_6"
+            android:paddingVertical="@dimen/dp_12"
+            android:text="@string/add_marker" />
+
+        <TextView
+            android:id="@+id/tvTemplate"
+            style="@style/TextStyle"
+            android:layout_marginTop="@dimen/dp_8"
+            android:text="@string/template"
+            android:textSize="@dimen/sp_14" />
+
+        <!-- For all usages of Spinners in plugins one must make
+               use of the PluginSpinner class supplied with the SDK -->
+        <com.atakmap.android.gui.PluginSpinner
+            android:id="@+id/spTemplate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_8"
+            android:background="@drawable/et_background"
+            android:prompt="@string/template_option_prompt" />
+
+<!--        <androidx.recyclerview.widget.RecyclerView-->
+<!--            android:id="@+id/rvTemplates"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"/>-->
+
+    </LinearLayout>
+
+    <include
+        android:id="@+id/ilSettings"
+        layout="@layout/setting_layout"
+        android:visibility="gone" />
+
+</LinearLayout>

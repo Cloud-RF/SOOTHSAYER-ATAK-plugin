@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:background="@drawable/et_background"
+    android:padding="@dimen/dp_4"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        style="@style/TextStyle"
+        android:drawableStart="@drawable/marker_icon"
+        android:textColor="@color/darker_gray"
+        android:textStyle="normal"
+        android:textSize="@dimen/sp_14"
+        android:id="@+id/tvMarkerDetails"
+        android:drawablePadding="@dimen/dp_8"
+        android:layout_toStartOf="@id/ivRemove"
+        android:layout_width="match_parent"
+        android:layout_centerVertical="true"
+        tools:text="Motorola DMR 2W \nLocation: 51.96403, -2.113952" />
+
+    <ImageView
+        android:id="@+id/ivRemove"
+        android:src="@drawable/ic_cross"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:padding="@dimen/dp_4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/app_name" />
+
+</RelativeLayout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Draggable Marker Plugin</string>
+    <!-- description -->
+    <string name="app_desc">Draggable Plugin that provide markers to be places on various places on the map</string>
+    <string name="example_layer_description">This is an example layer.</string>
+
+    <string name="route_exporter_name">Route Exporter</string>
+
+    <string name="option_prompt" translatable="false">Choose option</string>
+    <string name="draggable_marker_plugin">Draggable Marker plugin</string>
+    <string name="open_settings_txt">Open Settings</string>
+    <string name="template">Template</string>
+    <string name="add_marker">Add Marker</string>
+    <string name="example_header">Header Example</string>
+    <string name="example_footer">Footer Example</string>
+    <string name="settings">Settings</string>
+    <string name="template_option_prompt" translatable="false">Choose marker type</string>
+    <string name="save">Save</string>
+    <string name="option_a">Option A</string>
+    <string name="api_key">API key</string>
+    <string name="server">Server</string>
+
+    <string-array name="tbc_option_arrays">
+        <item>Enable</item>
+        <item>Disable</item>
+    </string-array>
+
+
+
+</resources>

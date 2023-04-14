@@ -6,7 +6,9 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.VectorDrawable
+import android.os.Environment
 import androidx.core.content.ContextCompat
+import java.io.File
 
 /**
  * Note - this will become a API offering in 4.5.1 and beyond.
@@ -32,4 +34,15 @@ fun Context.getBitmap(drawableId: Int): Bitmap? {
             null
         }
     }
+}
+
+
+fun createAndStoreFiles(): String {
+    val folderPath =
+        Environment.getExternalStorageDirectory().toString() + "/ATAK/SOOTHSAYER/templates"
+    val folder = File(folderPath)
+    if (!folder.exists()) {
+        folder.mkdirs()
+    }
+    return folderPath
 }

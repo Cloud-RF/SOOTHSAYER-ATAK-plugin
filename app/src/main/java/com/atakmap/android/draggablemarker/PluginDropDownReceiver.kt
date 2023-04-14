@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.*
 import com.atak.plugins.impl.PluginLayoutInflater
+import com.atakmap.android.draggablemarker.models.MarkerDataModel
 import com.atakmap.android.draggablemarker.models.TemplateDataModel
 import com.atakmap.android.draggablemarker.plugin.R
 import com.atakmap.android.draggablemarker.util.Constant
@@ -25,6 +26,7 @@ import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class PluginDropDownReceiver(
@@ -42,6 +44,8 @@ class PluginDropDownReceiver(
     private val settingView = templateView.findViewById<LinearLayout>(R.id.ilSettings)
     private var etServerUrl: EditText? = null
     private var etApiKey: EditText? = null
+    private var markersList: ArrayList<MarkerDataModel> = ArrayList()
+    private var selectedMarkerType: TemplateDataModel? = null
 
     /**************************** CONSTRUCTOR  */
     init {
@@ -93,6 +97,7 @@ class PluginDropDownReceiver(
             ) {
 
                 Log.d(TAG, "onItemSelected......$position")
+                selectedMarkerType = items[position]
 //                if (view is TextView) view.text = items[position].template.name
             }
         }
@@ -100,7 +105,7 @@ class PluginDropDownReceiver(
 
     private fun initListeners() {
         // The button bellow shows settings layout and hide the actual layout
-        val btnOpenSettings = templateView.findViewById<Button>(R.id.btnOpenSettings)
+        val btnOpenSettings: ImageView = templateView.findViewById(R.id.ivSettings)
         btnOpenSettings.setOnClickListener { v: View? ->
             mainLayout.visibility = View.GONE
             settingView.visibility = View.VISIBLE
@@ -152,9 +157,8 @@ class PluginDropDownReceiver(
         marker.setMetaBoolean("movable", true)
         marker.setMetaBoolean("removable", true)
         marker.setMetaString("entry", "user")
-        marker.setMetaString("callsign", "Test Marker")
-        marker.title = "Test Marker"
-        marker.title = "HelloWorld"
+        marker.setMetaString("callsign", selectedMarkerType?.template?.name?:"Test Marker")
+        marker.title = selectedMarkerType?.template?.name?:"Test Marker"
         marker.type = "custom-type"
 
         //Add custom icon
@@ -176,13 +180,15 @@ class PluginDropDownReceiver(
                 TAG,
                 "addOnStateChangedListener latitude: $latitude Longitude: $longitude Marker_id: $marker.uid"
             )
+            // update the lat and lon of that marker.
+            val item = markersList.find {  it.markerID == uid }
+                item?.markerDetails?.transmitter?.lat = latitude
+                item?.markerDetails?.transmitter?.lon = longitude
         }
-        val newCotIntent = Intent()
-        newCotIntent.action = "com.atakmap.android.maps.COT_PLACED"
-        newCotIntent.putExtra("uid", marker.uid)
-        AtakBroadcast.getInstance().sendBroadcast(
-            newCotIntent
-        )
+        selectedMarkerType?.let {
+            markersList.add(MarkerDataModel(uid, it))
+        }
+        Log.d(TAG, "${markersList.size} listData : ${Gson().toJson(markersList)}")
     }
 
     private fun getAllTemplates(): ArrayList<TemplateDataModel> {

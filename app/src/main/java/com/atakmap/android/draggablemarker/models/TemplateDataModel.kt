@@ -80,8 +80,8 @@ data class Transmitter(
     val alt: Int,
     val bwi: Double,
     val frq: Int,
-    val lat: Double,
-    val lon: Double,
+    var lat: Double,
+    var lon: Double,
     val powerUnit: String,
     val txw: Int
 )

@@ -13,7 +13,7 @@ data class TemplateDataModel(
     val reference: String,
     val site: String,
     val template: Template,
-    val transmitter: Transmitter,
+    val transmitter: Transmitter?,
     val version: String
 )
 

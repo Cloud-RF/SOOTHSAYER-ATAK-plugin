@@ -3,6 +3,8 @@ package com.atakmap.android.draggablemarker
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.view.View
 import android.view.ViewGroup
@@ -13,17 +15,17 @@ import com.atakmap.android.draggablemarker.models.MarkerDataModel
 import com.atakmap.android.draggablemarker.models.TemplateDataModel
 import com.atakmap.android.draggablemarker.plugin.R
 import com.atakmap.android.draggablemarker.util.Constant
+import com.atakmap.android.draggablemarker.util.createAndStoreFiles
 import com.atakmap.android.draggablemarker.util.getBitmap
+import com.atakmap.android.draggablemarker.util.getTemplatesFromFolder
 import com.atakmap.android.dropdown.DropDown.OnStateListener
 import com.atakmap.android.dropdown.DropDownReceiver
-import com.atakmap.android.ipc.AtakBroadcast
 import com.atakmap.android.maps.MapView
 import com.atakmap.android.maps.Marker
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.log.Log
 import com.atakmap.coremap.maps.assets.Icon
 import com.google.gson.Gson
-import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.util.*
 import kotlin.collections.ArrayList
@@ -46,6 +48,7 @@ class PluginDropDownReceiver(
     private var etApiKey: EditText? = null
     private var markersList: ArrayList<MarkerDataModel> = ArrayList()
     private var selectedMarkerType: TemplateDataModel? = null
+    private val templateItems: ArrayList<TemplateDataModel> = ArrayList()
 
     /**************************** CONSTRUCTOR  */
     init {
@@ -60,10 +63,15 @@ class PluginDropDownReceiver(
 
         // Set Template spinner list from json files.
         val spinner: Spinner = templateView.findViewById(R.id.spTemplate)
-        val items: ArrayList<TemplateDataModel> = ArrayList()
-        items.addAll(getAllTemplates())
+//        val items: ArrayList<TemplateDataModel> = ArrayList()
+//        items.addAll(getAllTemplates())
+        templateItems.addAll(getTemplatesFromFolder())
         val adapter: ArrayAdapter<TemplateDataModel> = object :
-            ArrayAdapter<TemplateDataModel>(pluginContext, R.layout.spinner_item_layout, items) {
+            ArrayAdapter<TemplateDataModel>(
+                pluginContext,
+                R.layout.spinner_item_layout,
+                templateItems
+            ) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val textView = super.getView(position, convertView, parent) as TextView
                 val item: TemplateDataModel? = getItem(position)
@@ -97,10 +105,18 @@ class PluginDropDownReceiver(
             ) {
 
                 Log.d(TAG, "onItemSelected......$position")
-                selectedMarkerType = items[position]
+                selectedMarkerType = templateItems[position]
 //                if (view is TextView) view.text = items[position].template.name
             }
         }
+
+        pluginContext.createAndStoreFiles(getAllFilesFromAssets())
+        Log.d(TAG, "initCalled")
+
+//        adapter?.let {
+//            adapter.addAll(getAllTemplates())
+//            adapter.notifyDataSetChanged()
+//        }
     }
 
     private fun initListeners() {
@@ -157,8 +173,8 @@ class PluginDropDownReceiver(
         marker.setMetaBoolean("movable", true)
         marker.setMetaBoolean("removable", true)
         marker.setMetaString("entry", "user")
-        marker.setMetaString("callsign", selectedMarkerType?.template?.name?:"Test Marker")
-        marker.title = selectedMarkerType?.template?.name?:"Test Marker"
+        marker.setMetaString("callsign", selectedMarkerType?.template?.name ?: "Test Marker")
+        marker.title = selectedMarkerType?.template?.name ?: "Test Marker"
         marker.type = "custom-type"
 
         //Add custom icon
@@ -173,17 +189,17 @@ class PluginDropDownReceiver(
 
 
         // This method get callback when we drag a marker.
-        marker.addOnStateChangedListener { marker ->
-            val latitude = marker.geoPointMetaData.get().latitude
-            val longitude = marker.geoPointMetaData.get().longitude
+        marker.addOnStateChangedListener { mark ->
+            val latitude = mark.geoPointMetaData.get().latitude
+            val longitude = mark.geoPointMetaData.get().longitude
             Log.d(
                 TAG,
-                "addOnStateChangedListener latitude: $latitude Longitude: $longitude Marker_id: $marker.uid"
+                "addOnStateChangedListener latitude: $latitude Longitude: $longitude Marker_id: $mark.uid"
             )
             // update the lat and lon of that marker.
-            val item = markersList.find {  it.markerID == uid }
-                item?.markerDetails?.transmitter?.lat = latitude
-                item?.markerDetails?.transmitter?.lon = longitude
+            val item = markersList.find { it.markerID == uid }
+            item?.markerDetails?.transmitter?.lat = latitude
+            item?.markerDetails?.transmitter?.lon = longitude
         }
         selectedMarkerType?.let {
             markersList.add(MarkerDataModel(uid, it))
@@ -191,18 +207,9 @@ class PluginDropDownReceiver(
         Log.d(TAG, "${markersList.size} listData : ${Gson().toJson(markersList)}")
     }
 
-    private fun getAllTemplates(): ArrayList<TemplateDataModel> {
+    private fun getAllFilesFromAssets(): List<String>? {
         val assetManager = pluginContext.assets
-        val fileList = assetManager.list("")?.filter { it.endsWith(".json") }
-        Log.d(TAG, "getAllTemplates......${fileList?.size}")
-        val templateList: ArrayList<TemplateDataModel> = ArrayList()
-        fileList?.forEach { fileName ->
-            val jsonString = assetManager.open(fileName).bufferedReader().use { it.readText() }
-            val jsonObject = JSONObject(jsonString)
-            templateList.add(Gson().fromJson(jsonString, TemplateDataModel::class.java))
-            Log.d(TAG, "fileName: $fileName  \n${jsonObject.toString()}")
-        }
-        return templateList
+        return assetManager.list("")?.filter { it.endsWith(".json") }
     }
 
     /**************************** PUBLIC METHODS  */
@@ -217,11 +224,27 @@ class PluginDropDownReceiver(
                 templateView, HALF_WIDTH, FULL_HEIGHT, FULL_WIDTH,
                 HALF_HEIGHT, false, this
             )
+
+            // If user added any other template to that folder then below code will get that template if it is valid one and show in the list.
+            val extraTemplates = getTemplatesFromFolder()
+            if (extraTemplates.size > templateItems.size) {
+                val handler = Handler(Looper.getMainLooper())
+                handler.postDelayed({
+                    val spinner = templateView.findViewById<Spinner>(R.id.spTemplate)
+                    spinner.adapter?.let {
+                        val differentElements = extraTemplates.filterNot { templateItems.contains(it) }
+                        val adapter = spinner.adapter as ArrayAdapter<TemplateDataModel>
+                        templateItems.addAll(differentElements)
+                        adapter.notifyDataSetChanged()
+                    }
+                }, 1000)
+            }
         }
     }
 
     override fun onDropDownSelectionRemoved() {}
     override fun onDropDownVisible(v: Boolean) {}
+
     override fun onDropDownSizeChanged(width: Double, height: Double) {}
     override fun onDropDownClose() {}
 

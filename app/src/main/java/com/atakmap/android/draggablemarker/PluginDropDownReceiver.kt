@@ -3,41 +3,36 @@ package com.atakmap.android.draggablemarker
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.os.Handler
-import android.os.Looper
 import android.util.Base64
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
 import com.atakmap.android.draggablemarker.models.MarkerDataModel
 import com.atakmap.android.draggablemarker.models.TemplateDataModel
 import com.atakmap.android.draggablemarker.plugin.R
-import com.atakmap.android.draggablemarker.util.Constant
-import com.atakmap.android.draggablemarker.util.createAndStoreFiles
-import com.atakmap.android.draggablemarker.util.getBitmap
-import com.atakmap.android.draggablemarker.util.getTemplatesFromFolder
+import com.atakmap.android.draggablemarker.recyclerview.RecyclerViewAdapter
+import com.atakmap.android.draggablemarker.util.*
 import com.atakmap.android.dropdown.DropDown.OnStateListener
 import com.atakmap.android.dropdown.DropDownReceiver
-import com.atakmap.android.maps.MapView
-import com.atakmap.android.maps.Marker
+import com.atakmap.android.maps.*
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.log.Log
 import com.atakmap.coremap.maps.assets.Icon
 import com.google.gson.Gson
 import java.io.ByteArrayOutputStream
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class PluginDropDownReceiver(
     mapView: MapView?,
     private val pluginContext: Context
-) : DropDownReceiver(mapView), OnStateListener {
-    // Remember to use the PluginLayoutInflator if you are actually inflating a custom view
-    // In this case, using it is not necessary - but I am putting it here to remind
-    // developers to look at this Inflator
+) : DropDownReceiver(mapView), OnStateListener, MapEventDispatcher.MapEventDispatchListener {
+    // Remember to use the PluginLayoutInflater if you are actually inflating a custom view.
     private val templateView: View = PluginLayoutInflater.inflate(
         pluginContext,
         R.layout.main_layout, null
@@ -49,22 +44,23 @@ class PluginDropDownReceiver(
     private var markersList: ArrayList<MarkerDataModel> = ArrayList()
     private var selectedMarkerType: TemplateDataModel? = null
     private val templateItems: ArrayList<TemplateDataModel> = ArrayList()
+    private var markerAdapter: RecyclerViewAdapter? = null
+    private val mItemType: String = "custom-type"
 
-    /**************************** CONSTRUCTOR  */
     init {
         initViews()
         initListeners()
     }
 
     private fun initViews() {
+        pluginContext.createAndStoreFiles(getAllFilesFromAssets())
+
         etServerUrl = settingView.findViewById(R.id.etServerUrl)
         etServerUrl?.setText(Constant.SERVER_URL)
         etApiKey = settingView.findViewById(R.id.etApiKey)
 
         // Set Template spinner list from json files.
         val spinner: Spinner = templateView.findViewById(R.id.spTemplate)
-//        val items: ArrayList<TemplateDataModel> = ArrayList()
-//        items.addAll(getAllTemplates())
         templateItems.addAll(getTemplatesFromFolder())
         val adapter: ArrayAdapter<TemplateDataModel> = object :
             ArrayAdapter<TemplateDataModel>(
@@ -106,23 +102,46 @@ class PluginDropDownReceiver(
 
                 Log.d(TAG, "onItemSelected......$position")
                 selectedMarkerType = templateItems[position]
-//                if (view is TextView) view.text = items[position].template.name
             }
         }
 
-        pluginContext.createAndStoreFiles(getAllFilesFromAssets())
-        Log.d(TAG, "initCalled")
-
-//        adapter?.let {
-//            adapter.addAll(getAllTemplates())
-//            adapter.notifyDataSetChanged()
-//        }
+        spinner.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // If user added any other template to that folder then below code will get that template if it is valid one and show in the list.
+                    val extraTemplates = getTemplatesFromFolder()
+                    if(extraTemplates.isEmpty()){ // add default files again so that folder is not empty.
+                        pluginContext.createAndStoreFiles(getAllFilesFromAssets())
+                        templateItems.clear()
+                        templateItems.addAll(getTemplatesFromFolder())
+                    }else{
+                        if (extraTemplates.size != templateItems.size) {
+                            Log.d(TAG, "extraTemplates : ${extraTemplates.size}")
+                            spinner.adapter?.let { adapter ->
+                                if (adapter is ArrayAdapter<*>) {
+                                    templateItems.clear()
+                                    templateItems.addAll(extraTemplates)
+                                    adapter.notifyDataSetChanged()
+                                    Log.d(TAG, "extraTemplates : addeddddd")
+                                }
+                            }
+                        }
+                    }
+                }
+                MotionEvent.ACTION_UP -> {
+                    // Click was detected, perform click
+                    spinner.performClick()
+                }
+            }
+            false
+        }
+        initRecyclerview()
     }
 
     private fun initListeners() {
         // The button bellow shows settings layout and hide the actual layout
         val btnOpenSettings: ImageView = templateView.findViewById(R.id.ivSettings)
-        btnOpenSettings.setOnClickListener { v: View? ->
+        btnOpenSettings.setOnClickListener {
             mainLayout.visibility = View.GONE
             settingView.visibility = View.VISIBLE
         }
@@ -148,6 +167,21 @@ class PluginDropDownReceiver(
         }
     }
 
+    private fun initRecyclerview() {
+        val recyclerView: RecyclerView = templateView.findViewById(R.id.rvTemplates)
+        markerAdapter = RecyclerViewAdapter(markersList, mapView, pluginContext, onItemRemove = {
+            // remove marker from list
+            removeMarkerFromList(it)
+            // remove marker from map
+            removeMarkerFromMap(it)
+        })
+        recyclerView.layoutManager = LinearLayoutManager(
+            pluginContext,
+            LinearLayoutManager.VERTICAL, false
+        )
+        recyclerView.adapter = markerAdapter
+    }
+
     private fun moveBackToMainLayout() {
         mainLayout.visibility = View.VISIBLE
         settingView.visibility = View.GONE
@@ -163,7 +197,6 @@ class PluginDropDownReceiver(
         val location = mapView.centerPoint.get()
 
         val marker = Marker(location, uid)
-//        marker.setAlwaysShowText(true)
         marker.type = "a-f-G-U-C-I"
         // m.setMetaBoolean("disableCoordinateOverlay", true); // used if you don't want the coordinate overlay to appear
         marker.setMetaBoolean("readiness", true)
@@ -175,41 +208,84 @@ class PluginDropDownReceiver(
         marker.setMetaString("entry", "user")
         marker.setMetaString("callsign", selectedMarkerType?.template?.name ?: "Test Marker")
         marker.title = selectedMarkerType?.template?.name ?: "Test Marker"
-        marker.type = "custom-type"
+        marker.type = mItemType
 
         //Add custom icon
         val icon: Bitmap? = pluginContext.getBitmap(R.drawable.marker_icon_svg)
-        val baos = ByteArrayOutputStream()
-        icon?.compress(Bitmap.CompressFormat.PNG, 100, baos)
-        val b = baos.toByteArray()
+        val outputStream = ByteArrayOutputStream()
+        icon?.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        val b = outputStream.toByteArray()
         val encoded = "base64://" + Base64.encodeToString(b, Base64.NO_WRAP or Base64.URL_SAFE)
         val markerIconBuilder = Icon.Builder().setImageUri(0, encoded)
         marker.icon = markerIconBuilder.build()
         mapView.rootGroup.addItem(marker)
 
+        // Listener for marker removed and dragged on the map.
+        mapView.mapEventDispatcher.addMapItemEventListener(
+            marker
+        ) { mapItem, mapEvent ->
+            if (mapItem.type == mItemType) {
+                when (mapEvent.type) {
+                    MapEvent.ITEM_ADDED -> {
+                        // not getting any callback while adding the marker.
+                        Log.d(TAG, "mapItem : Added ")
+                    }
+                    MapEvent.ITEM_REMOVED -> {
+                        Log.d(TAG, "mapItem : Removed ")
+                        val item: MarkerDataModel? = markersList.find { marker ->
+                            marker.markerID == mapItem.uid
+                        }
+                        removeMarkerFromList(item)
+                    }
+                    MapEvent.ITEM_DRAG_DROPPED -> {
+                        Log.d(TAG, "mapItem : DragDropped ")
 
-        // This method get callback when we drag a marker.
-        marker.addOnStateChangedListener { mark ->
-            val latitude = mark.geoPointMetaData.get().latitude
-            val longitude = mark.geoPointMetaData.get().longitude
-            Log.d(
-                TAG,
-                "addOnStateChangedListener latitude: $latitude Longitude: $longitude Marker_id: $mark.uid"
-            )
-            // update the lat and lon of that marker.
-            val item = markersList.find { it.markerID == uid }
-            item?.markerDetails?.transmitter?.lat = latitude
-            item?.markerDetails?.transmitter?.lon = longitude
+                        val latitude = mapItem.clickPoint.latitude
+                        val longitude = mapItem.clickPoint.longitude
+                        Log.d(
+                            TAG,
+                            "DragDropped latitude: $latitude Longitude: $longitude Marker_id: ${mapItem.uid}"
+                        )
+                        // update the lat and lon of that marker.
+                        val item = markersList.find { it.markerID == uid }
+                        item?.markerDetails?.transmitter?.lat = latitude.roundValue()
+                        item?.markerDetails?.transmitter?.lon = longitude.roundValue()
+                        markerAdapter?.notifyDataSetChanged()
+                    }
+                }
+            }
         }
+
+        // add marker to list
         selectedMarkerType?.let {
-            markersList.add(MarkerDataModel(uid, it))
+            val markerItem = MarkerDataModel(uid, it)
+            markerItem.markerDetails.transmitter?.lat = location.latitude.roundValue()
+            markerItem.markerDetails.transmitter?.lon = location.longitude.roundValue()
+            markersList.add(markerItem)
+            markerAdapter?.notifyDataSetChanged()
         }
         Log.d(TAG, "${markersList.size} listData : ${Gson().toJson(markersList)}")
     }
 
+    private fun removeMarkerFromList(item: MarkerDataModel?) {
+        item?.let {
+            markersList.remove(it)
+            markerAdapter?.notifyDataSetChanged()
+        }
+    }
+
+    private fun removeMarkerFromMap(marker: MarkerDataModel?) {
+        marker?.let {
+            val item: MapItem? = mapView.rootGroup.items.find { mapItem ->
+                mapItem.uid == it.markerID
+            }
+            mapView.rootGroup.removeItem(item)
+        }
+    }
+
     private fun getAllFilesFromAssets(): List<String>? {
         val assetManager = pluginContext.assets
-        return assetManager.list("")?.filter { it.endsWith(".json") }
+        return assetManager.list("")?.filter { it.endsWith(Constant.TEMPLATE_FORMAT) }
     }
 
     /**************************** PUBLIC METHODS  */
@@ -224,20 +300,11 @@ class PluginDropDownReceiver(
                 templateView, HALF_WIDTH, FULL_HEIGHT, FULL_WIDTH,
                 HALF_HEIGHT, false, this
             )
-
-            // If user added any other template to that folder then below code will get that template if it is valid one and show in the list.
-            val extraTemplates = getTemplatesFromFolder()
-            if (extraTemplates.size > templateItems.size) {
-                val handler = Handler(Looper.getMainLooper())
-                handler.postDelayed({
-                    val spinner = templateView.findViewById<Spinner>(R.id.spTemplate)
-                    spinner.adapter?.let {
-                        val differentElements = extraTemplates.filterNot { templateItems.contains(it) }
-                        val adapter = spinner.adapter as ArrayAdapter<TemplateDataModel>
-                        templateItems.addAll(differentElements)
-                        adapter.notifyDataSetChanged()
-                    }
-                }, 1000)
+            // To check custom-type marker when plugin is visible.
+            Log.d(TAG, "Group Items: ${mapView.rootGroup.items}")
+            for (item in mapView.rootGroup.items) {
+                if (item.type == mItemType)
+                    Log.d(TAG, "group mapItem : ${item.uid} type: ${item.type}")
             }
         }
     }
@@ -249,8 +316,11 @@ class PluginDropDownReceiver(
     override fun onDropDownClose() {}
 
     companion object {
-        val TAG = PluginDropDownReceiver::class.java
-            .simpleName
+        val TAG: String? = PluginDropDownReceiver::class.java.simpleName
         const val SHOW_PLUGIN = "com.atakmap.android.plugintemplate.SHOW_PLUGIN"
+    }
+
+    override fun onMapEvent(event: MapEvent?) {
+        Log.d(TAG, "initListeners ITEM_ADDED: ${event?.type}")
     }
 }

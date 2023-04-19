@@ -21,6 +21,7 @@
     <string name="option_a">Option TBC</string>
     <string name="api_key">API key</string>
     <string name="server">Server</string>
+    <string name="marker_details">%1$s \nLocation: %2$s, %3$s</string>
 
     <string-array name="tbc_option_arrays">
         <item>Enable</item>

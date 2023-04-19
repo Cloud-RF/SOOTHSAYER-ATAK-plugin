@@ -20,7 +20,7 @@
             <TextView
                 style="@style/TextStyle"
                 android:layout_centerVertical="true"
-                android:drawableEnd="@drawable/marker_icon"
+                android:drawableEnd="@drawable/marker_icon_svg"
                 android:drawablePadding="@dimen/dp_4"
                 android:gravity="center"
                 android:text="@string/draggable_marker_plugin" />
@@ -37,49 +37,53 @@
 
         </RelativeLayout>
 
-        <!--        <Button-->
-        <!--            android:id="@+id/btnOpenSettings"-->
-        <!--            style="@style/darkButton"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:layout_marginTop="@dimen/dp_8"-->
-        <!--            android:paddingHorizontal="@dimen/dp_8"-->
-        <!--            android:paddingVertical="@dimen/dp_14"-->
-        <!--            android:text="@string/open_settings_txt" />-->
+<!--        <ScrollView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
 
-        <Button
-            android:id="@+id/btnAddMarker"
-            style="@style/darkButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_8"
-            android:drawableEnd="@drawable/marker_icon"
-            android:drawablePadding="@dimen/dp_2"
-            android:paddingHorizontal="@dimen/dp_6"
-            android:paddingVertical="@dimen/dp_12"
-            android:text="@string/add_marker" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvTemplate"
-            style="@style/TextStyle"
-            android:layout_marginTop="@dimen/dp_8"
-            android:text="@string/template"
-            android:textSize="@dimen/sp_14" />
+                <Button
+                    android:id="@+id/btnAddMarker"
+                    style="@style/darkButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:drawableEnd="@drawable/marker_icon_svg"
+                    android:drawablePadding="@dimen/dp_2"
+                    android:paddingHorizontal="@dimen/dp_6"
+                    android:paddingVertical="@dimen/dp_12"
+                    android:text="@string/add_marker" />
 
-        <!-- For all usages of Spinners in plugins one must make
-               use of the PluginSpinner class supplied with the SDK -->
-        <com.atakmap.android.gui.PluginSpinner
-            android:id="@+id/spTemplate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_8"
-            android:background="@drawable/et_background"
-            android:prompt="@string/template_option_prompt" />
+                <TextView
+                    android:id="@+id/tvTemplate"
+                    style="@style/TextStyle"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:text="@string/template"
+                    android:textSize="@dimen/sp_14" />
 
-        <!--        <androidx.recyclerview.widget.RecyclerView-->
-        <!--            android:id="@+id/rvTemplates"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"/>-->
+                <!-- For all usages of Spinners in plugins one must make
+                       use of the PluginSpinner class supplied with the SDK -->
+                <com.atakmap.android.gui.PluginSpinner
+                    android:id="@+id/spTemplate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:background="@drawable/et_background"
+                    android:prompt="@string/template_option_prompt" />
+
+                <com.atakmap.android.draggablemarker.recyclerview.RecyclerView
+                    android:id="@+id/rvTemplates"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_20"
+                    android:fadeScrollbars="false"
+                    android:paddingBottom="@dimen/dp_8" />
+            </LinearLayout>
+<!--        </ScrollView>-->
 
     </LinearLayout>
 

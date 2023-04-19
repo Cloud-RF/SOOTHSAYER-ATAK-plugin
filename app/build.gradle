@@ -254,8 +254,7 @@ dependencies {
 //    // Recyclerview version depends on some androidx libraries which
 //    // are supplied by core, so they should be excluded.  Otherwise
 //    // bad things happen in the release builds after proguarding
-    implementation ('androidx.recyclerview:recyclerview:1.3.0')
-            {
+    implementation ('androidx.recyclerview:recyclerview:1.1.0') {
         exclude module: 'collection'
         // this is an example of a local exclude since androidx.core is supplied by core atak
         exclude module: 'core'
@@ -264,6 +263,7 @@ dependencies {
         exclude module: 'collection'
         exclude module: 'customview'
     }
+
     implementation 'com.google.code.gson:gson:2.8.7'
 }
 

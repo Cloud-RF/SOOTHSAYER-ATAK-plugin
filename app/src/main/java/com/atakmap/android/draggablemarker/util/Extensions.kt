@@ -15,6 +15,7 @@ import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
+import kotlin.math.round
 
 private val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/ATAK/SOOTHSAYER/templates"
 
@@ -96,4 +97,8 @@ fun Context.getAllTemplates(): ArrayList<TemplateDataModel> {
         Log.d(PluginDropDownReceiver.TAG, "fileName: $fileName  \n$jsonObject")
     }
     return templateList
+}
+
+fun Double.roundValue():Double {
+    return round(this * 100000) / 100000
 }

@@ -4,12 +4,13 @@
     android:orientation="vertical"
     android:background="@drawable/et_background"
     android:padding="@dimen/dp_4"
+    android:layout_marginBottom="@dimen/dp_2"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <TextView
         style="@style/TextStyle"
-        android:drawableStart="@drawable/marker_icon"
+        android:drawableStart="@drawable/marker_icon_svg"
         android:textColor="@color/darker_gray"
         android:textStyle="normal"
         android:textSize="@dimen/sp_14"

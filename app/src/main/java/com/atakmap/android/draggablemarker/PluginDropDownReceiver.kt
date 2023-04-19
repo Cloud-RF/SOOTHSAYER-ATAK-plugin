@@ -3,6 +3,8 @@ package com.atakmap.android.draggablemarker
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Base64
 import android.view.MotionEvent
 import android.view.View
@@ -12,8 +14,9 @@ import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
-import com.atakmap.android.draggablemarker.models.MarkerDataModel
+import com.atakmap.android.draggablemarker.models.common.MarkerDataModel
 import com.atakmap.android.draggablemarker.models.TemplateDataModel
+import com.atakmap.android.draggablemarker.network.repository.PluginRepository
 import com.atakmap.android.draggablemarker.plugin.R
 import com.atakmap.android.draggablemarker.recyclerview.RecyclerViewAdapter
 import com.atakmap.android.draggablemarker.util.*
@@ -47,6 +50,8 @@ class PluginDropDownReceiver(
     private var markerAdapter: RecyclerViewAdapter? = null
     private val mItemType: String = "custom-type"
 
+    private val repository by lazy { PluginRepository.getInstance() }
+
     init {
         initViews()
         initListeners()
@@ -54,11 +59,60 @@ class PluginDropDownReceiver(
 
     private fun initViews() {
         pluginContext.createAndStoreFiles(getAllFilesFromAssets())
+        initSettings()
+        initSpinner()
+        initRecyclerview()
+    }
 
-        etServerUrl = settingView.findViewById(R.id.etServerUrl)
-        etServerUrl?.setText(Constant.SERVER_URL)
-        etApiKey = settingView.findViewById(R.id.etApiKey)
+    private fun initListeners() {
+        // The button bellow shows settings layout and hide the actual layout
+        val btnOpenSettings: ImageView = templateView.findViewById(R.id.ivSettings)
+        btnOpenSettings.setOnClickListener {
+            mainLayout.visibility = View.GONE
+            settingView.visibility = View.VISIBLE
+        }
 
+        // The button bellow shows settings layout and hide the actual layout
+        val btnSave = templateView.findViewById<Button>(R.id.btnSave)
+        btnSave.setOnClickListener {
+            if (isValidSettings()) {
+                moveBackToMainLayout()
+            }
+        }
+
+        // The ImageView bellow shows settings layout and hide the actual layout
+        val ivBack = settingView.findViewById<ImageView>(R.id.ivBack)
+        ivBack.setOnClickListener {
+            moveBackToMainLayout()
+        }
+
+        // The button bellow add marker on the map
+        val btnAddMarker = templateView.findViewById<Button>(R.id.btnAddMarker)
+        btnAddMarker.setOnClickListener {
+            if (isValidSettings()) {
+                addCustomMarker()
+            } else {
+                pluginContext.toast(pluginContext.getString(R.string.marker_error))
+            }
+        }
+    }
+
+    private fun initRecyclerview() {
+        val recyclerView: RecyclerView = templateView.findViewById(R.id.rvTemplates)
+        markerAdapter = RecyclerViewAdapter(markersList, mapView, pluginContext, onItemRemove = {
+            // remove marker from list
+            removeMarkerFromList(it)
+            // remove marker from map
+            removeMarkerFromMap(it)
+        })
+        recyclerView.layoutManager = LinearLayoutManager(
+            pluginContext,
+            LinearLayoutManager.VERTICAL, false
+        )
+        recyclerView.adapter = markerAdapter
+    }
+
+    private fun initSpinner() {
         // Set Template spinner list from json files.
         val spinner: Spinner = templateView.findViewById(R.id.spTemplate)
         templateItems.addAll(getTemplatesFromFolder())
@@ -110,11 +164,11 @@ class PluginDropDownReceiver(
                 MotionEvent.ACTION_DOWN -> {
                     // If user added any other template to that folder then below code will get that template if it is valid one and show in the list.
                     val extraTemplates = getTemplatesFromFolder()
-                    if(extraTemplates.isEmpty()){ // add default files again so that folder is not empty.
+                    if (extraTemplates.isEmpty()) { // add default files again so that folder is not empty.
                         pluginContext.createAndStoreFiles(getAllFilesFromAssets())
                         templateItems.clear()
                         templateItems.addAll(getTemplatesFromFolder())
-                    }else{
+                    } else {
                         if (extraTemplates.size != templateItems.size) {
                             Log.d(TAG, "extraTemplates : ${extraTemplates.size}")
                             spinner.adapter?.let { adapter ->
@@ -122,7 +176,6 @@ class PluginDropDownReceiver(
                                     templateItems.clear()
                                     templateItems.addAll(extraTemplates)
                                     adapter.notifyDataSetChanged()
-                                    Log.d(TAG, "extraTemplates : addeddddd")
                                 }
                             }
                         }
@@ -135,51 +188,31 @@ class PluginDropDownReceiver(
             }
             false
         }
-        initRecyclerview()
     }
 
-    private fun initListeners() {
-        // The button bellow shows settings layout and hide the actual layout
-        val btnOpenSettings: ImageView = templateView.findViewById(R.id.ivSettings)
-        btnOpenSettings.setOnClickListener {
-            mainLayout.visibility = View.GONE
-            settingView.visibility = View.VISIBLE
-        }
+    private fun initSettings() {
+        etServerUrl = settingView.findViewById(R.id.etServerUrl)
+        etServerUrl?.setText(Constant.sServerUrl)
+        etApiKey = settingView.findViewById(R.id.etApiKey)
+        etApiKey?.setText(Constant.sAccessToken)
 
-        // The button bellow shows settings layout and hide the actual layout
-        val btnSave = templateView.findViewById<Button>(R.id.btnSave)
-        btnSave.setOnClickListener {
-            if (isValidSettings()) {
-                moveBackToMainLayout()
+        etServerUrl?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                Constant.sServerUrl = etServerUrl?.text.toString()
             }
-        }
-
-        // The ImageView bellow shows settings layout and hide the actual layout
-        val ivBack = settingView.findViewById<ImageView>(R.id.ivBack)
-        ivBack.setOnClickListener {
-            moveBackToMainLayout()
-        }
-
-        // The button bellow add marker on the map
-        val btnAddMarker = templateView.findViewById<Button>(R.id.btnAddMarker)
-        btnAddMarker.setOnClickListener {
-            addCustomMarker()
-        }
-    }
-
-    private fun initRecyclerview() {
-        val recyclerView: RecyclerView = templateView.findViewById(R.id.rvTemplates)
-        markerAdapter = RecyclerViewAdapter(markersList, mapView, pluginContext, onItemRemove = {
-            // remove marker from list
-            removeMarkerFromList(it)
-            // remove marker from map
-            removeMarkerFromMap(it)
         })
-        recyclerView.layoutManager = LinearLayoutManager(
-            pluginContext,
-            LinearLayoutManager.VERTICAL, false
-        )
-        recyclerView.adapter = markerAdapter
+
+        etApiKey?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                Constant.sAccessToken = etApiKey?.text.toString()
+            }
+        })
     }
 
     private fun moveBackToMainLayout() {
@@ -251,6 +284,9 @@ class PluginDropDownReceiver(
                         item?.markerDetails?.transmitter?.lat = latitude.roundValue()
                         item?.markerDetails?.transmitter?.lon = longitude.roundValue()
                         markerAdapter?.notifyDataSetChanged()
+
+                        // send marker position changed data to server.
+                        sendDataToServer(item?.markerDetails)
                     }
                 }
             }
@@ -265,6 +301,46 @@ class PluginDropDownReceiver(
             markerAdapter?.notifyDataSetChanged()
         }
         Log.d(TAG, "${markersList.size} listData : ${Gson().toJson(markersList)}")
+    }
+
+    /**
+     * This method is used to send data to server when marker is dragged.
+     */
+    private fun sendDataToServer(markerData: TemplateDataModel?) {
+        // In case of area api Receiver's lat and lon should be zero.
+        markerData?.let {
+            markerData.receiver.lat = 0.0
+            markerData.receiver.lon = 0.0
+            repository.sendMarkerData(
+                markerData,
+                object : PluginRepository.ApiCallBacks {
+                    override fun onLoading() {
+                        pluginContext.toast(pluginContext.getString(R.string.loading_msg))
+                    }
+
+                    override fun onSuccess(response: Any?) {
+                        Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
+                        pluginContext.toast(pluginContext.getString(R.string.success_msg))
+                    }
+
+                    override fun onFailed(error: String?, responseCode: Int?) {
+                        val message = when {
+                            error?.contains(pluginContext.getString(R.string.host_not_resolved)) == true ->
+                                pluginContext.getString(R.string.internet_error)
+                            responseCode == Constant.ApiErrorCodes.sUnAuthorized ||   responseCode == Constant.ApiErrorCodes.sBadRequest-> {
+                                pluginContext.getString(R.string.unauthorized_error)
+                            }
+                            responseCode == Constant.ApiErrorCodes.sForbidden || responseCode == Constant.ApiErrorCodes.sNotFound-> {
+                                pluginContext.getString(R.string.invalid_url_error)
+                            }
+                            else -> {
+                                error ?: pluginContext.getString(R.string.error_msg)
+                            }
+                        }
+                        pluginContext.toast(message)
+                    }
+                })
+        }
     }
 
     private fun removeMarkerFromList(item: MarkerDataModel?) {

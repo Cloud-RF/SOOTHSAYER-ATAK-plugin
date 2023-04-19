@@ -62,8 +62,8 @@ data class Output(
 
 data class Receiver(
     val alt: Int,
-    val lat: Double,
-    val lon: Double,
+    var lat: Double,
+    var lon: Double,
     val rxg: Int,
     val rxs: Int
 )

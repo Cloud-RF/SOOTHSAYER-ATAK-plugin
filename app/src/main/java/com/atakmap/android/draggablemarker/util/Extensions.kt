@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.VectorDrawable
 import android.os.Environment
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.atakmap.android.draggablemarker.PluginDropDownReceiver
 import com.atakmap.android.draggablemarker.models.TemplateDataModel
@@ -101,4 +102,8 @@ fun Context.getAllTemplates(): ArrayList<TemplateDataModel> {
 
 fun Double.roundValue():Double {
     return round(this * 100000) / 100000
+}
+
+fun Context.toast(message:String){
+    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
 }

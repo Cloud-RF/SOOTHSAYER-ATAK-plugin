@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.atakmap.android.draggablemarker.models.MarkerDataModel
+import com.atakmap.android.draggablemarker.models.common.MarkerDataModel
 import com.atakmap.android.draggablemarker.plugin.R
 import com.atakmap.android.maps.MapView
 

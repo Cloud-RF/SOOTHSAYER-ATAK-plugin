@@ -30,6 +30,7 @@
     <string name="host_not_resolved">Unable to resolve host</string>
     <string name="invalid_url_error">Please add a valid server url.</string>
     <string name="marker_error">Please add valid server url and api key before adding marker to map.</string>
+    <string name="empty_api_key">Please enter Api key.</string>
 
     <string-array name="tbc_option_arrays">
         <item>Enable</item>

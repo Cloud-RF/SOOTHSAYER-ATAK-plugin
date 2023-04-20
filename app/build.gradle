@@ -249,6 +249,11 @@ android {
     }
 }
 
+ext {
+    retrofitVersion = '2.9.0'
+    okHttpVersion = '4.9.1'
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: '*.jar')
 //    // Recyclerview version depends on some androidx libraries which
@@ -264,6 +269,10 @@ dependencies {
         exclude module: 'customview'
     }
 
-    implementation 'com.google.code.gson:gson:2.8.7'
+//    implementation 'com.google.code.gson:gson:2.8.7'
+    // Http client
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
 }
 

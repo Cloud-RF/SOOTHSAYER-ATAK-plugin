@@ -3,8 +3,6 @@ package com.atakmap.android.draggablemarker
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Base64
 import android.view.MotionEvent
 import android.view.View
@@ -14,8 +12,8 @@ import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
-import com.atakmap.android.draggablemarker.models.common.MarkerDataModel
 import com.atakmap.android.draggablemarker.models.TemplateDataModel
+import com.atakmap.android.draggablemarker.models.common.MarkerDataModel
 import com.atakmap.android.draggablemarker.network.repository.PluginRepository
 import com.atakmap.android.draggablemarker.plugin.R
 import com.atakmap.android.draggablemarker.recyclerview.RecyclerViewAdapter
@@ -23,6 +21,7 @@ import com.atakmap.android.draggablemarker.util.*
 import com.atakmap.android.dropdown.DropDown.OnStateListener
 import com.atakmap.android.dropdown.DropDownReceiver
 import com.atakmap.android.maps.*
+import com.atakmap.android.preference.AtakPreferences
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.log.Log
 import com.atakmap.coremap.maps.assets.Icon
@@ -51,6 +50,7 @@ class PluginDropDownReceiver(
     private val mItemType: String = "custom-type"
 
     private val repository by lazy { PluginRepository.getInstance() }
+    private var sharedPrefs: AtakPreferences? = AtakPreferences(mapView?.context)
 
     init {
         initViews()
@@ -68,6 +68,11 @@ class PluginDropDownReceiver(
         // The button bellow shows settings layout and hide the actual layout
         val btnOpenSettings: ImageView = templateView.findViewById(R.id.ivSettings)
         btnOpenSettings.setOnClickListener {
+            // set views with the saved setting values
+            setDataFromPref()
+            if (sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, "")?.isEmpty() == true) {
+                etServerUrl?.setText(Constant.sServerUrl)
+            }
             mainLayout.visibility = View.GONE
             settingView.visibility = View.VISIBLE
         }
@@ -76,6 +81,10 @@ class PluginDropDownReceiver(
         val btnSave = templateView.findViewById<Button>(R.id.btnSave)
         btnSave.setOnClickListener {
             if (isValidSettings()) {
+                Constant.sServerUrl = etServerUrl?.text.toString()
+                Constant.sAccessToken = etApiKey?.text.toString()
+                sharedPrefs?.set(Constant.PreferenceKey.sServerUrl, Constant.sServerUrl)
+                sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
                 moveBackToMainLayout()
             }
         }
@@ -83,13 +92,14 @@ class PluginDropDownReceiver(
         // The ImageView bellow shows settings layout and hide the actual layout
         val ivBack = settingView.findViewById<ImageView>(R.id.ivBack)
         ivBack.setOnClickListener {
+            setDataFromPref()
             moveBackToMainLayout()
         }
 
         // The button bellow add marker on the map
         val btnAddMarker = templateView.findViewById<Button>(R.id.btnAddMarker)
         btnAddMarker.setOnClickListener {
-            if (isValidSettings()) {
+            if (URLUtil.isValidUrl(etServerUrl?.text.toString()) && etApiKey?.text?.trim()?.isNotEmpty() == true) {
                 addCustomMarker()
             } else {
                 pluginContext.toast(pluginContext.getString(R.string.marker_error))
@@ -154,7 +164,7 @@ class PluginDropDownReceiver(
                 position: Int, id: Long
             ) {
 
-                Log.d(TAG, "onItemSelected......$position")
+//                Log.d(TAG, "onItemSelected......$position")
                 selectedMarkerType = templateItems[position]
             }
         }
@@ -196,23 +206,23 @@ class PluginDropDownReceiver(
         etApiKey = settingView.findViewById(R.id.etApiKey)
         etApiKey?.setText(Constant.sAccessToken)
 
-        etServerUrl?.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable?) {
-                Constant.sServerUrl = etServerUrl?.text.toString()
-            }
-        })
-
-        etApiKey?.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable?) {
-                Constant.sAccessToken = etApiKey?.text.toString()
-            }
-        })
+//        etServerUrl?.addTextChangedListener(object : TextWatcher {
+//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+//
+//            override fun afterTextChanged(s: Editable?) {
+//                Constant.sServerUrl = etServerUrl?.text.toString()
+//            }
+//        })
+//
+//        etApiKey?.addTextChangedListener(object : TextWatcher {
+//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+//
+//            override fun afterTextChanged(s: Editable?) {
+//                Constant.sAccessToken = etApiKey?.text.toString()
+//            }
+//        })
     }
 
     private fun moveBackToMainLayout() {
@@ -220,9 +230,24 @@ class PluginDropDownReceiver(
         settingView.visibility = View.GONE
     }
 
-    private fun isValidSettings(): Boolean {
-        return URLUtil.isValidUrl(etServerUrl?.text.toString()) && etApiKey?.text?.trim()
-            ?.isNotEmpty() ?: false
+    private fun isValidSettings():Boolean{
+        var isValid = true
+        val message = when{
+            !URLUtil.isValidUrl(etServerUrl?.text.toString())->{
+                pluginContext.getString(R.string.invalid_url_error)
+            }
+            etApiKey?.text?.trim()?.isEmpty()==true -> {
+                pluginContext.getString(R.string.empty_api_key)
+            }
+            else -> {
+                null
+            }
+        }
+        message?.let {
+            isValid = false
+            pluginContext.toast(message)
+        }
+        return isValid
     }
 
     private fun addCustomMarker() {
@@ -308,38 +333,44 @@ class PluginDropDownReceiver(
      */
     private fun sendDataToServer(markerData: TemplateDataModel?) {
         // In case of area api Receiver's lat and lon should be zero.
-        markerData?.let {
-            markerData.receiver.lat = 0.0
-            markerData.receiver.lon = 0.0
-            repository.sendMarkerData(
-                markerData,
-                object : PluginRepository.ApiCallBacks {
-                    override fun onLoading() {
-                        pluginContext.toast(pluginContext.getString(R.string.loading_msg))
-                    }
-
-                    override fun onSuccess(response: Any?) {
-                        Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
-                        pluginContext.toast(pluginContext.getString(R.string.success_msg))
-                    }
-
-                    override fun onFailed(error: String?, responseCode: Int?) {
-                        val message = when {
-                            error?.contains(pluginContext.getString(R.string.host_not_resolved)) == true ->
-                                pluginContext.getString(R.string.internet_error)
-                            responseCode == Constant.ApiErrorCodes.sUnAuthorized ||   responseCode == Constant.ApiErrorCodes.sBadRequest-> {
-                                pluginContext.getString(R.string.unauthorized_error)
-                            }
-                            responseCode == Constant.ApiErrorCodes.sForbidden || responseCode == Constant.ApiErrorCodes.sNotFound-> {
-                                pluginContext.getString(R.string.invalid_url_error)
-                            }
-                            else -> {
-                                error ?: pluginContext.getString(R.string.error_msg)
-                            }
+        if (pluginContext.isConnected()) {
+            markerData?.let {
+                markerData.receiver.lat = 0.0
+                markerData.receiver.lon = 0.0
+                repository.sendMarkerData(
+                    markerData,
+                    object : PluginRepository.ApiCallBacks {
+                        override fun onLoading() {
+                            pluginContext.toast(pluginContext.getString(R.string.loading_msg))
                         }
-                        pluginContext.toast(message)
-                    }
-                })
+
+                        override fun onSuccess(response: Any?) {
+                            Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
+                            pluginContext.toast(pluginContext.getString(R.string.success_msg))
+                        }
+
+                        override fun onFailed(error: String?, responseCode: Int?) {
+                            Log.e(
+                                TAG,
+                                "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
+                            )
+                            val message = when (responseCode) {
+                                Constant.ApiErrorCodes.sUnAuthorized, Constant.ApiErrorCodes.sBadRequest -> {
+                                    pluginContext.getString(R.string.unauthorized_error)
+                                }
+                                Constant.ApiErrorCodes.sForbidden, Constant.ApiErrorCodes.sNotFound -> {
+                                    pluginContext.getString(R.string.invalid_url_error)
+                                }
+                                else -> {
+                                    error ?: pluginContext.getString(R.string.error_msg)
+                                }
+                            }
+                            pluginContext.toast(message)
+                        }
+                    })
+            }
+        }else{
+            pluginContext.toast(pluginContext.getString(R.string.internet_error))
         }
     }
 
@@ -364,6 +395,14 @@ class PluginDropDownReceiver(
         return assetManager.list("")?.filter { it.endsWith(Constant.TEMPLATE_FORMAT) }
     }
 
+    /**
+     * This method is used to get data from local preferences.
+     *  */
+    private fun setDataFromPref() {
+        etServerUrl?.setText(sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, ""))
+        etApiKey?.setText(sharedPrefs?.get(Constant.PreferenceKey.sApiKey, ""))
+    }
+
     /**************************** PUBLIC METHODS  */
     public override fun disposeImpl() {}
 
@@ -382,6 +421,16 @@ class PluginDropDownReceiver(
                 if (item.type == mItemType)
                     Log.d(TAG, "group mapItem : ${item.uid} type: ${item.type}")
             }
+
+            val data = "ApiKey ${
+                sharedPrefs?.get(
+                    Constant.PreferenceKey.sApiKey,
+                    ""
+                )
+            } Serverurl: ${sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, "")}"
+            pluginContext.toast(data)
+
+            setDataFromPref()
         }
     }
 

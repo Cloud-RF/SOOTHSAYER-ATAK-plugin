@@ -7,6 +7,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.net.URL
 import java.util.concurrent.TimeUnit
 
 
@@ -17,8 +18,10 @@ object RetrofitClient {
     private const val mCookieValue = "PHPSESSID=j613liqg80g0b6e8h06ta9h7e2"
     private const val mAuthorizationKey = "key"
 
-
-    private val BASE_URL = Constant.sServerUrl
+    const val DEFAULT_URL = "https://api.cloudrf.com"
+    val BASE_URL =
+        if (URL(Constant.sServerUrl.substringBeforeLast("/")).host.isNullOrEmpty()) Constant.sServerUrl
+        else Constant.sServerUrl.substringBeforeLast("/")
 
     private val OK_HTTP_CLIENT by lazy {
         OkHttpClient.Builder()

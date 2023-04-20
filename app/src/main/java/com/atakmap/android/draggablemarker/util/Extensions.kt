@@ -6,6 +6,9 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.VectorDrawable
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Environment
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -18,7 +21,10 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.round
 
-private val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/ATAK/SOOTHSAYER/templates"
+
+//private val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/ATAK/SOOTHSAYER/templates"
+private val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/ATAK/SOOTHSAYER"
+private val TEMPLATES_PATH = "$FOLDER_PATH/templates"
 
 /**
  * Note - this will become a API offering in 4.5.1 and beyond.
@@ -47,7 +53,7 @@ fun Context.getBitmap(drawableId: Int): Bitmap? {
 }
 
 fun Context.createAndStoreFiles(fileList: List<String>?) {
-    val folder = File(FOLDER_PATH)
+    val folder = File(TEMPLATES_PATH)
     if (!folder.exists()) {
         Log.d(PluginDropDownReceiver.TAG, "createAndStoreFiles creating  new folder....")
         folder.mkdirs()
@@ -64,46 +70,66 @@ fun Context.createAndStoreFiles(fileList: List<String>?) {
     }
 }
 
-fun getTemplatesFromFolder():ArrayList<TemplateDataModel>{
-    val folder = File(FOLDER_PATH)
+fun getTemplatesFromFolder(): ArrayList<TemplateDataModel> {
+    val folder = File(TEMPLATES_PATH)
     val templateList: ArrayList<TemplateDataModel> = ArrayList()
     if (folder.exists()) {
-        val files = folder.listFiles()?.filter { it.path.endsWith(".json") }?:ArrayList()
-        Log.d(PluginDropDownReceiver.TAG, "files : ${files.size}")
-        for(file in files){
-            val jsonString = File(FOLDER_PATH, file.name).readText()
+        val files = folder.listFiles()?.filter { it.path.endsWith(".json") } ?: ArrayList()
+//        Log.d(PluginDropDownReceiver.TAG, "files : ${files.size}")
+        for (file in files) {
+            val jsonString = File(TEMPLATES_PATH, file.name).readText()
             try {
                 val jsonData = Gson().fromJson(jsonString, TemplateDataModel::class.java)
                 jsonData.transmitter?.let {
                     templateList.add(jsonData)
-                    Log.d(PluginDropDownReceiver.TAG, "fileName: ${file.name} \n${JSONObject(jsonString)}")
+                    Log.d(
+                        PluginDropDownReceiver.TAG,
+                        "fileName: ${file.name} \n${JSONObject(jsonString)}"
+                    )
                 }
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 Log.e(PluginDropDownReceiver.TAG, e.stackTrace.toString())
             }
         }
     }
-    Log.d(PluginDropDownReceiver.TAG, "templateList : ${Gson().toJson(templateList)}")
+//    Log.d(PluginDropDownReceiver.TAG, "templateList : ${Gson().toJson(templateList)}")
     return templateList
 }
 
-fun Context.getAllTemplates(): ArrayList<TemplateDataModel> {
-        val assetManager = assets
-        val fileList = assetManager.list("")?.filter { it.endsWith(".json") }
-    val templateList: ArrayList<TemplateDataModel> = ArrayList()
-    fileList?.forEach { fileName ->
-        val jsonString = assets.open(fileName).bufferedReader().use { it.readText() }
-        val jsonObject = JSONObject(jsonString)
-        templateList.add(Gson().fromJson(jsonString, TemplateDataModel::class.java))
-        Log.d(PluginDropDownReceiver.TAG, "fileName: $fileName  \n$jsonObject")
-    }
-    return templateList
-}
-
-fun Double.roundValue():Double {
+fun Double.roundValue(): Double {
     return round(this * 100000) / 100000
 }
 
-fun Context.toast(message:String){
+fun Context.toast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+}
+
+fun Context.isConnected(): Boolean {
+    var result = false
+    val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val networkCapabilities = connectivityManager.activeNetwork
+        networkCapabilities?.let { capabilities ->
+            val actNw = connectivityManager.getNetworkCapabilities(capabilities)
+            actNw?.let {
+                result = when {
+                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+                    else -> {
+                        false
+                    }
+                }
+            }
+        }
+    } else {
+        result = try {
+            connectivityManager.activeNetworkInfo != null && connectivityManager.activeNetworkInfo!!.isConnected
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    return result
 }

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
 import com.atakmap.android.draggablemarker.models.common.MarkerDataModel
 import com.atakmap.android.draggablemarker.models.request.TemplateDataModel
+import com.atakmap.android.draggablemarker.network.remote.RetrofitClient
 import com.atakmap.android.draggablemarker.network.repository.PluginRepository
 import com.atakmap.android.draggablemarker.plugin.R
 import com.atakmap.android.draggablemarker.recyclerview.RecyclerViewAdapter
@@ -78,7 +79,7 @@ class PluginDropDownReceiver(
             // set views with the saved setting values
             setDataFromPref()
             if (sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, "")?.isEmpty() == true) {
-                etServerUrl?.setText(Constant.sServerUrl)
+                etServerUrl?.setText(RetrofitClient.DEFAULT_URL)
             }
             mainLayout.visibility = View.GONE
             settingView.visibility = View.VISIBLE
@@ -429,13 +430,13 @@ class PluginDropDownReceiver(
             // To check custom-type marker when plugin is visible.
             Log.d(TAG, "Group Items: ${mapView.rootGroup.items}")
             Log.d(TAG, "Pref Items: ${sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null)}")
-            val templateList: ArrayList<MarkerDataModel> =
+            val templateList: ArrayList<MarkerDataModel>?=
                 Gson().fromJson(
                     sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null),
                     object : TypeToken<ArrayList<MarkerDataModel>>() {}.type
                 )
 
-            val commonList = templateList.filter { marker ->
+            val commonList = templateList?.filter { marker ->
                 mapView.rootGroup.items.any { items -> marker.markerID == items.uid }
             }
 
@@ -455,6 +456,8 @@ class PluginDropDownReceiver(
 //            pluginContext.toast(data)
 
             setDataFromPref()
+            Constant.sServerUrl = etServerUrl?.text.toString()
+            Constant.sAccessToken = etApiKey?.text.toString()
         }
     }
 

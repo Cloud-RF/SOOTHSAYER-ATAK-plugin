@@ -13,7 +13,7 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.atakmap.android.draggablemarker.PluginDropDownReceiver
-import com.atakmap.android.draggablemarker.models.TemplateDataModel
+import com.atakmap.android.draggablemarker.models.request.TemplateDataModel
 import com.atakmap.coremap.log.Log
 import com.google.gson.Gson
 import org.json.JSONObject

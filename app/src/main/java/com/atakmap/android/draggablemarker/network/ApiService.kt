@@ -1,6 +1,6 @@
 package com.atakmap.android.draggablemarker.network
 
-import com.atakmap.android.draggablemarker.models.TemplateDataModel
+import com.atakmap.android.draggablemarker.models.request.TemplateDataModel
 import com.atakmap.android.draggablemarker.network.remote.RetrofitClient
 import com.atakmap.android.draggablemarker.util.Constant
 import retrofit2.Call

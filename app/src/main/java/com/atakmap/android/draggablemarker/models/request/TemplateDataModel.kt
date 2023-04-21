@@ -1,4 +1,6 @@
-package com.atakmap.android.draggablemarker.models
+package com.atakmap.android.draggablemarker.models.request
+
+import java.io.Serializable
 
 data class TemplateDataModel(
     val antenna: Antenna,
@@ -13,9 +15,9 @@ data class TemplateDataModel(
     val reference: String,
     val site: String,
     val template: Template,
-    val transmitter: Transmitter?,
+    var transmitter: Transmitter?,
     val version: String
-)
+): Serializable
 
 data class Antenna(
     val ant: Int,
@@ -28,26 +30,26 @@ data class Antenna(
     val txg: Double,
     val txl: Int,
     val vbw: Int
-)
+): Serializable
 
 data class Environment(
     val cll: Int,
     val clm: Int,
     val clt: String
-)
+): Serializable
 
 data class Feeder(
     val fcc: Int,
     val fll: Int,
     val flt: Int
-)
+): Serializable
 
 data class Model(
     val ked: Int,
     val pe: Int,
     val pm: Int,
     val rel: Int
-)
+): Serializable
 
 data class Output(
     val ber: Int,
@@ -58,7 +60,7 @@ data class Output(
     val rad: Int,
     val res: Int,
     val units: String
-)
+): Serializable
 
 data class Receiver(
     val alt: Int,
@@ -66,7 +68,7 @@ data class Receiver(
     var lon: Double,
     val rxg: Int,
     val rxs: Int
-)
+): Serializable
 
 data class Template(
     val bom_value: Int,
@@ -74,7 +76,7 @@ data class Template(
     val name: String,
     val owner: Int,
     val service: String
-)
+): Serializable
 
 data class Transmitter(
     val alt: Int,
@@ -84,4 +86,4 @@ data class Transmitter(
     var lon: Double,
     val powerUnit: String,
     val txw: Int
-)
+): Serializable

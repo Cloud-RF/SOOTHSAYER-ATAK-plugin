@@ -12,28 +12,35 @@ import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
-import com.atakmap.android.draggablemarker.models.TemplateDataModel
 import com.atakmap.android.draggablemarker.models.common.MarkerDataModel
+import com.atakmap.android.draggablemarker.models.request.TemplateDataModel
 import com.atakmap.android.draggablemarker.network.repository.PluginRepository
 import com.atakmap.android.draggablemarker.plugin.R
 import com.atakmap.android.draggablemarker.recyclerview.RecyclerViewAdapter
 import com.atakmap.android.draggablemarker.util.*
 import com.atakmap.android.dropdown.DropDown.OnStateListener
 import com.atakmap.android.dropdown.DropDownReceiver
-import com.atakmap.android.maps.*
+import com.atakmap.android.maps.MapEvent
+import com.atakmap.android.maps.MapItem
+import com.atakmap.android.maps.MapView
+import com.atakmap.android.maps.Marker
 import com.atakmap.android.preference.AtakPreferences
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.log.Log
 import com.atakmap.coremap.maps.assets.Icon
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import java.util.*
 
 
 class PluginDropDownReceiver(
     mapView: MapView?,
     private val pluginContext: Context
-) : DropDownReceiver(mapView), OnStateListener, MapEventDispatcher.MapEventDispatchListener {
+) : DropDownReceiver(mapView), OnStateListener{
     // Remember to use the PluginLayoutInflater if you are actually inflating a custom view.
     private val templateView: View = PluginLayoutInflater.inflate(
         pluginContext,
@@ -99,7 +106,9 @@ class PluginDropDownReceiver(
         // The button bellow add marker on the map
         val btnAddMarker = templateView.findViewById<Button>(R.id.btnAddMarker)
         btnAddMarker.setOnClickListener {
-            if (URLUtil.isValidUrl(etServerUrl?.text.toString()) && etApiKey?.text?.trim()?.isNotEmpty() == true) {
+            if (URLUtil.isValidUrl(etServerUrl?.text.toString()) && etApiKey?.text?.trim()
+                    ?.isNotEmpty() == true
+            ) {
                 addCustomMarker()
             } else {
                 pluginContext.toast(pluginContext.getString(R.string.marker_error))
@@ -163,8 +172,6 @@ class PluginDropDownReceiver(
                 view: View,
                 position: Int, id: Long
             ) {
-
-//                Log.d(TAG, "onItemSelected......$position")
                 selectedMarkerType = templateItems[position]
             }
         }
@@ -205,24 +212,6 @@ class PluginDropDownReceiver(
         etServerUrl?.setText(Constant.sServerUrl)
         etApiKey = settingView.findViewById(R.id.etApiKey)
         etApiKey?.setText(Constant.sAccessToken)
-
-//        etServerUrl?.addTextChangedListener(object : TextWatcher {
-//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-//
-//            override fun afterTextChanged(s: Editable?) {
-//                Constant.sServerUrl = etServerUrl?.text.toString()
-//            }
-//        })
-//
-//        etApiKey?.addTextChangedListener(object : TextWatcher {
-//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-//
-//            override fun afterTextChanged(s: Editable?) {
-//                Constant.sAccessToken = etApiKey?.text.toString()
-//            }
-//        })
     }
 
     private fun moveBackToMainLayout() {
@@ -230,13 +219,13 @@ class PluginDropDownReceiver(
         settingView.visibility = View.GONE
     }
 
-    private fun isValidSettings():Boolean{
+    private fun isValidSettings(): Boolean {
         var isValid = true
-        val message = when{
-            !URLUtil.isValidUrl(etServerUrl?.text.toString())->{
+        val message = when {
+            !URLUtil.isValidUrl(etServerUrl?.text.toString()) -> {
                 pluginContext.getString(R.string.invalid_url_error)
             }
-            etApiKey?.text?.trim()?.isEmpty()==true -> {
+            etApiKey?.text?.trim()?.isEmpty() == true -> {
                 pluginContext.getString(R.string.empty_api_key)
             }
             else -> {
@@ -253,7 +242,7 @@ class PluginDropDownReceiver(
     private fun addCustomMarker() {
         val uid = UUID.randomUUID().toString()
         val location = mapView.centerPoint.get()
-
+        Log.d(TAG, "location : $location")
         val marker = Marker(location, uid)
         marker.type = "a-f-G-U-C-I"
         // m.setMetaBoolean("disableCoordinateOverlay", true); // used if you don't want the coordinate overlay to appear
@@ -296,22 +285,23 @@ class PluginDropDownReceiver(
                         removeMarkerFromList(item)
                     }
                     MapEvent.ITEM_DRAG_DROPPED -> {
-                        Log.d(TAG, "mapItem : DragDropped ")
-
                         val latitude = mapItem.clickPoint.latitude
                         val longitude = mapItem.clickPoint.longitude
                         Log.d(
                             TAG,
-                            "DragDropped latitude: $latitude Longitude: $longitude Marker_id: ${mapItem.uid}"
+                            "DragDropped latitude: $latitude Longitude: $longitude Marker_id: ${mapItem.uid} actual uid = $uid"
                         )
                         // update the lat and lon of that marker.
-                        val item = markersList.find { it.markerID == uid }
-                        item?.markerDetails?.transmitter?.lat = latitude.roundValue()
-                        item?.markerDetails?.transmitter?.lon = longitude.roundValue()
-                        markerAdapter?.notifyDataSetChanged()
+                        val item = markersList.find { it.markerID == mapItem.uid }
+                        item?.let {
+                            item.markerDetails.transmitter?.lat = latitude.roundValue()
+                            item.markerDetails.transmitter?.lon = longitude.roundValue()
+                            saveMarkerListToPref()
+                            markerAdapter?.notifyItemChanged(markersList.indexOf(item))
 
-                        // send marker position changed data to server.
-                        sendDataToServer(item?.markerDetails)
+                            // send marker position changed data to server.
+                            sendDataToServer(item.markerDetails)
+                        }
                     }
                 }
             }
@@ -319,12 +309,29 @@ class PluginDropDownReceiver(
 
         // add marker to list
         selectedMarkerType?.let {
-            val markerItem = MarkerDataModel(uid, it)
+            // below code is to create a new object from selectedMarkerType
+            val output = ByteArrayOutputStream()
+            val objectOutputStream = ObjectOutputStream(output)
+            objectOutputStream.writeObject(it)
+            objectOutputStream.flush()
+            objectOutputStream.close()
+            output.close()
+
+            val inputStream = ByteArrayInputStream(output.toByteArray())
+            val objectInputStream = ObjectInputStream(inputStream)
+            val copiedMarkerType = objectInputStream.readObject() as TemplateDataModel
+            objectInputStream.close()
+            inputStream.close()
+
+            val markerItem = MarkerDataModel(uid, copiedMarkerType)
             markerItem.markerDetails.transmitter?.lat = location.latitude.roundValue()
             markerItem.markerDetails.transmitter?.lon = location.longitude.roundValue()
             markersList.add(markerItem)
-            markerAdapter?.notifyDataSetChanged()
+
+            saveMarkerListToPref()
+            markerAdapter?.notifyItemInserted(markersList.indexOf(markerItem))
         }
+
         Log.d(TAG, "${markersList.size} listData : ${Gson().toJson(markersList)}")
     }
 
@@ -369,7 +376,7 @@ class PluginDropDownReceiver(
                         }
                     })
             }
-        }else{
+        } else {
             pluginContext.toast(pluginContext.getString(R.string.internet_error))
         }
     }
@@ -377,8 +384,12 @@ class PluginDropDownReceiver(
     private fun removeMarkerFromList(item: MarkerDataModel?) {
         item?.let {
             markersList.remove(it)
+            saveMarkerListToPref()
             markerAdapter?.notifyDataSetChanged()
         }
+    }
+    private fun saveMarkerListToPref() {
+        sharedPrefs?.set(Constant.PreferenceKey.sMarkerList, Gson().toJson(markersList))
     }
 
     private fun removeMarkerFromMap(marker: MarkerDataModel?) {
@@ -417,18 +428,31 @@ class PluginDropDownReceiver(
             )
             // To check custom-type marker when plugin is visible.
             Log.d(TAG, "Group Items: ${mapView.rootGroup.items}")
-            for (item in mapView.rootGroup.items) {
-                if (item.type == mItemType)
-                    Log.d(TAG, "group mapItem : ${item.uid} type: ${item.type}")
+            Log.d(TAG, "Pref Items: ${sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null)}")
+            val templateList: ArrayList<MarkerDataModel> =
+                Gson().fromJson(
+                    sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null),
+                    object : TypeToken<ArrayList<MarkerDataModel>>() {}.type
+                )
+
+            val commonList = templateList.filter { marker ->
+                mapView.rootGroup.items.any { items -> marker.markerID == items.uid }
             }
 
-            val data = "ApiKey ${
-                sharedPrefs?.get(
-                    Constant.PreferenceKey.sApiKey,
-                    ""
-                )
-            } Serverurl: ${sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, "")}"
-            pluginContext.toast(data)
+            Log.d(TAG, "Group Items: commonList : $commonList")
+//            for (item in mapView.rootGroup.items) {
+//                    if (item.type == mItemType)
+//                        Log.d(TAG, "group mapItem : ${item.uid} type: ${item.type} group: ${item.group.itemCount} ${item.get<String>("callsign")} \n")
+//                }
+
+
+//            val data = "ApiKey ${
+//                sharedPrefs?.get(
+//                    Constant.PreferenceKey.sApiKey,
+//                    ""
+//                )
+//            } Serverurl: ${sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, "")}"
+//            pluginContext.toast(data)
 
             setDataFromPref()
         }
@@ -443,9 +467,5 @@ class PluginDropDownReceiver(
     companion object {
         val TAG: String? = PluginDropDownReceiver::class.java.simpleName
         const val SHOW_PLUGIN = "com.atakmap.android.plugintemplate.SHOW_PLUGIN"
-    }
-
-    override fun onMapEvent(event: MapEvent?) {
-        Log.d(TAG, "initListeners ITEM_ADDED: ${event?.type}")
     }
 }

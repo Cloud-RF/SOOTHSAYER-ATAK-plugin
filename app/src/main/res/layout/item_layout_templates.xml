@@ -8,18 +8,40 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <ImageView
+        android:id="@+id/ivMarker"
+        android:layout_centerVertical="true"
+        android:src="@drawable/marker_icon_svg"
+        android:layout_marginEnd="@dimen/dp_8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/app_name" />
+
     <TextView
         style="@style/TextStyle"
-        android:drawableStart="@drawable/marker_icon_svg"
         android:textColor="@color/darker_gray"
         android:textStyle="normal"
         android:textSize="@dimen/sp_14"
+        android:singleLine="false"
+        android:includeFontPadding="false"
         android:id="@+id/tvMarkerDetails"
-        android:drawablePadding="@dimen/dp_8"
         android:layout_toStartOf="@id/ivRemove"
+        android:layout_toEndOf="@id/ivMarker"
         android:layout_width="match_parent"
-        android:layout_centerVertical="true"
-        tools:text="Motorola DMR 2W \nLocation: 51.96403, -2.113952" />
+        tools:text="Motorola DMR 2W"/>
+
+    <TextView
+        style="@style/TextStyle"
+        android:textColor="@color/darker_gray"
+        android:textStyle="normal"
+        android:textSize="@dimen/sp_14"
+        android:id="@+id/tvLocation"
+        android:layout_below="@id/tvMarkerDetails"
+        android:includeFontPadding="false"
+        android:layout_toStartOf="@id/ivRemove"
+        android:layout_toEndOf="@id/ivMarker"
+        android:layout_width="match_parent"
+        tools:text="Location: 51.96403, -2.113952" />
 
     <ImageView
         android:id="@+id/ivRemove"

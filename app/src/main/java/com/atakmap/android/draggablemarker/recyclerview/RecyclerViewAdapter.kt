@@ -36,12 +36,9 @@ class RecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[position].markerDetails
-        holder.markerDetails.text = holder.markerDetails.context.getString(
-            R.string.marker_details,
-            item.template.name,
-            item.transmitter?.lat ?: "",
-            item.transmitter?.lon ?: ""
-        )
+        holder.markerDetails.text =  item.template.name
+        holder.tvLocation.text = holder.tvLocation.context.getString(R.string.location_details, item.transmitter?.lat ?: "",
+            item.transmitter?.lon ?: "")
         holder.ivRemove.setOnClickListener {
             onItemRemove(list[position])
         }
@@ -53,10 +50,12 @@ class RecyclerViewAdapter(
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
         val markerDetails: TextView
+        val tvLocation: TextView
         val ivRemove: ImageView
 
         init {
             markerDetails = view.findViewById(R.id.tvMarkerDetails)
+            tvLocation = view.findViewById(R.id.tvLocation)
             ivRemove = view.findViewById(R.id.ivRemove)
         }
     }

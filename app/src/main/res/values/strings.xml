@@ -22,6 +22,7 @@
     <string name="api_key">API key</string>
     <string name="server">Server</string>
     <string name="marker_details">%1$s \nLocation: %2$s, %3$s</string>
+    <string name="location_details">Location: %1$s, %2$s</string>
     <string name="success_msg">Completed in 3s.</string>
     <string name="loading_msg">Calculating. Please wait…</string>
     <string name="error_msg">Something went wrong</string>
@@ -31,6 +32,13 @@
     <string name="invalid_url_error">Please add a valid server url.</string>
     <string name="marker_error">Please add valid server url and api key before adding marker to map.</string>
     <string name="empty_api_key">Please enter Api key.</string>
+    <string name="api_mode">Calculation mode \nSingle or Multiple</string>
+    <string name="single">Single</string>
+    <string name="multiple">Multiple</string>
+    <string name="help">Help</string>
+    <string name="ok_txt">OK</string>
+    <string name="help_title">SOOTHSAYER ATAK Plugin by CloudRF</string>
+    <string name="help_msg">This plugin requires a server and an account.You can use either https://api.cloudrf.com or a private SOOTHSAYER server.To create a CloudRF account, visit cloudrf.com\nYou will need to copy paste your API key into the settings and copy JSON radio templates to your SD card before you can use it. You can find JSON radio templates in the web interface of your server.\nFor help email support@cloudrf.com with your account details.</string>
 
     <string-array name="tbc_option_arrays">
         <item>Enable</item>

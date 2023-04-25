@@ -1,5 +1,6 @@
 package com.atakmap.android.draggablemarker
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -86,7 +87,7 @@ class PluginDropDownReceiver(
         }
 
         // The button bellow shows settings layout and hide the actual layout
-        val btnSave = templateView.findViewById<Button>(R.id.btnSave)
+        val btnSave = settingView.findViewById<Button>(R.id.btnSave)
         btnSave.setOnClickListener {
             if (isValidSettings()) {
                 Constant.sServerUrl = etServerUrl?.text.toString()
@@ -95,6 +96,12 @@ class PluginDropDownReceiver(
                 sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
                 moveBackToMainLayout()
             }
+        }
+
+        // open help dialog on click of Help view
+        val tvHelp = settingView.findViewById<TextView>(R.id.tvHelp)
+        tvHelp.setOnClickListener {
+           showHelpDialog()
         }
 
         // The ImageView bellow shows settings layout and hide the actual layout
@@ -213,6 +220,27 @@ class PluginDropDownReceiver(
         etServerUrl?.setText(Constant.sServerUrl)
         etApiKey = settingView.findViewById(R.id.etApiKey)
         etApiKey?.setText(Constant.sAccessToken)
+
+        val svMode: Switch = settingView.findViewById(R.id.svMode)
+        svMode.setOnCheckedChangeListener { _, isChecked ->
+            val mode = if (isChecked) {
+                svMode.textOn
+            } else {
+                svMode.textOff
+            }
+        }
+    }
+
+    private fun showHelpDialog(){
+        val builderSingle = AlertDialog.Builder(
+            mapView.context
+        )
+        builderSingle.setTitle(pluginContext.getString(R.string.help_title))
+        builderSingle.setMessage(pluginContext.getString(R.string.help_msg))
+        builderSingle.setNegativeButton(
+            pluginContext.getString(R.string.ok_txt)
+        ) { dialog, _ -> dialog.dismiss() }
+        builderSingle.show()
     }
 
     private fun moveBackToMainLayout() {

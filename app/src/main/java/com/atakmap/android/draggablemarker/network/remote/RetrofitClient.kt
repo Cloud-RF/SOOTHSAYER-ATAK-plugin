@@ -7,7 +7,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.net.URL
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
@@ -23,9 +22,7 @@ object RetrofitClient {
     private const val mAuthorizationKey = "key"
 
     const val DEFAULT_URL = "https://api.cloudrf.com"
-    val BASE_URL =
-        if (URL(Constant.sServerUrl.substringBeforeLast("/")).host.isNullOrEmpty()) Constant.sServerUrl
-        else Constant.sServerUrl.substringBeforeLast("/")
+    val BASE_URL = Constant.sServerUrl
 
     private val OK_HTTP_CLIENT by lazy {
         OkHttpClient.Builder()
@@ -43,7 +40,7 @@ object RetrofitClient {
             .build()
     }
 
-    val apiService: ApiService by lazy { RETROFIT.create(ApiService::class.java) }
+    val apiService: ApiService? by lazy { RETROFIT.create(ApiService::class.java) }
 
     private class AuthorizationInterceptor : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {

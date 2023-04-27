@@ -4,17 +4,23 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.MimeTypeMap
 import android.webkit.URLUtil
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
 import com.atakmap.android.draggablemarker.models.common.MarkerDataModel
+import com.atakmap.android.draggablemarker.models.request.MultiSiteTransmitter
+import com.atakmap.android.draggablemarker.models.request.MultisiteRequest
 import com.atakmap.android.draggablemarker.models.request.TemplateDataModel
+import com.atakmap.android.draggablemarker.models.response.ResponseModel
 import com.atakmap.android.draggablemarker.network.remote.RetrofitClient
 import com.atakmap.android.draggablemarker.network.repository.PluginRepository
 import com.atakmap.android.draggablemarker.plugin.R
@@ -22,6 +28,7 @@ import com.atakmap.android.draggablemarker.recyclerview.RecyclerViewAdapter
 import com.atakmap.android.draggablemarker.util.*
 import com.atakmap.android.dropdown.DropDown.OnStateListener
 import com.atakmap.android.dropdown.DropDownReceiver
+import com.atakmap.android.layers.kmz.KMZPackageImporter
 import com.atakmap.android.maps.MapEvent
 import com.atakmap.android.maps.MapItem
 import com.atakmap.android.maps.MapView
@@ -32,17 +39,14 @@ import com.atakmap.coremap.log.Log
 import com.atakmap.coremap.maps.assets.Icon
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
+import java.io.*
 import java.util.*
 
 
 class PluginDropDownReceiver(
     mapView: MapView?,
     private val pluginContext: Context
-) : DropDownReceiver(mapView), OnStateListener{
+) : DropDownReceiver(mapView), OnStateListener {
     // Remember to use the PluginLayoutInflater if you are actually inflating a custom view.
     private val templateView: View = PluginLayoutInflater.inflate(
         pluginContext,
@@ -50,6 +54,7 @@ class PluginDropDownReceiver(
     )
     private val mainLayout: LinearLayout = templateView.findViewById(R.id.llMain)
     private val settingView = templateView.findViewById<LinearLayout>(R.id.ilSettings)
+    private val svMode: Switch = settingView.findViewById(R.id.svMode)
     private var etServerUrl: EditText? = null
     private var etApiKey: EditText? = null
     private var markersList: ArrayList<MarkerDataModel> = ArrayList()
@@ -60,6 +65,7 @@ class PluginDropDownReceiver(
 
     private val repository by lazy { PluginRepository.getInstance() }
     private var sharedPrefs: AtakPreferences? = AtakPreferences(mapView?.context)
+//    var exampleLayer: ExampleLayer? = null
 
     init {
         initViews()
@@ -94,6 +100,7 @@ class PluginDropDownReceiver(
                 Constant.sAccessToken = etApiKey?.text.toString()
                 sharedPrefs?.set(Constant.PreferenceKey.sServerUrl, Constant.sServerUrl)
                 sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
+                sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
                 moveBackToMainLayout()
             }
         }
@@ -101,7 +108,7 @@ class PluginDropDownReceiver(
         // open help dialog on click of Help view
         val tvHelp = settingView.findViewById<TextView>(R.id.tvHelp)
         tvHelp.setOnClickListener {
-           showHelpDialog()
+            showHelpDialog()
         }
 
         // The ImageView bellow shows settings layout and hide the actual layout
@@ -220,18 +227,9 @@ class PluginDropDownReceiver(
         etServerUrl?.setText(Constant.sServerUrl)
         etApiKey = settingView.findViewById(R.id.etApiKey)
         etApiKey?.setText(Constant.sAccessToken)
-
-        val svMode: Switch = settingView.findViewById(R.id.svMode)
-        svMode.setOnCheckedChangeListener { _, isChecked ->
-            val mode = if (isChecked) {
-                svMode.textOn
-            } else {
-                svMode.textOff
-            }
-        }
     }
 
-    private fun showHelpDialog(){
+    private fun showHelpDialog() {
         val builderSingle = AlertDialog.Builder(
             mapView.context
         )
@@ -320,6 +318,7 @@ class PluginDropDownReceiver(
                             TAG,
                             "DragDropped latitude: $latitude Longitude: $longitude Marker_id: ${mapItem.uid} actual uid = $uid"
                         )
+
                         // update the lat and lon of that marker.
                         val item = markersList.find { it.markerID == mapItem.uid }
                         item?.let {
@@ -327,9 +326,44 @@ class PluginDropDownReceiver(
                             item.markerDetails.transmitter?.lon = longitude.roundValue()
                             saveMarkerListToPref()
                             markerAdapter?.notifyItemChanged(markersList.indexOf(item))
+                        }
+//                        pluginContext.toast("svMode.isChecked :${svMode.isChecked}")
+                        if (svMode.isChecked) {
+                            // For multisite api
+                            item?.markerDetails?.let { template ->
+                                val list: List<MultiSiteTransmitter> =
+                                    markersList.mapNotNull { marker ->
+                                        marker.markerDetails.transmitter?.run {
+                                            MultiSiteTransmitter(
+                                                alt,
+                                                bwi,
+                                                frq,
+                                                lat,
+                                                lon,
+                                                powerUnit,
+                                                txw,
+                                                marker.markerDetails.antenna
+                                            )
+                                        }
+                                    }
 
-                            // send marker position changed data to server.
-                            sendDataToServer(item.markerDetails)
+                                val request = MultisiteRequest(
+                                    template.site,
+                                    template.network,
+                                    list,
+                                    template.receiver,
+                                    template.model,
+                                    template.environment,
+                                    template.output
+                                )
+                                sendMultiSiteDataToServer(request)
+                            }
+                        } else {
+//                            For single site api
+                            item?.let {
+                                // send marker position changed data to server.
+                                sendSingleSiteDataToServer(item.markerDetails)
+                            }
                         }
                     }
                 }
@@ -365,15 +399,15 @@ class PluginDropDownReceiver(
     }
 
     /**
-     * This method is used to send data to server when marker is dragged.
+     * This method is used to send data to server when marker is dragged for single site api.
      */
-    private fun sendDataToServer(markerData: TemplateDataModel?) {
+    private fun sendSingleSiteDataToServer(markerData: TemplateDataModel?) {
         // In case of area api Receiver's lat and lon should be zero.
         if (pluginContext.isConnected()) {
             markerData?.let {
                 markerData.receiver.lat = 0.0
                 markerData.receiver.lon = 0.0
-                repository.sendMarkerData(
+                repository.sendSingleSiteMarkerData(
                     markerData,
                     object : PluginRepository.ApiCallBacks {
                         override fun onLoading() {
@@ -391,7 +425,68 @@ class PluginDropDownReceiver(
                                 "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
                             )
                             val message = when (responseCode) {
-                                Constant.ApiErrorCodes.sUnAuthorized, Constant.ApiErrorCodes.sBadRequest -> {
+//                                Constant.ApiErrorCodes.sUnAuthorized, Constant.ApiErrorCodes.sBadRequest -> {
+                                Constant.ApiErrorCodes.sUnAuthorized -> {
+                                    pluginContext.getString(R.string.unauthorized_error)
+                                }
+                                Constant.ApiErrorCodes.sForbidden, Constant.ApiErrorCodes.sNotFound -> {
+                                    pluginContext.getString(R.string.invalid_url_error)
+                                }
+                                else -> {
+                                    error ?: pluginContext.getString(R.string.error_msg)
+                                }
+                            }
+                            pluginContext.toast(message)
+                        }
+                    })
+            }
+        } else {
+            pluginContext.toast(pluginContext.getString(R.string.internet_error))
+        }
+    }
+
+    /**
+     * This method is used to send data to server when marker is dragged for multi site api.
+     */
+    private fun sendMultiSiteDataToServer(markerData: MultisiteRequest?) {
+        if (pluginContext.isConnected()) {
+            markerData?.let {
+//                markerData.receiver.lat = 0.0
+//                markerData.receiver.lon = 0.0
+                repository.sendMultiSiteMarkerData(
+                    markerData,
+                    object : PluginRepository.ApiCallBacks {
+                        override fun onLoading() {
+                            pluginContext.toast(pluginContext.getString(R.string.loading_msg))
+                        }
+
+                        override fun onSuccess(response: Any?) {
+                            Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
+                            pluginContext.toast(pluginContext.getString(R.string.success_msg))
+//                            val result:ResponseModel = Gson().fromJson(Gson().toJson(response), ResponseModel::class.java)
+                            if (response is ResponseModel) {
+                                Log.d(TAG, "onSuccess response.kmz: ${response.kmz}")
+//                                pluginContext.downloadFile(response.kmz)
+                                repository.downloadFile(response.kmz,
+                                    listener = { isDownloaded, value ->
+                                        Handler(Looper.getMainLooper()).post {
+                                            pluginContext.toast("DownloadFile success: $isDownloaded , message: $value")
+                                        }
+//                                        if (isDownloaded) {
+                                            //                    importFile(value)
+//                                        }
+                                    })
+                            }
+                        }
+
+                        override fun onFailed(error: String?, responseCode: Int?) {
+                            Log.e(
+                                TAG,
+                                "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
+                            )
+                            val message = when (responseCode) {
+//                                Constant.ApiErrorCodes.sUnAuthorized, Constant.ApiErrorCodes.sBadRequest -> {
+                                Constant.ApiErrorCodes.sUnAuthorized -> {
                                     pluginContext.getString(R.string.unauthorized_error)
                                 }
                                 Constant.ApiErrorCodes.sForbidden, Constant.ApiErrorCodes.sNotFound -> {
@@ -417,6 +512,7 @@ class PluginDropDownReceiver(
             markerAdapter?.notifyDataSetChanged()
         }
     }
+
     private fun saveMarkerListToPref() {
         sharedPrefs?.set(Constant.PreferenceKey.sMarkerList, Gson().toJson(markersList))
     }
@@ -441,6 +537,35 @@ class PluginDropDownReceiver(
     private fun setDataFromPref() {
         etServerUrl?.setText(sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, ""))
         etApiKey?.setText(sharedPrefs?.get(Constant.PreferenceKey.sApiKey, ""))
+        svMode.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
+    }
+
+    private fun importFile(filePath: String) {
+//        val importer = KMZPackageImporter()
+//        val file = File(filePath)
+//        try {
+//            val result = importer.importData(
+//                Uri.parse(file.path),
+//                MimeTypeMap.getFileExtensionFromUrl(file.path), null)
+//            Log.d(TAG, "importFile: $result")
+//        }catch (e:java.lang.Exception){
+//            e.printStackTrace()
+//        }
+
+        val importer = KMZPackageImporter()
+        val file = File(filePath)
+        try {
+            val inputStream = FileInputStream(file)
+            inputStream.close()
+            val result = importer.importData(
+                FileInputStream(file),
+                MimeTypeMap.getFileExtensionFromUrl(file.path), null
+            )
+            Log.d(TAG, "importFile: $result")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
     }
 
     /**************************** PUBLIC METHODS  */
@@ -458,7 +583,7 @@ class PluginDropDownReceiver(
             // To check custom-type marker when plugin is visible.
             Log.d(TAG, "Group Items: ${mapView.rootGroup.items}")
             Log.d(TAG, "Pref Items: ${sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null)}")
-            val templateList: ArrayList<MarkerDataModel>?=
+            val templateList: ArrayList<MarkerDataModel>? =
                 Gson().fromJson(
                     sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null),
                     object : TypeToken<ArrayList<MarkerDataModel>>() {}.type
@@ -469,20 +594,6 @@ class PluginDropDownReceiver(
             }
 
             Log.d(TAG, "Group Items: commonList : $commonList")
-//            for (item in mapView.rootGroup.items) {
-//                    if (item.type == mItemType)
-//                        Log.d(TAG, "group mapItem : ${item.uid} type: ${item.type} group: ${item.group.itemCount} ${item.get<String>("callsign")} \n")
-//                }
-
-
-//            val data = "ApiKey ${
-//                sharedPrefs?.get(
-//                    Constant.PreferenceKey.sApiKey,
-//                    ""
-//                )
-//            } Serverurl: ${sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, "")}"
-//            pluginContext.toast(data)
-
             setDataFromPref()
             Constant.sServerUrl = etServerUrl?.text.toString()
             Constant.sAccessToken = etApiKey?.text.toString()

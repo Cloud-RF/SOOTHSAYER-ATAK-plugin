@@ -1,11 +1,11 @@
 package com.atakmap.android.draggablemarker.models.response
 
-data class AreaResponseModel(
+data class ResponseModel(
     val PNG_Mercator: String,
     val PNG_WGS84: String,
     val area: Int,
     val balance: Int,
-    val bounds: List<Int>,
+    val bounds: List<Double>,
     val calculation_adjusted: List<String>,
     val coverage: String,
     val elapsed: Int,

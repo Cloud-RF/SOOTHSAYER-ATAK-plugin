@@ -19,5 +19,6 @@ object Constant {
         const val sServerUrl = "Server url"
         const val sApiKey = "Api key"
         const val sMarkerList = "Marker list"
+        const val sCalculationMode = "Calculation Mode"
     }
 }

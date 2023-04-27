@@ -19,12 +19,14 @@ import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.round
 
-
-//private val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/ATAK/SOOTHSAYER/templates"
-private val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/ATAK/SOOTHSAYER"
+val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/ATAK/SOOTHSAYER"
 private val TEMPLATES_PATH = "$FOLDER_PATH/templates"
+var KMZ_FILE_NAME =
+    "SOOTHSAYER_${SimpleDateFormat("yyMMddHHmm", Locale.getDefault()).format(Date())}.kmz"
 
 /**
  * Note - this will become a API offering in 4.5.1 and beyond.

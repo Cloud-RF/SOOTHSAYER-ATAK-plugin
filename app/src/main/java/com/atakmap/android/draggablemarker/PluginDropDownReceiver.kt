@@ -10,12 +10,14 @@ import android.util.Base64
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.MimeTypeMap
 import android.webkit.URLUtil
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
+import com.atakmap.android.draggablemarker.layers.CloudRFLayer
+import com.atakmap.android.draggablemarker.layers.GLCloudRFLayer
+import com.atakmap.android.draggablemarker.layers.PluginMapOverlay
 import com.atakmap.android.draggablemarker.models.common.MarkerDataModel
 import com.atakmap.android.draggablemarker.models.request.MultiSiteTransmitter
 import com.atakmap.android.draggablemarker.models.request.MultisiteRequest
@@ -28,24 +30,29 @@ import com.atakmap.android.draggablemarker.recyclerview.RecyclerViewAdapter
 import com.atakmap.android.draggablemarker.util.*
 import com.atakmap.android.dropdown.DropDown.OnStateListener
 import com.atakmap.android.dropdown.DropDownReceiver
-import com.atakmap.android.layers.kmz.KMZPackageImporter
+import com.atakmap.android.hierarchy.HierarchyListReceiver
+import com.atakmap.android.ipc.AtakBroadcast
 import com.atakmap.android.maps.MapEvent
 import com.atakmap.android.maps.MapItem
 import com.atakmap.android.maps.MapView
+import com.atakmap.android.maps.MapView.RenderStack
 import com.atakmap.android.maps.Marker
 import com.atakmap.android.preference.AtakPreferences
+import com.atakmap.android.util.ATAKUtilities
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.log.Log
 import com.atakmap.coremap.maps.assets.Icon
+import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class PluginDropDownReceiver(
     mapView: MapView?,
-    private val pluginContext: Context
+    private val pluginContext: Context, private val mapOverlay: PluginMapOverlay
 ) : DropDownReceiver(mapView), OnStateListener {
     // Remember to use the PluginLayoutInflater if you are actually inflating a custom view.
     private val templateView: View = PluginLayoutInflater.inflate(
@@ -65,7 +72,7 @@ class PluginDropDownReceiver(
 
     private val repository by lazy { PluginRepository.getInstance() }
     private var sharedPrefs: AtakPreferences? = AtakPreferences(mapView?.context)
-//    var exampleLayer: ExampleLayer? = null
+    private var cloudRFLayer: CloudRFLayer? = null
 
     init {
         initViews()
@@ -271,7 +278,7 @@ class PluginDropDownReceiver(
         val location = mapView.centerPoint.get()
         Log.d(TAG, "location : $location")
         val marker = Marker(location, uid)
-        marker.type = "a-f-G-U-C-I"
+//        marker.type = "a-f-G-U-C-I"
         // m.setMetaBoolean("disableCoordinateOverlay", true); // used if you don't want the coordinate overlay to appear
         marker.setMetaBoolean("readiness", true)
         marker.setMetaBoolean("archive", true)
@@ -322,9 +329,18 @@ class PluginDropDownReceiver(
                         // update the lat and lon of that marker.
                         val item = markersList.find { it.markerID == mapItem.uid }
                         item?.let {
+                            val index = markersList.indexOf(item)
+                            Log.d(
+                                TAG,
+                                "Before latitude: ${markersList[index].markerDetails.transmitter?.lat} Longitude: ${markersList[index].markerDetails.transmitter?.lon}"
+                            )
                             item.markerDetails.transmitter?.lat = latitude.roundValue()
                             item.markerDetails.transmitter?.lon = longitude.roundValue()
                             saveMarkerListToPref()
+                            Log.d(
+                                TAG,
+                                "After latitude: ${markersList[index].markerDetails.transmitter?.lat} Longitude: ${markersList[index].markerDetails.transmitter?.lon}"
+                            )
                             markerAdapter?.notifyItemChanged(markersList.indexOf(item))
                         }
 //                        pluginContext.toast("svMode.isChecked :${svMode.isChecked}")
@@ -463,18 +479,18 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
                             pluginContext.toast(pluginContext.getString(R.string.success_msg))
-//                            val result:ResponseModel = Gson().fromJson(Gson().toJson(response), ResponseModel::class.java)
                             if (response is ResponseModel) {
-                                Log.d(TAG, "onSuccess response.kmz: ${response.kmz}")
-//                                pluginContext.downloadFile(response.kmz)
-                                repository.downloadFile(response.kmz,
-                                    listener = { isDownloaded, value ->
+                                Log.d(TAG, "onSuccess response.kmz: ${response.PNG_WGS84}")
+//                                repository.downloadFile(response.kmz,
+                                repository.downloadFile(response.PNG_WGS84,
+                                    listener = { isDownloaded, filePath ->
                                         Handler(Looper.getMainLooper()).post {
-                                            pluginContext.toast("DownloadFile success: $isDownloaded , message: $value")
+                                            pluginContext.toast("DownloadFile success: $isDownloaded , message: $filePath")
                                         }
-//                                        if (isDownloaded) {
-                                            //                    importFile(value)
-//                                        }
+                                        if (isDownloaded) {
+                                            //adding kmz layer using image file
+                                            addKMZLayer(filePath, response.bounds)
+                                        }
                                     })
                             }
                         }
@@ -540,64 +556,122 @@ class PluginDropDownReceiver(
         svMode.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
     }
 
-    private fun importFile(filePath: String) {
-//        val importer = KMZPackageImporter()
-//        val file = File(filePath)
-//        try {
-//            val result = importer.importData(
-//                Uri.parse(file.path),
-//                MimeTypeMap.getFileExtensionFromUrl(file.path), null)
-//            Log.d(TAG, "importFile: $result")
-//        }catch (e:java.lang.Exception){
-//            e.printStackTrace()
-//        }
-
-        val importer = KMZPackageImporter()
+    private fun addKMZLayer(filePath: String, bounds: List<Double>) {
+//        val file = File("${FOLDER_PATH}/kmz_img.png")
         val file = File(filePath)
-        try {
-            val inputStream = FileInputStream(file)
-            inputStream.close()
-            val result = importer.importData(
-                FileInputStream(file),
-                MimeTypeMap.getFileExtensionFromUrl(file.path), null
+        Log.d(TAG, "addKMZLayer: filePath: ${file.absolutePath}")
+//        synchronized(this@PluginDropDownReceiver) {
+        cloudRFLayer = null
+        GLLayerFactory.unregister(GLCloudRFLayer.SPI)
+        GLLayerFactory.register(GLCloudRFLayer.SPI)
+        val layerName = pluginContext.getString(R.string.soothsayer_layer)
+        cloudRFLayer = CloudRFLayer(pluginContext, layerName, file.absolutePath, bounds)
+//        }
+        // Add the layer to the map
+        cloudRFLayer?.let {
+            mapView.addLayer(
+                RenderStack.MAP_SURFACE_OVERLAYS,
+                cloudRFLayer
             )
-            Log.d(TAG, "importFile: $result")
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+            cloudRFLayer?.isVisible = true
 
+            // Pan and zoom to the layer
+            ATAKUtilities.scaleToFit(
+                mapView, cloudRFLayer?.points,
+                mapView.width, mapView.height
+            )
+            // Refresh Overlay Manager
+            AtakBroadcast.getInstance().sendBroadcast(
+                Intent(
+                    HierarchyListReceiver.REFRESH_HIERARCHY
+                )
+            )
+        }
     }
 
     /**************************** PUBLIC METHODS  */
-    public override fun disposeImpl() {}
+    public override fun disposeImpl() {
+        try {
+            if (cloudRFLayer != null) {
+                mapView.removeLayer(
+                    RenderStack.MAP_SURFACE_OVERLAYS,
+                    cloudRFLayer
+                )
+                GLLayerFactory.unregister(GLCloudRFLayer.SPI)
+            }
+            cloudRFLayer = null
+        } catch (e: java.lang.Exception) {
+            Log.e(TAG, "error", e)
+        }
+    }
 
     /**************************** INHERITED METHODS  */
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action ?: return
-        if (action == SHOW_PLUGIN) {
-            Log.d(TAG, "showing plugin drop down")
-            showDropDown(
-                templateView, HALF_WIDTH, FULL_HEIGHT, FULL_WIDTH,
-                HALF_HEIGHT, false, this
-            )
-            // To check custom-type marker when plugin is visible.
-            Log.d(TAG, "Group Items: ${mapView.rootGroup.items}")
-            Log.d(TAG, "Pref Items: ${sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null)}")
-            val templateList: ArrayList<MarkerDataModel>? =
-                Gson().fromJson(
-                    sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null),
-                    object : TypeToken<ArrayList<MarkerDataModel>>() {}.type
+        when (action) {
+            SHOW_PLUGIN -> {
+                Log.d(TAG, "showing plugin drop down")
+                showDropDown(
+                    templateView, HALF_WIDTH, FULL_HEIGHT, FULL_WIDTH,
+                    HALF_HEIGHT, false, this
                 )
+                // To check custom-type marker when plugin is visible.
+                Log.d(TAG, "Group Items: ${mapView.rootGroup.items}")
+                Log.d(
+                    TAG,
+                    "Pref Items: ${sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null)}"
+                )
+                val templateList: ArrayList<MarkerDataModel>? =
+                    Gson().fromJson(
+                        sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null),
+                        object : TypeToken<ArrayList<MarkerDataModel>>() {}.type
+                    )
 
-            val commonList = templateList?.filter { marker ->
-                mapView.rootGroup.items.any { items -> marker.markerID == items.uid }
+                val commonList = templateList?.filter { marker ->
+                    mapView.rootGroup.items.any { items -> marker.markerID == items.uid }
+                }
+
+                Log.d(TAG, "Group Items: commonList : $commonList")
+                setDataFromPref()
+                Constant.sServerUrl = etServerUrl?.text.toString()
+                Constant.sAccessToken = etApiKey?.text.toString()
+
             }
-
-            Log.d(TAG, "Group Items: commonList : $commonList")
-            setDataFromPref()
-            Constant.sServerUrl = etServerUrl?.text.toString()
-            Constant.sAccessToken = etApiKey?.text.toString()
+            LAYER_VISIBILITY -> {
+                Log.d(
+                    TAG,
+                    "used the custom action to toggle layer visibility on: "
+                            + intent
+                        .getStringExtra("uid")
+                )
+                val l: CloudRFLayer? = mapOverlay.findLayer(
+                    intent
+                        .getStringExtra("uid")
+                )
+                if (l != null) {
+                    l.isVisible = !l.isVisible
+                }
+            }
+            LAYER_DELETE -> {
+                Log.d(
+                    TAG,
+                    "used the custom action to delete the layer on: "
+                            + intent
+                        .getStringExtra("uid")
+                )
+                val l = mapOverlay.findLayer(
+                    intent
+                        .getStringExtra("uid")
+                )
+                if (l != null) {
+                    mapView.removeLayer(
+                        RenderStack.MAP_SURFACE_OVERLAYS,
+                        l
+                    )
+                }
+            }
         }
+
     }
 
     override fun onDropDownSelectionRemoved() {}
@@ -609,5 +683,7 @@ class PluginDropDownReceiver(
     companion object {
         val TAG: String? = PluginDropDownReceiver::class.java.simpleName
         const val SHOW_PLUGIN = "com.atakmap.android.plugintemplate.SHOW_PLUGIN"
+        const val LAYER_VISIBILITY = "com.atakmap.android.plugintemplate.LAYER_VISIBILITY"
+        const val LAYER_DELETE = "com.atakmap.android.plugintemplate.LAYER_DELETE"
     }
 }

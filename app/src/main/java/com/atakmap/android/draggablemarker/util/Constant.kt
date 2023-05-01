@@ -4,7 +4,7 @@ import com.atakmap.android.draggablemarker.network.remote.RetrofitClient.DEFAULT
 
 object Constant {
     var sServerUrl = DEFAULT_URL
-    var sAccessToken = "" //"49166-ea0f41501071b6309e896d98099d69811b5ba10e"
+    var sAccessToken = ""
     const val TEMPLATE_FORMAT = ".json"
 
     object ApiErrorCodes{

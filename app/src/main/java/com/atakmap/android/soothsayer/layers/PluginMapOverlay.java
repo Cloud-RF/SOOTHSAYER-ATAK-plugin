@@ -47,9 +47,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-/**
- * Example map overlay that is displayed within Overlay Manager
- */
 public class PluginMapOverlay extends AbstractMapOverlay2 {
 
     private static final String TAG = "PluginMapOverlay";
@@ -122,34 +119,8 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
         return null;
     }
 
-//    private List<ExampleMultiLayer> getMultiLayers() {
-//        List<ExampleMultiLayer> ret = new ArrayList<>();
-//        List<Layer> layers = _mapView.getLayers(
-//                RenderStack.MAP_SURFACE_OVERLAYS);
-//        for (Layer l : layers) {
-//            if (l instanceof ExampleMultiLayer) {
-//                ExampleMultiLayer el = (ExampleMultiLayer) l;
-//                MetaShape shape = el.getMetaShape();
-//                if (shape.getGroup() == null)
-//                    _group.addItem(shape);
-//                ret.add(el);
-//            }
-//        }
-//        return ret;
-//    }
-
-//    public ExampleMultiLayer findMultiLayer(String uid) {
-//        for (ExampleMultiLayer l : getMultiLayers()) {
-//            if (l.getMetaShape().getUID().equals(uid))
-//                return l;
-//        }
-//        return null;
-//    }
-
     public class PluginListModel extends AbstractHierarchyListItem2
             implements Search, Visibility2, View.OnClickListener, CompoundButton.OnCheckedChangeListener {
-
-//        private final static String TAG = "PluginListModel";
 
         private View _footer;
         private ToggleButton _vizBtn, _outlineBtn;
@@ -219,7 +190,6 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
             }
 
             _outlineBtn.setOnCheckedChangeListener(null);
-//            _outlineBtn.setChecked(_prefs.get("grgs.outlines-visible", true));
             _outlineBtn.setOnCheckedChangeListener(this);
 
             int viz = getVisibility();
@@ -250,12 +220,6 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
                 if (this.filter.accept(item))
                     filtered.add(item);
             }
-//            List<ExampleMultiLayer> multilayers = getMultiLayers();
-//            for (ExampleMultiLayer ml : multilayers) {
-//                LayerHierarchyListItem item = new LayerHierarchyListItem(ml);
-//                if (this.filter.accept(item))
-//                    filtered.add(item);
-//            }
 
             // Sort
             sortItems(filtered);

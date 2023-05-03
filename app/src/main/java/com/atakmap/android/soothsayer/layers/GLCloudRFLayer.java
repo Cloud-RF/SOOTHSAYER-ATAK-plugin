@@ -55,7 +55,6 @@ public class GLCloudRFLayer extends GLAbstractLayer {
         super.init();
 
         this.frame = new Data();
-//        setData(subject.layerARGB, subject.layerWidth, subject.layerHeight,
         setData(subject.bitmap,subject.layerWidth, subject.layerHeight,
                 subject.upperLeft, subject.upperRight, subject.lowerRight,
                 subject.lowerLeft);
@@ -89,7 +88,6 @@ public class GLCloudRFLayer extends GLAbstractLayer {
 
         // this example makes use of Bitmap, but does not need to.
 
-//        final Bitmap bitmap = Bitmap.createBitmap(argb, width, height,
         final Bitmap bitmap = Bitmap.createBitmap(width, height,
                 Bitmap.Config.ARGB_8888);
         final GeoPoint ul = new GeoPoint(upperLeft);

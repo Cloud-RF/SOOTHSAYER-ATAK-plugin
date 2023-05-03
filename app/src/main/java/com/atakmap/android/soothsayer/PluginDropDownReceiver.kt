@@ -49,7 +49,6 @@ import com.google.gson.reflect.TypeToken
 import java.io.*
 import java.util.*
 
-
 class PluginDropDownReceiver(
     mapView: MapView?,
     private val pluginContext: Context, private val mapOverlay: PluginMapOverlay
@@ -69,7 +68,6 @@ class PluginDropDownReceiver(
     private val templateItems: ArrayList<TemplateDataModel> = ArrayList()
     private var markerAdapter: RecyclerViewAdapter? = null
     private val mItemType: String = "custom-type"
-
     private val repository by lazy { PluginRepository.getInstance() }
     private var sharedPrefs: AtakPreferences? = AtakPreferences(mapView?.context)
     private var cloudRFLayer: CloudRFLayer? = null
@@ -88,7 +86,7 @@ class PluginDropDownReceiver(
     }
 
     private fun initListeners() {
-        // The button bellow shows settings layout and hide the actual layout
+        // The button below shows settings layout and hides the actual layout
         val btnOpenSettings: ImageView = templateView.findViewById(R.id.ivSettings)
         btnOpenSettings.setOnClickListener {
             // set views with the saved setting values
@@ -100,7 +98,6 @@ class PluginDropDownReceiver(
             settingView.visibility = View.VISIBLE
         }
 
-        // The button bellow shows settings layout and hide the actual layout
         val btnSave = settingView.findViewById<Button>(R.id.btnSave)
         btnSave.setOnClickListener {
             if (isValidSettings()) {
@@ -113,20 +110,19 @@ class PluginDropDownReceiver(
             }
         }
 
-        // open help dialog on click of Help view
+        // open help dialog
         val tvHelp = settingView.findViewById<TextView>(R.id.tvHelp)
         tvHelp.setOnClickListener {
             showHelpDialog()
         }
 
-        // The ImageView bellow shows settings layout and hide the actual layout
         val ivBack = settingView.findViewById<ImageView>(R.id.ivBack)
         ivBack.setOnClickListener {
             setDataFromPref()
             moveBackToMainLayout()
         }
 
-        // The button bellow add marker on the map
+        // add a marker on the map
         val btnAddMarker = templateView.findViewById<Button>(R.id.btnAddMarker)
         btnAddMarker.setOnClickListener {
             if (URLUtil.isValidUrl(etServerUrl?.text.toString()) && etApiKey?.text?.trim()
@@ -202,7 +198,7 @@ class PluginDropDownReceiver(
         spinner.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    // If user added any other template to that folder then below code will get that template if it is valid one and show in the list.
+                    // Load templates from folder
                     val extraTemplates = getTemplatesFromFolder()
                     if (extraTemplates.isEmpty()) { // add default files again so that folder is not empty.
                         pluginContext.createAndStoreFiles(getAllFilesFromAssets())
@@ -222,7 +218,7 @@ class PluginDropDownReceiver(
                     }
                 }
                 MotionEvent.ACTION_UP -> {
-                    // Click was detected, perform click
+                    // tap was detected, perform click
                     spinner.performClick()
                 }
             }
@@ -282,7 +278,7 @@ class PluginDropDownReceiver(
         val location = mapView.centerPoint.get()
         Log.d(TAG, "location : $location")
         val marker = Marker(location, uid)
-//        marker.type = "a-f-G-U-C-I"
+        // marker.type = "a-f-G-U-C-I"
         // m.setMetaBoolean("disableCoordinateOverlay", true); // used if you don't want the coordinate overlay to appear
         marker.setMetaBoolean("readiness", true)
         marker.setMetaBoolean("archive", true)
@@ -295,7 +291,7 @@ class PluginDropDownReceiver(
         marker.title = selectedMarkerType?.template?.name ?: "Test Marker"
         marker.type = mItemType
 
-        //Add custom icon
+        // Add custom icon. TODO: custom icons!
         val icon: Bitmap? = pluginContext.getBitmap(R.drawable.marker_icon_svg)
         val outputStream = ByteArrayOutputStream()
         icon?.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
@@ -326,8 +322,6 @@ class PluginDropDownReceiver(
                         Log.d(TAG, "mapItem : ITEM_RELEASE ")
                     }
                     MapEvent.ITEM_DRAG_DROPPED -> {
-//                        val latitude = mapItem.clickPoint.latitude
-//                        val longitude = mapItem.clickPoint.longitude
                         val latitude = marker.geoPointMetaData.get().latitude
                         val longitude = marker.geoPointMetaData.get().longitude
                         Log.d(
@@ -356,7 +350,6 @@ class PluginDropDownReceiver(
                             )
                             markerAdapter?.notifyItemChanged(markersList.indexOf(item))
                         }
-//                        pluginContext.toast("svMode.isChecked :${svMode.isChecked}")
                         if (svMode.isChecked) {
                             // For multisite api
                             item?.markerDetails?.let { template ->
@@ -427,11 +420,9 @@ class PluginDropDownReceiver(
         Log.d(TAG, "${markersList.size} listData : ${Gson().toJson(markersList)}")
     }
 
-    /**
-     * This method is used to send data to server when marker is dragged for single site api.
-     */
+    // Area API
     private fun sendSingleSiteDataToServer(markerData: TemplateDataModel?) {
-        // In case of area api Receiver's lat and lon should be zero.
+        // For an area call, the receiver lat and lon should be zero.
         if (pluginContext.isConnected()) {
             markerData?.let {
                 markerData.receiver.lat = 0.0
@@ -447,16 +438,16 @@ class PluginDropDownReceiver(
                             Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
                             pluginContext.toast(pluginContext.getString(R.string.success_msg))
                             if (response is ResponseModel) {
-                                // download kmz png image
+                                // download PNG image
                                 repository.downloadFile(response.PNG_WGS84,
                                     FOLDER_PATH,
-                                    KMZ_IMAGE.getFileName(),
+                                    PNG_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
                                         /*Handler(Looper.getMainLooper()).post {
                                             pluginContext.toast("DownloadFile success: $isDownloaded , message: $filePath")
                                         }*/
                                         if (isDownloaded) {
-                                            //adding kmz layer using image file
+                                            //adding layer using image
                                             addSingleKMZLayer(
                                                 markerData.template.name,
                                                 filePath,
@@ -465,7 +456,7 @@ class PluginDropDownReceiver(
                                         }
                                     })
 
-                                //Download kmz file
+                                //Download kmz file also to SD card
                                 repository.downloadFile(response.kmz,
                                     KMZ_FOLDER,
                                     KMZ_FILE.getFileName(),
@@ -507,14 +498,10 @@ class PluginDropDownReceiver(
         }
     }
 
-    /**
-     * This method is used to send data to server when marker is dragged for multi site api.
-     */
+    // Multisite API (GPU!)
     private fun sendMultiSiteDataToServer(markerData: MultisiteRequest?) {
         if (pluginContext.isConnected()) {
             markerData?.let {
-//                markerData.receiver.lat = 0.0
-//                markerData.receiver.lon = 0.0
                 repository.sendMultiSiteMarkerData(
                     markerData,
                     object : PluginRepository.ApiCallBacks {
@@ -526,21 +513,21 @@ class PluginDropDownReceiver(
                             Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
                             pluginContext.toast(pluginContext.getString(R.string.success_msg))
                             if (response is ResponseModel) {
-                                // download kmz png image
+                                // download PNG image
                                 repository.downloadFile(response.PNG_WGS84,
                                     FOLDER_PATH,
-                                    KMZ_IMAGE.getFileName(),
+                                    PNG_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
                                         /*Handler(Looper.getMainLooper()).post {
                                             pluginContext.toast("DownloadFile success: $isDownloaded , message: $filePath")
                                         }*/
                                         if (isDownloaded) {
-                                            //adding kmz layer using image file
+                                            //adding layer using image file
                                             addKMZLayer(filePath, response.bounds)
                                         }
                                     })
 
-                                //Download kmz file
+                                // Download kmz file also to SD card
                                 repository.downloadFile(response.kmz,
                                     KMZ_FOLDER,
                                     KMZ_FILE.getFileName(),
@@ -559,7 +546,6 @@ class PluginDropDownReceiver(
                                 "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
                             )
                             val message = when (responseCode) {
-//                                Constant.ApiErrorCodes.sUnAuthorized, Constant.ApiErrorCodes.sBadRequest -> {
                                 Constant.ApiErrorCodes.sUnAuthorized -> {
                                     pluginContext.getString(R.string.unauthorized_error)
                                 }
@@ -608,18 +594,16 @@ class PluginDropDownReceiver(
         return assetManager.list("")?.filter { it.endsWith(Constant.TEMPLATE_FORMAT) }
     }
 
-    /**
-     * This method is used to get data from local preferences.
-     *  */
+    // Fetch saved settings
     private fun setDataFromPref() {
         etServerUrl?.setText(sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, ""))
         etApiKey?.setText(sharedPrefs?.get(Constant.PreferenceKey.sApiKey, ""))
         svMode.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
     }
 
+    // Add a layer. Previously KMZ..
     private fun addSingleKMZLayer(layerName: String, filePath: String, bounds: List<Double>) {
         val file = File(filePath)
-//        Log.d(TAG, "addKMZLayer: filePath: ${file.absolutePath}")
         synchronized(this@PluginDropDownReceiver) {
             if (singleSiteCloudRFLayer != null) { // remove previous layer if exists.
                 singleSiteCloudRFLayer = null
@@ -647,11 +631,13 @@ class PluginDropDownReceiver(
             )
             singleSiteCloudRFLayer?.isVisible = true
 
-            // Pan and zoom to the layer
+            // Pan and zoom to the layer. Can be annoying
+
             /*ATAKUtilities.scaleToFit(
                 mapView, singleSiteCloudRFLayer?.points,
                 mapView.width, mapView.height
             )*/
+
             // Refresh Overlay Manager
             AtakBroadcast.getInstance().sendBroadcast(
                 Intent(
@@ -663,7 +649,6 @@ class PluginDropDownReceiver(
 
     private fun addKMZLayer(filePath: String, bounds: List<Double>) {
         val file = File(filePath)
-//        Log.d(TAG, "addKMZLayer: filePath: ${file.absolutePath}")
         synchronized(this@PluginDropDownReceiver) {
             if (cloudRFLayer != null) { // remove previous layer if exists.
                 mapView.removeLayer(RenderStack.MAP_SURFACE_OVERLAYS, cloudRFLayer)
@@ -699,6 +684,7 @@ class PluginDropDownReceiver(
                 mapView, cloudRFLayer?.points,
                 mapView.width, mapView.height
             )*/
+
             // Refresh Overlay Manager
             AtakBroadcast.getInstance().sendBroadcast(
                 Intent(
@@ -708,7 +694,6 @@ class PluginDropDownReceiver(
         }
     }
 
-    /**************************** PUBLIC METHODS  */
     public override fun disposeImpl() {
         try {
             if (singleSiteCloudRFLayer != null) {
@@ -731,7 +716,6 @@ class PluginDropDownReceiver(
         }
     }
 
-    /**************************** INHERITED METHODS  */
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action ?: return
         when (action) {
@@ -804,30 +788,6 @@ class PluginDropDownReceiver(
         }
 
     }
-
-//    private fun promptDelete(layer:CloudRFLayer) {
-//        val context = mapView.context
-//        val builder = AlertDialog.Builder(context)
-//        builder.setTitle(CloudRFLayer.TAG)
-//        builder.setIcon(com.atakmap.app.R.drawable.ic_menu_delete)
-//        builder.setMessage(
-//            context.getString(com.atakmap.app.R.string.delete) + layer.metaShape.getMetaString("shapeName", "KMZ Layer")
-//                    + context.getString(com.atakmap.app.R.string.question_mark_symbol)
-//        )
-//        builder.setNegativeButton(com.atakmap.app.R.string.cancel, null)
-//        builder.setPositiveButton(
-//            com.atakmap.app.R.string.ok
-//        ) { dialog, i ->
-//            mapView.removeLayer(
-//                RenderStack.MAP_SURFACE_OVERLAYS,
-//                layer
-//            )
-//            mapOverlay.PluginListModel()
-//            AtakBroadcast.getInstance().sendBroadcast(Intent(ImportExportMapComponent.ACTION_DELETE_DATA)) // not working
-//            dialog.dismiss()
-//        }
-//        builder.show()
-//    }
 
     private fun promptDelete(layer: CloudRFLayer) {
         val builder = AlertDialog.Builder(mapView.context)

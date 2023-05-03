@@ -85,8 +85,6 @@ class PluginRepository {
 
             override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                 val inputStream = response.body?.byteStream()
-//                val path = FOLDER_PATH
-                // folder doesn't exists.
                 val folder = File(downloadFolder)
                 if (!folder.exists()) {
                     Log.d(PluginDropDownReceiver.TAG, "downloadFile creating  new folder....")

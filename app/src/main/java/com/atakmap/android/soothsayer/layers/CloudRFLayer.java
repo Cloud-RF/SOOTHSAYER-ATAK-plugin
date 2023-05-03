@@ -87,8 +87,6 @@ public class CloudRFLayer extends AbstractLayer {
         metaShape.setMetaBoolean("removable", true);
         metaShape.setType(plugin.getString(R.string.soothsayer_layer));
         metaShape.setMetaString("menu", PluginMenuParser.getMenu(plugin, "menus/layer_menu.xml"));
-//        metaShape.setMetaString("menu", "menus/grg_menu.xml");  // use this to get default menu.
-//        bitmap.recycle();
     }
 
     public GeoBounds getBounds() {

@@ -31,8 +31,8 @@
     <string name="invalid_url_error">Please add a valid server url.</string>
     <string name="forbidden_url_error">Forbidden. Your account may require an upgrade to use this feature. See https://cloudrf.com/plans</string>
     <string name="not_found_url_error">URL not found</string>
-    <string name="marker_error">Please add valid server url and api key before adding marker to map.</string>
-    <string name="empty_api_key">Please enter Api key.</string>
+    <string name="marker_error">Please add a valid server URL starting https:// and an API key first.</string>
+    <string name="empty_api_key">Please enter your API key.</string>
     <string name="api_mode">Calculation mode \n(Multisite requires GPU)</string>
     <string name="single">Single</string>
     <string name="multiple">Multisite</string>
@@ -44,7 +44,7 @@
     <string name="multisite_layer">Multisite Layer</string>
 
     <!--Prompt Dialog strings-->
-    <string name="civ_delete_layer">Delete CloudRF Layer</string>
+    <string name="civ_delete_layer">Delete layer</string>
     <string name="delete">Delete</string>
     <string name="question_mark_symbol">\?</string>
     <string name="cancel">Cancel</string>

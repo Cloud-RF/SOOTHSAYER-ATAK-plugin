@@ -23,11 +23,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.round
 
-val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/ATAK/SOOTHSAYER"
+val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/atak/SOOTHSAYER"
 private val TEMPLATES_PATH = "$FOLDER_PATH/templates"
 val KMZ_FOLDER = "$FOLDER_PATH/KMZ"
 const val SOOTHSAYER = "SOOTHSAYER_"
-const val KMZ_IMAGE = ".png"
+const val PNG_IMAGE = ".png"
 const val KMZ_FILE = ".kmz"
 
 /**
@@ -139,5 +139,5 @@ fun Context.isConnected(): Boolean {
 }
 
 fun String.getFileName():String{
-   return "$SOOTHSAYER${SimpleDateFormat("yyMMddHHmm", Locale.getDefault()).format(Date())}$this"
+   return "${SimpleDateFormat("HHmmSS", Locale.getDefault()).format(Date())}$SOOTHSAYER$this"
 }

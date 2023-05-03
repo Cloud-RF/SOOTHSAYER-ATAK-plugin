@@ -31,6 +31,7 @@ import com.atakmap.android.draggablemarker.util.*
 import com.atakmap.android.dropdown.DropDown.OnStateListener
 import com.atakmap.android.dropdown.DropDownReceiver
 import com.atakmap.android.hierarchy.HierarchyListReceiver
+import com.atakmap.android.importexport.ImportExportMapComponent
 import com.atakmap.android.ipc.AtakBroadcast
 import com.atakmap.android.maps.MapEvent
 import com.atakmap.android.maps.MapItem
@@ -47,7 +48,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.*
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class PluginDropDownReceiver(
@@ -73,6 +73,7 @@ class PluginDropDownReceiver(
     private val repository by lazy { PluginRepository.getInstance() }
     private var sharedPrefs: AtakPreferences? = AtakPreferences(mapView?.context)
     private var cloudRFLayer: CloudRFLayer? = null
+    private var singleSiteCloudRFLayer: CloudRFLayer? = null
 
     init {
         initViews()
@@ -318,12 +319,21 @@ class PluginDropDownReceiver(
                         }
                         removeMarkerFromList(item)
                     }
+                    MapEvent.ITEM_RELEASE -> {
+                        Log.d(TAG, "mapItem : ITEM_RELEASE ")
+                    }
                     MapEvent.ITEM_DRAG_DROPPED -> {
-                        val latitude = mapItem.clickPoint.latitude
-                        val longitude = mapItem.clickPoint.longitude
+//                        val latitude = mapItem.clickPoint.latitude
+//                        val longitude = mapItem.clickPoint.longitude
+                        val latitude =   marker.geoPointMetaData.get().latitude
+                        val longitude =   marker.geoPointMetaData.get().longitude
                         Log.d(
                             TAG,
                             "DragDropped latitude: $latitude Longitude: $longitude Marker_id: ${mapItem.uid} actual uid = $uid"
+                        )
+                        Log.d(
+                            TAG,
+                            "MapItem: ${mapItem.altitudeMode} radialMenuPath: ${mapItem.radialMenuPath} serialId: ${mapItem.serialId} zOrder: ${mapItem.zOrder} "
                         )
 
                         // update the lat and lon of that marker.
@@ -433,6 +443,36 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
                             pluginContext.toast(pluginContext.getString(R.string.success_msg))
+                            if (response is ResponseModel) {
+                                // download kmz png image
+                                repository.downloadFile(response.PNG_WGS84,
+                                    FOLDER_PATH,
+                                    KMZ_IMAGE.getFileName(),
+                                    listener = { isDownloaded, filePath ->
+                                        Handler(Looper.getMainLooper()).post {
+                                            pluginContext.toast("DownloadFile success: $isDownloaded , message: $filePath")
+                                        }
+                                        if (isDownloaded) {
+                                            //adding kmz layer using image file
+                                            addSingleKMZLayer(
+                                                markerData.template.name,
+                                                filePath,
+                                                response.bounds
+                                            )
+                                        }
+                                    })
+
+                                //Download kmz file
+                                repository.downloadFile(response.kmz,
+                                    KMZ_FOLDER,
+                                    KMZ_FILE.getFileName(),
+                                    listener = { isDownloaded, filePath ->
+                                        Log.d(
+                                            TAG,
+                                            "sendSingleSiteMarkerData: kmz downloaded isDownloaded:$isDownloaded to path: $filePath "
+                                        )
+                                    })
+                            }
                         }
 
                         override fun onFailed(error: String?, responseCode: Int?) {
@@ -480,9 +520,10 @@ class PluginDropDownReceiver(
                             Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
                             pluginContext.toast(pluginContext.getString(R.string.success_msg))
                             if (response is ResponseModel) {
-                                Log.d(TAG, "onSuccess response.kmz: ${response.PNG_WGS84}")
-//                                repository.downloadFile(response.kmz,
+                                // download kmz png image
                                 repository.downloadFile(response.PNG_WGS84,
+                                    FOLDER_PATH,
+                                    KMZ_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
                                         Handler(Looper.getMainLooper()).post {
                                             pluginContext.toast("DownloadFile success: $isDownloaded , message: $filePath")
@@ -491,6 +532,17 @@ class PluginDropDownReceiver(
                                             //adding kmz layer using image file
                                             addKMZLayer(filePath, response.bounds)
                                         }
+                                    })
+
+                                //Download kmz file
+                                repository.downloadFile(response.kmz,
+                                    KMZ_FOLDER,
+                                    KMZ_FILE.getFileName(),
+                                    listener = { isDownloaded, filePath ->
+                                        Log.d(
+                                            TAG,
+                                            "sendMultiSiteMarkerData: kmz downloaded isDownloaded:$isDownloaded to path: $filePath "
+                                        )
                                     })
                             }
                         }
@@ -556,17 +608,61 @@ class PluginDropDownReceiver(
         svMode.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
     }
 
-    private fun addKMZLayer(filePath: String, bounds: List<Double>) {
-//        val file = File("${FOLDER_PATH}/kmz_img.png")
+    private fun addSingleKMZLayer(layerName: String, filePath: String, bounds: List<Double>) {
         val file = File(filePath)
-        Log.d(TAG, "addKMZLayer: filePath: ${file.absolutePath}")
-//        synchronized(this@PluginDropDownReceiver) {
-        cloudRFLayer = null
-        GLLayerFactory.unregister(GLCloudRFLayer.SPI)
-        GLLayerFactory.register(GLCloudRFLayer.SPI)
-        val layerName = pluginContext.getString(R.string.soothsayer_layer)
-        cloudRFLayer = CloudRFLayer(pluginContext, layerName, file.absolutePath, bounds)
-//        }
+//        Log.d(TAG, "addKMZLayer: filePath: ${file.absolutePath}")
+        synchronized(this@PluginDropDownReceiver) {
+            if (singleSiteCloudRFLayer != null) { // remove previous layer if exists.
+                singleSiteCloudRFLayer = null
+                GLLayerFactory.unregister(GLCloudRFLayer.SPI)
+            }
+            // create new layer.
+            GLLayerFactory.register(GLCloudRFLayer.SPI)
+            singleSiteCloudRFLayer = CloudRFLayer(
+                pluginContext,
+                layerName,
+                pluginContext.getString(R.string.layer, layerName),
+                file.absolutePath,
+                bounds
+            )
+        }
+        // Add the layer to the map
+        singleSiteCloudRFLayer?.let {
+            mapView.addLayer(
+                RenderStack.MAP_SURFACE_OVERLAYS,
+                singleSiteCloudRFLayer
+            )
+            singleSiteCloudRFLayer?.isVisible = true
+
+            // Pan and zoom to the layer
+            ATAKUtilities.scaleToFit(
+                mapView, singleSiteCloudRFLayer?.points,
+                mapView.width, mapView.height
+            )
+            // Refresh Overlay Manager
+            AtakBroadcast.getInstance().sendBroadcast(
+                Intent(
+                    HierarchyListReceiver.REFRESH_HIERARCHY
+                )
+            )
+        }
+    }
+
+    private fun addKMZLayer(filePath: String, bounds: List<Double>) {
+        val file = File(filePath)
+//        Log.d(TAG, "addKMZLayer: filePath: ${file.absolutePath}")
+        synchronized(this@PluginDropDownReceiver) {
+            if (cloudRFLayer != null) { // remove previous layer if exists.
+                mapView.removeLayer(RenderStack.MAP_SURFACE_OVERLAYS, cloudRFLayer)
+                cloudRFLayer = null
+                GLLayerFactory.unregister(GLCloudRFLayer.SPI)
+            }
+            // create new layer.
+            GLLayerFactory.register(GLCloudRFLayer.SPI)
+            val layerName = pluginContext.getString(R.string.multisite_layer)
+            cloudRFLayer =
+                CloudRFLayer(pluginContext, layerName, layerName, file.absolutePath, bounds)
+        }
         // Add the layer to the map
         cloudRFLayer?.let {
             mapView.addLayer(
@@ -592,6 +688,13 @@ class PluginDropDownReceiver(
     /**************************** PUBLIC METHODS  */
     public override fun disposeImpl() {
         try {
+            if (singleSiteCloudRFLayer != null) {
+                mapView.removeLayer(
+                    RenderStack.MAP_SURFACE_OVERLAYS,
+                    singleSiteCloudRFLayer
+                )
+                singleSiteCloudRFLayer = null
+            }
             if (cloudRFLayer != null) {
                 mapView.removeLayer(
                     RenderStack.MAP_SURFACE_OVERLAYS,
@@ -637,7 +740,7 @@ class PluginDropDownReceiver(
                 Constant.sAccessToken = etApiKey?.text.toString()
 
             }
-            LAYER_VISIBILITY -> {
+            GRG_TOGGLE_VISIBILITY, LAYER_VISIBILITY -> {
                 Log.d(
                     TAG,
                     "used the custom action to toggle layer visibility on: "
@@ -651,8 +754,12 @@ class PluginDropDownReceiver(
                 if (l != null) {
                     l.isVisible = !l.isVisible
                 }
+                AtakBroadcast.getInstance()
+                    .sendBroadcast( Intent(
+                        HierarchyListReceiver.REFRESH_HIERARCHY
+                    ))
             }
-            LAYER_DELETE -> {
+           GRG_DELETE, LAYER_DELETE -> {
                 Log.d(
                     TAG,
                     "used the custom action to delete the layer on: "
@@ -664,14 +771,45 @@ class PluginDropDownReceiver(
                         .getStringExtra("uid")
                 )
                 if (l != null) {
-                    mapView.removeLayer(
-                        RenderStack.MAP_SURFACE_OVERLAYS,
-                        l
-                    )
+                    promptDelete(l)
                 }
+
+           }
+            GRG_BRIGHTNESS ->{
+
+            }
+            GRG_COLOR ->{
+
+            }
+            GRG_TRANSPARENCY ->{
+
             }
         }
 
+    }
+
+    private fun promptDelete(layer:CloudRFLayer) {
+        val context = mapView.context
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle(com.atakmap.app.R.string.delete_grg)
+        builder.setIcon(com.atakmap.app.R.drawable.ic_menu_delete)
+        builder.setMessage(
+            context.getString(com.atakmap.app.R.string.delete) + layer.metaShape.getMetaString("shapeName", "KMZ Layer")
+                    + context.getString(com.atakmap.app.R.string.question_mark_symbol)
+        )
+        builder.setNegativeButton(com.atakmap.app.R.string.cancel, null)
+        builder.setPositiveButton(
+            com.atakmap.app.R.string.ok
+        ) { dialog, i ->
+            mapView.removeLayer(
+                RenderStack.MAP_SURFACE_OVERLAYS,
+                layer
+            )
+            mapOverlay.PluginListModel()
+            AtakBroadcast.getInstance().sendBroadcast(Intent(ImportExportMapComponent.ACTION_DELETE_DATA)) // not working
+            dialog.dismiss()
+        }
+        builder.show()
     }
 
     override fun onDropDownSelectionRemoved() {}
@@ -685,5 +823,10 @@ class PluginDropDownReceiver(
         const val SHOW_PLUGIN = "com.atakmap.android.plugintemplate.SHOW_PLUGIN"
         const val LAYER_VISIBILITY = "com.atakmap.android.plugintemplate.LAYER_VISIBILITY"
         const val LAYER_DELETE = "com.atakmap.android.plugintemplate.LAYER_DELETE"
+        const val GRG_DELETE = "com.atakmap.android.grg.DELETE"
+        const val GRG_TOGGLE_VISIBILITY = "com.atakmap.android.grg.TOGGLE_VISIBILITY"
+        const val GRG_BRIGHTNESS = "com.atakmap.android.grg.BRIGHTNESS"
+        const val GRG_COLOR = "com.atakmap.android.grg.COLOR"
+        const val GRG_TRANSPARENCY = "com.atakmap.android.grg.TRANSPARENCY"
     }
 }

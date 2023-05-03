@@ -11,9 +11,8 @@ interface ApiService {
 
     @POST("/area")
     fun sendSingleSiteDataToServer(
-//        @Url url: String? = Constant.sServerUrl.substringAfter(RetrofitClient.BASE_URL),
         @Body request: TemplateDataModel? = null
-    ): Call<Any>
+    ): Call<ResponseModel>
 
     @POST("/multisite")
     fun sendMultiSiteDataToServer(

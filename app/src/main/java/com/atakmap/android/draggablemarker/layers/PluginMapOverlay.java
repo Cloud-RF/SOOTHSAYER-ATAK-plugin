@@ -2,7 +2,6 @@
 package com.atakmap.android.draggablemarker.layers;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -46,20 +45,20 @@ import java.util.TreeSet;
  */
 public class PluginMapOverlay extends AbstractMapOverlay2 {
 
-    private static final String TAG = "HelloWorldMapOverlay";
+    private static final String TAG = "PluginMapOverlay";
 
     private final MapView _mapView;
     private final Context _plugin;
-    private final HelloWorldDeepMapItemQuery _query;
+    private final PluginDeepMapItemQuery _query;
     private final DefaultMapGroup _group;
 
-    private HelloWorldListModel _listModel;
+    private PluginListModel _listModel;
 
     public PluginMapOverlay(MapView mapView, Context plugin) {
         _mapView = mapView;
         _plugin = plugin;
-        _query = new HelloWorldDeepMapItemQuery();
-        _group = new DefaultMapGroup("Hello World Map Group");
+        _query = new PluginDeepMapItemQuery();
+        _group = new DefaultMapGroup("Plugin Map Group");
         _group.setMetaBoolean("addToObjList", false);
     }
 
@@ -87,7 +86,7 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
     public HierarchyListItem getListModel(BaseAdapter adapter,
                                           long capabilities, HierarchyListFilter prefFilter) {
         if (_listModel == null)
-            _listModel = new HelloWorldListModel();
+            _listModel = new PluginListModel();
         _listModel.refresh(adapter, prefFilter);
         return _listModel;
     }
@@ -140,14 +139,14 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
 //        return null;
 //    }
 
-    public class HelloWorldListModel extends AbstractHierarchyListItem2
+    public class PluginListModel extends AbstractHierarchyListItem2
             implements Search, Visibility2, View.OnClickListener {
 
-        private final static String TAG = "HelloWorldListModel";
+//        private final static String TAG = "PluginListModel";
 
-        private View _header, _footer;
+//        private View _header, _footer;
 
-        public HelloWorldListModel() {
+        public PluginListModel() {
             this.asyncRefresh = true;
         }
 
@@ -183,24 +182,31 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
 
         @Override
         public View getHeaderView() {
-            if (_header == null) {
-                _header = LayoutInflater.from(_plugin).inflate(
-                        R.layout.overlay_header, _mapView, false);
-                _header.findViewById(R.id.header_button)
-                        .setOnClickListener(this);
-            }
-            return _header;
+//            if (_header == null) {
+//                _header = LayoutInflater.from(_plugin).inflate(
+//                        R.layout.overlay_header, _mapView, false);
+//                _header.findViewById(R.id.header_button)
+//                        .setOnClickListener(this);
+//            }
+//            return _header;
+            return super.getHeaderView();
         }
 
         @Override
         public View getFooterView() {
-            if (_footer == null) {
-                _footer = LayoutInflater.from(_plugin).inflate(
-                        R.layout.overlay_footer, _mapView, false);
-                _footer.findViewById(R.id.footer_button)
-                        .setOnClickListener(this);
-            }
-            return _footer;
+//            if (_footer == null) {
+//                _footer = LayoutInflater.from(_plugin).inflate(
+//                        R.layout.overlay_footer, _mapView, false);
+//                _footer.findViewById(R.id.footer_button)
+//                        .setOnClickListener(this);
+//            }
+//            return _footer;
+            return super.getFooterView();
+        }
+
+        @Override
+        public View getCustomLayout() {
+            return super.getCustomLayout();
         }
 
         @Override
@@ -208,7 +214,7 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
             List<HierarchyListItem> filtered = new ArrayList<>();
             List<CloudRFLayer> layers = getLayers();
             for (CloudRFLayer l : layers) {
-                LayerHierarchyListItem item = new LayerHierarchyListItem(l);
+                LayerHierarchyListItem item = new LayerHierarchyListItem(l,l.description);
                 if (this.filter.accept(item))
                     filtered.add(item);
             }
@@ -275,10 +281,12 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
             implements Visibility, GoTo, MapItemUser {
 
         private final CloudRFLayer _layer;
+        private final String _description;
 //        private final ExampleMultiLayer _multilayer;
 
-        LayerHierarchyListItem(CloudRFLayer layer) {
+        LayerHierarchyListItem(CloudRFLayer layer, String description) {
             _layer = layer;
+            _description = description;
 //            _multilayer = null;
         }
 
@@ -300,7 +308,8 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
 
         @Override
         public String getDescription() {
-            return _plugin.getString(R.string.example_layer_description);
+//            return _plugin.getString(R.string.example_layer_description);
+            return _description;
         }
 
         @Override
@@ -312,13 +321,10 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
 
         @Override
         public Object getUserObject() {
-            if (_layer != null) {
-                return _layer;
-            }
+            return _layer;
 //            if (_multilayer != null) {
 //                return _multilayer;
 //            }
-            return null;
         }
 
         @Override
@@ -407,7 +413,7 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
         }
     }
 
-    private class HelloWorldDeepMapItemQuery implements DeepMapItemQuery {
+    private class PluginDeepMapItemQuery implements DeepMapItemQuery {
 
         @Override
         public MapItem deepFindItem(Map<String, String> metadata) {

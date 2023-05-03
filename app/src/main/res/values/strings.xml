@@ -40,6 +40,8 @@
     <string name="help_title">SOOTHSAYER ATAK Plugin by CloudRF</string>
     <string name="help_msg">This plugin requires a server and an account.You can use either https://api.cloudrf.com or a private SOOTHSAYER server.To create a CloudRF account, visit cloudrf.com\nYou will need to copy paste your API key into the settings and copy JSON radio templates to your SD card before you can use it. You can find JSON radio templates in the web interface of your server.\nFor help email support@cloudrf.com with your account details.</string>
     <string name="soothsayer_layer">SOOTHSAYER Layer</string>
+    <string name="layer">%1$s Layer</string>
+    <string name="multisite_layer">Multisite Layer</string>
 
     <string-array name="tbc_option_arrays">
         <item>Enable</item>

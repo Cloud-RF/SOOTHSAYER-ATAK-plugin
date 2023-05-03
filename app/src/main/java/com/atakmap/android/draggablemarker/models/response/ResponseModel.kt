@@ -3,7 +3,7 @@ package com.atakmap.android.draggablemarker.models.response
 data class ResponseModel(
     val PNG_Mercator: String,
     val PNG_WGS84: String,
-    val area: Int,
+    val area: Double,
     val balance: Int,
     val bounds: List<Double>,
     val calculation_adjusted: List<String>,

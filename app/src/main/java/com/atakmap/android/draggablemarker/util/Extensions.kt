@@ -25,9 +25,10 @@ import kotlin.math.round
 
 val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/ATAK/SOOTHSAYER"
 private val TEMPLATES_PATH = "$FOLDER_PATH/templates"
-var KMZ_FILE_NAME =
-//    "SOOTHSAYER_${SimpleDateFormat("yyMMddHHmm", Locale.getDefault()).format(Date())}.kmz"
-    "SOOTHSAYER_${SimpleDateFormat("yyMMddHHmm", Locale.getDefault()).format(Date())}.png"
+val KMZ_FOLDER = "$FOLDER_PATH/KMZ"
+const val SOOTHSAYER = "SOOTHSAYER_"
+const val KMZ_IMAGE = ".png"
+const val KMZ_FILE = ".kmz"
 
 /**
  * Note - this will become a API offering in 4.5.1 and beyond.
@@ -135,4 +136,8 @@ fun Context.isConnected(): Boolean {
     }
 
     return result
+}
+
+fun String.getFileName():String{
+   return "$SOOTHSAYER${SimpleDateFormat("yyMMddHHmm", Locale.getDefault()).format(Date())}$this"
 }

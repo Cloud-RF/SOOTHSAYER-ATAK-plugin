@@ -7,8 +7,6 @@ import com.atakmap.android.draggablemarker.models.request.TemplateDataModel
 import com.atakmap.android.draggablemarker.models.response.ResponseModel
 import com.atakmap.android.draggablemarker.network.remote.RetrofitClient
 import com.atakmap.android.draggablemarker.util.Constant
-import com.atakmap.android.draggablemarker.util.FOLDER_PATH
-import com.atakmap.android.draggablemarker.util.KMZ_FILE_NAME
 import com.atakmap.coremap.log.Log
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
@@ -35,9 +33,9 @@ class PluginRepository {
         callback?.onLoading()
         if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
             RetrofitClient.apiService?.sendSingleSiteDataToServer(request = request)
-                ?.enqueue(object : Callback<Any> {
+                ?.enqueue(object : Callback<ResponseModel> {
                     override fun onResponse(
-                        call: Call<Any>, response: Response<Any>
+                        call: Call<ResponseModel>, response: Response<ResponseModel>
                     ) {
                         if (response.isSuccessful) {
                             Log.d(
@@ -54,7 +52,7 @@ class PluginRepository {
                         }
                     }
 
-                    override fun onFailure(call: Call<Any>, t: Throwable) {
+                    override fun onFailure(call: Call<ResponseModel>, t: Throwable) {
                         try {
                             Log.d(
                                 PluginDropDownReceiver.TAG,
@@ -73,7 +71,7 @@ class PluginRepository {
 
     }
 
-    fun downloadFile(url:String, listener: (Boolean, String) -> Unit){
+    fun downloadFile(url:String, downloadFolder :String,fileName :String, listener: (Boolean, String) -> Unit){
         val client = OkHttpClient()
         val request = Request.Builder()
             .url(url)
@@ -87,9 +85,14 @@ class PluginRepository {
 
             override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                 val inputStream = response.body?.byteStream()
-                val path = FOLDER_PATH
-                Log.d(PluginDropDownReceiver.TAG, "downloadFile: start path:$path \n FileNme: $KMZ_FILE_NAME")
-                val file = File(path, KMZ_FILE_NAME)
+//                val path = FOLDER_PATH
+                // folder doesn't exists.
+                val folder = File(downloadFolder)
+                if (!folder.exists()) {
+                    Log.d(PluginDropDownReceiver.TAG, "downloadFile creating  new folder....")
+                    folder.mkdirs()
+                }
+                val file = File(downloadFolder, fileName)
                 val outputStream = FileOutputStream(file)
                 inputStream?.copyTo(outputStream)
                 outputStream.close()

@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.atakmap.android.draggablemarker.layers.PluginMapOverlay;
-import com.atakmap.android.ipc.AtakBroadcast.DocumentedIntentFilter;
-
-import com.atakmap.android.maps.MapView;
-import com.atakmap.android.dropdown.DropDownMapComponent;
-
-import com.atakmap.coremap.log.Log;
 import com.atakmap.android.draggablemarker.plugin.R;
+import com.atakmap.android.dropdown.DropDownMapComponent;
+import com.atakmap.android.ipc.AtakBroadcast.DocumentedIntentFilter;
+import com.atakmap.android.maps.MapView;
+import com.atakmap.coremap.log.Log;
 
 public class PluginMapComponent extends DropDownMapComponent {
 
@@ -28,6 +26,7 @@ public class PluginMapComponent extends DropDownMapComponent {
         context.setTheme(R.style.ATAKPluginTheme);
         super.onCreate(context, intent, view);
         pluginContext = context;
+
         //Plugin MapOverlay added to Overlay Manager.
         this.mapOverlay = new PluginMapOverlay(view, pluginContext);
         view.getMapOverlayManager().addOverlay(this.mapOverlay);
@@ -37,9 +36,9 @@ public class PluginMapComponent extends DropDownMapComponent {
         Log.d(TAG, "registering the plugin filter");
         DocumentedIntentFilter ddFilter = new DocumentedIntentFilter();
         ddFilter.addAction(PluginDropDownReceiver.SHOW_PLUGIN);
-        ddFilter.addAction(PluginDropDownReceiver.LAYER_VISIBILITY,
+        ddFilter.addAction(PluginDropDownReceiver.GRG_TOGGLE_VISIBILITY,
                 "Toggle visibility of kmz layer");
-        ddFilter.addAction(PluginDropDownReceiver.LAYER_DELETE,
+        ddFilter.addAction(PluginDropDownReceiver.GRG_DELETE,
                 "Delete kmz layer");
         registerDropDownReceiver(ddr, ddFilter);
     }
@@ -49,5 +48,4 @@ public class PluginMapComponent extends DropDownMapComponent {
         super.onDestroyImpl(context, view);
         view.getMapOverlayManager().removeOverlay(mapOverlay);
     }
-
 }

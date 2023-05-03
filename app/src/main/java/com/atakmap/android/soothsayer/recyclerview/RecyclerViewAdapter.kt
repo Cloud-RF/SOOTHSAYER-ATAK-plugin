@@ -1,4 +1,4 @@
-package com.atakmap.android.draggablemarker.recyclerview
+package com.atakmap.android.soothsayer.recyclerview
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.atakmap.android.draggablemarker.models.common.MarkerDataModel
-import com.atakmap.android.draggablemarker.plugin.R
+import com.atakmap.android.soothsayer.models.common.MarkerDataModel
+import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.maps.MapView
 
 /**

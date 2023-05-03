@@ -1,5 +1,5 @@
 
-package com.atakmap.android.draggablemarker.plugin;
+package com.atakmap.android.soothsayer.plugin;
 
 import java.io.File;
 import android.content.Context;

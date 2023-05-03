@@ -1,8 +1,8 @@
 
-package com.atakmap.android.draggablemarker.plugin;
+package com.atakmap.android.soothsayer.plugin;
 
 import com.atak.plugins.impl.AbstractPluginTool;
-import com.atakmap.android.draggablemarker.PluginDropDownReceiver;
+import com.atakmap.android.soothsayer.PluginDropDownReceiver;
 import com.atakmap.util.Disposable;
 
 import android.content.Context;

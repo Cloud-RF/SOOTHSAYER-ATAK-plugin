@@ -1,8 +1,8 @@
-package com.atakmap.android.draggablemarker.network
+package com.atakmap.android.soothsayer.network
 
-import com.atakmap.android.draggablemarker.models.request.MultisiteRequest
-import com.atakmap.android.draggablemarker.models.request.TemplateDataModel
-import com.atakmap.android.draggablemarker.models.response.ResponseModel
+import com.atakmap.android.soothsayer.models.request.MultisiteRequest
+import com.atakmap.android.soothsayer.models.request.TemplateDataModel
+import com.atakmap.android.soothsayer.models.response.ResponseModel
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST

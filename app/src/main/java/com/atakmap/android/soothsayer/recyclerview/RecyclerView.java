@@ -1,5 +1,5 @@
 
-package com.atakmap.android.draggablemarker.recyclerview;
+package com.atakmap.android.soothsayer.recyclerview;
 
 import android.content.Context;
 import android.util.AttributeSet;

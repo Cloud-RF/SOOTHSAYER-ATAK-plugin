@@ -1,11 +1,11 @@
 
-package com.atakmap.android.draggablemarker;
+package com.atakmap.android.soothsayer;
 
 import android.content.Context;
 import android.content.Intent;
 
-import com.atakmap.android.draggablemarker.layers.PluginMapOverlay;
-import com.atakmap.android.draggablemarker.plugin.R;
+import com.atakmap.android.soothsayer.layers.PluginMapOverlay;
+import com.atakmap.android.soothsayer.plugin.R;
 import com.atakmap.android.dropdown.DropDownMapComponent;
 import com.atakmap.android.ipc.AtakBroadcast.DocumentedIntentFilter;
 import com.atakmap.android.maps.MapView;

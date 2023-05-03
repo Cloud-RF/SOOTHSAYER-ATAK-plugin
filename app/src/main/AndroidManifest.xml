@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.atakmap.android.draggablemarker.plugin"
+    package="com.atakmap.android.soothsayer.plugin"
     tools:ignore="GoogleAppIndexingWarning">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

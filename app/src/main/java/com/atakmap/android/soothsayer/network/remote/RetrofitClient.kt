@@ -1,7 +1,7 @@
-package com.atakmap.android.draggablemarker.network.remote
+package com.atakmap.android.soothsayer.network.remote
 
-import com.atakmap.android.draggablemarker.network.ApiService
-import com.atakmap.android.draggablemarker.util.Constant
+import com.atakmap.android.soothsayer.network.ApiService
+import com.atakmap.android.soothsayer.util.Constant
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response

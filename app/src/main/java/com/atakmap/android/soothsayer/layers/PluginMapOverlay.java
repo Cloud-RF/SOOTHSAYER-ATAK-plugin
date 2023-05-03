@@ -1,5 +1,5 @@
 
-package com.atakmap.android.draggablemarker.layers;
+package com.atakmap.android.soothsayer.layers;
 
 import android.content.Context;
 import android.view.View;
@@ -7,7 +7,8 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.atakmap.android.draggablemarker.plugin.R;
+import android.content.Intent;
+import com.atakmap.android.soothsayer.plugin.R;
 import com.atakmap.android.hierarchy.HierarchyListFilter;
 import com.atakmap.android.hierarchy.HierarchyListItem;
 import com.atakmap.android.hierarchy.action.GoTo;
@@ -30,6 +31,8 @@ import com.atakmap.android.util.ATAKUtilities;
 import com.atakmap.coremap.maps.coords.GeoBounds;
 import com.atakmap.coremap.maps.coords.GeoPoint;
 import com.atakmap.map.layer.Layer;
+import com.atakmap.android.ipc.AtakBroadcast;
+import com.atakmap.android.hierarchy.HierarchyListReceiver;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -253,6 +256,13 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
             boolean ret = !actions.isEmpty();
             for (Visibility del : actions)
                 ret &= del.setVisible(visible);
+
+            AtakBroadcast.getInstance().sendBroadcast(
+                    new Intent(
+                            HierarchyListReceiver.REFRESH_HIERARCHY
+                    )
+            );
+
             return ret;
         }
 

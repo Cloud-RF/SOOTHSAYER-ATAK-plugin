@@ -1,4 +1,4 @@
-package com.atakmap.android.draggablemarker.models.request
+package com.atakmap.android.soothsayer.models.request
 
 import java.io.Serializable
 

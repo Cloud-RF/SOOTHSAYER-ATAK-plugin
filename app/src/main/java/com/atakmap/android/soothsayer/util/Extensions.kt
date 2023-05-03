@@ -1,4 +1,4 @@
-package com.atakmap.android.draggablemarker.util
+package com.atakmap.android.soothsayer.util
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -12,8 +12,8 @@ import android.os.Build
 import android.os.Environment
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import com.atakmap.android.draggablemarker.PluginDropDownReceiver
-import com.atakmap.android.draggablemarker.models.request.TemplateDataModel
+import com.atakmap.android.soothsayer.PluginDropDownReceiver
+import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.atakmap.coremap.log.Log
 import com.google.gson.Gson
 import org.json.JSONObject

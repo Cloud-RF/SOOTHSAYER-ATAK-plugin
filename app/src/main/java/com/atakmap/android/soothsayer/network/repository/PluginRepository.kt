@@ -1,12 +1,12 @@
-package com.atakmap.android.draggablemarker.network.repository
+package com.atakmap.android.soothsayer.network.repository
 
 import android.webkit.URLUtil
-import com.atakmap.android.draggablemarker.PluginDropDownReceiver
-import com.atakmap.android.draggablemarker.models.request.MultisiteRequest
-import com.atakmap.android.draggablemarker.models.request.TemplateDataModel
-import com.atakmap.android.draggablemarker.models.response.ResponseModel
-import com.atakmap.android.draggablemarker.network.remote.RetrofitClient
-import com.atakmap.android.draggablemarker.util.Constant
+import com.atakmap.android.soothsayer.PluginDropDownReceiver
+import com.atakmap.android.soothsayer.models.request.MultisiteRequest
+import com.atakmap.android.soothsayer.models.request.TemplateDataModel
+import com.atakmap.android.soothsayer.models.response.ResponseModel
+import com.atakmap.android.soothsayer.network.remote.RetrofitClient
+import com.atakmap.android.soothsayer.util.Constant
 import com.atakmap.coremap.log.Log
 import com.google.gson.Gson
 import okhttp3.OkHttpClient

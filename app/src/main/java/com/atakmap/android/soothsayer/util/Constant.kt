@@ -1,6 +1,6 @@
-package com.atakmap.android.draggablemarker.util
+package com.atakmap.android.soothsayer.util
 
-import com.atakmap.android.draggablemarker.network.remote.RetrofitClient.DEFAULT_URL
+import com.atakmap.android.soothsayer.network.remote.RetrofitClient.DEFAULT_URL
 
 object Constant {
     var sServerUrl = DEFAULT_URL

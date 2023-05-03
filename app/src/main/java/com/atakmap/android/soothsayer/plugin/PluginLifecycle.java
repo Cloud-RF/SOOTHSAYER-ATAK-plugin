@@ -1,9 +1,9 @@
 
-package com.atakmap.android.draggablemarker.plugin;
+package com.atakmap.android.soothsayer.plugin;
 
 
 import com.atak.plugins.impl.AbstractPluginLifecycle;
-import com.atakmap.android.draggablemarker.PluginMapComponent;
+import com.atakmap.android.soothsayer.PluginMapComponent;
 import android.content.Context;
 
 

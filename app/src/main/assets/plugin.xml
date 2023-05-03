@@ -4,12 +4,12 @@
 
     <extension
         type="transapps.maps.plugin.lifecycle.Lifecycle"
-        impl="com.atakmap.android.draggablemarker.plugin.PluginLifecycle"
+        impl="com.atakmap.android.soothsayer.plugin.PluginLifecycle"
         singleton="true" />
 
     <extension
         type="transapps.maps.plugin.tool.ToolDescriptor"
-        impl="com.atakmap.android.draggablemarker.plugin.PluginToolDescriptor"
+        impl="com.atakmap.android.soothsayer.plugin.PluginToolDescriptor"
         singleton="true" />
 
 </plugin>

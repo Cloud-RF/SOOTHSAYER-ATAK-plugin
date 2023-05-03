@@ -1,5 +1,5 @@
 
-package com.atakmap.android.draggablemarker.layers;
+package com.atakmap.android.soothsayer.layers;
 
 import android.graphics.Bitmap;
 import android.util.Pair;

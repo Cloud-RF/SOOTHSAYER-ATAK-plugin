@@ -1,11 +1,11 @@
 
-package com.atakmap.android.draggablemarker.layers;
+package com.atakmap.android.soothsayer.layers;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.atakmap.android.draggablemarker.plugin.R;
+import com.atakmap.android.soothsayer.plugin.R;
 import com.atakmap.android.maps.MetaShape;
 import com.atakmap.coremap.log.Log;
 import com.atakmap.coremap.maps.coords.GeoBounds;

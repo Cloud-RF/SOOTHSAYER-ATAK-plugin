@@ -1,4 +1,4 @@
-package com.atakmap.android.draggablemarker.models.response
+package com.atakmap.android.soothsayer.models.response
 
 data class ResponseModel(
     val PNG_Mercator: String,

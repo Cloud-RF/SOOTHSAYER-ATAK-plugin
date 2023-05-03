@@ -18,7 +18,6 @@ object RetrofitClient {
     private const val mContentType = "Content-type"
     private const val mContentTypeJson = "application/json"
     private const val mCookie = "Cookie"
-    private const val mCookieValue = "PHPSESSID=j613liqg80g0b6e8h06ta9h7e2"
     private const val mAuthorizationKey = "key"
 
     const val DEFAULT_URL = "https://api.cloudrf.com"
@@ -47,7 +46,6 @@ object RetrofitClient {
             val originalRequest = chain.request()
             val authRequest = originalRequest.newBuilder()
                 .header(mContentType, mContentTypeJson)
-                .header(mCookie, mCookieValue)
                 .header(
                     mAuthorizationKey, Constant.sAccessToken
                 ) // This should be from user input.

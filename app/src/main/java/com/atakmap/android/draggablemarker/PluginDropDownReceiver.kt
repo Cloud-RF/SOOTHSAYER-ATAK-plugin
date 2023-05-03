@@ -449,9 +449,9 @@ class PluginDropDownReceiver(
                                     FOLDER_PATH,
                                     KMZ_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
-                                        Handler(Looper.getMainLooper()).post {
+                                        /*Handler(Looper.getMainLooper()).post {
                                             pluginContext.toast("DownloadFile success: $isDownloaded , message: $filePath")
-                                        }
+                                        }*/
                                         if (isDownloaded) {
                                             //adding kmz layer using image file
                                             addSingleKMZLayer(
@@ -485,8 +485,11 @@ class PluginDropDownReceiver(
                                 Constant.ApiErrorCodes.sUnAuthorized -> {
                                     pluginContext.getString(R.string.unauthorized_error)
                                 }
-                                Constant.ApiErrorCodes.sForbidden, Constant.ApiErrorCodes.sNotFound -> {
-                                    pluginContext.getString(R.string.invalid_url_error)
+                                Constant.ApiErrorCodes.sForbidden -> {
+                                    pluginContext.getString(R.string.forbidden_url_error)
+                                }
+                                Constant.ApiErrorCodes.sNotFound -> {
+                                    pluginContext.getString(R.string.not_found_url_error)
                                 }
                                 else -> {
                                     error ?: pluginContext.getString(R.string.error_msg)
@@ -525,9 +528,9 @@ class PluginDropDownReceiver(
                                     FOLDER_PATH,
                                     KMZ_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
-                                        Handler(Looper.getMainLooper()).post {
+                                        /*Handler(Looper.getMainLooper()).post {
                                             pluginContext.toast("DownloadFile success: $isDownloaded , message: $filePath")
-                                        }
+                                        }*/
                                         if (isDownloaded) {
                                             //adding kmz layer using image file
                                             addKMZLayer(filePath, response.bounds)
@@ -557,8 +560,11 @@ class PluginDropDownReceiver(
                                 Constant.ApiErrorCodes.sUnAuthorized -> {
                                     pluginContext.getString(R.string.unauthorized_error)
                                 }
-                                Constant.ApiErrorCodes.sForbidden, Constant.ApiErrorCodes.sNotFound -> {
-                                    pluginContext.getString(R.string.invalid_url_error)
+                                Constant.ApiErrorCodes.sForbidden -> {
+                                    pluginContext.getString(R.string.forbidden_url_error)
+                                }
+                                Constant.ApiErrorCodes.sNotFound -> {
+                                    pluginContext.getString(R.string.not_found_url_error)
                                 }
                                 else -> {
                                     error ?: pluginContext.getString(R.string.error_msg)
@@ -635,10 +641,10 @@ class PluginDropDownReceiver(
             singleSiteCloudRFLayer?.isVisible = true
 
             // Pan and zoom to the layer
-            ATAKUtilities.scaleToFit(
+            /*ATAKUtilities.scaleToFit(
                 mapView, singleSiteCloudRFLayer?.points,
                 mapView.width, mapView.height
-            )
+            )*/
             // Refresh Overlay Manager
             AtakBroadcast.getInstance().sendBroadcast(
                 Intent(
@@ -672,10 +678,10 @@ class PluginDropDownReceiver(
             cloudRFLayer?.isVisible = true
 
             // Pan and zoom to the layer
-            ATAKUtilities.scaleToFit(
+            /*ATAKUtilities.scaleToFit(
                 mapView, cloudRFLayer?.points,
                 mapView.width, mapView.height
-            )
+            )*/
             // Refresh Overlay Manager
             AtakBroadcast.getInstance().sendBroadcast(
                 Intent(

@@ -15,39 +15,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/tvTitle"
-                style="@style/TextStyle"
-                android:layout_centerVertical="true"
-                android:drawableEnd="@drawable/marker_icon_svg"
-                android:drawablePadding="@dimen/dp_4"
-                android:gravity="center"
-                android:text="@string/draggable_marker_plugin" />
-
-
-            <Button
-                android:id="@+id/btnAddMarker"
-                style="@style/darkButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="@dimen/dp_8"
-                android:layout_toEndOf="@id/tvTitle"
-                android:drawableEnd="@drawable/marker_icon_svg"
-                android:drawablePadding="@dimen/dp_2"
-                android:paddingHorizontal="@dimen/dp_6"
-                android:paddingVertical="@dimen/dp_6"
-                android:text="@string/add_marker" />
 
             <ImageView
                 android:id="@+id/ivSettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="57dp"
+                android:layout_height="53dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:contentDescription="@string/app_name"
                 android:padding="@dimen/dp_8"
                 android:src="@drawable/ic_settings" />
+
+            <Button
+                android:id="@+id/btnAddMarker"
+                style="@style/darkButton"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="@dimen/dp_8"
+                android:layout_marginRight="249dp"
+                android:drawableEnd="@drawable/marker_icon_svg"
+                android:drawablePadding="@dimen/dp_2"
+                android:paddingHorizontal="@dimen/dp_6"
+                android:paddingVertical="@dimen/dp_6"
+                android:paddingTop="10dp"
+                android:text="@string/add_marker"
+                android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                android:textSize="24sp" />
 
         </RelativeLayout>
 

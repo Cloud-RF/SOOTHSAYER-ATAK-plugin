@@ -85,8 +85,8 @@ apply plugin: 'atak-takdev-plugin'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion "33.0.1"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.1"
 
     dexOptions {
         jumboMode = true
@@ -152,7 +152,6 @@ android {
 
     productFlavors {
         mil {
-            getIsDefault().set(true)
             dimension "application"
             manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".MIL"]
         }

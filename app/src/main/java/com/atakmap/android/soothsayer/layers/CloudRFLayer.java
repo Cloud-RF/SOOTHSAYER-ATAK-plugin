@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.atakmap.android.menu.PluginMenuParser;
 import com.atakmap.android.soothsayer.interfaces.CloudRFLayerListener;
 import com.atakmap.android.soothsayer.plugin.R;
 import com.atakmap.android.maps.MetaShape;
@@ -85,8 +86,8 @@ public class CloudRFLayer extends AbstractLayer {
         metaShape.setMetaString("shapeName", name);
         metaShape.setMetaBoolean("removable", true);
         metaShape.setType(plugin.getString(R.string.soothsayer_layer));
-//        metaShape.setMetaString("menu", PluginMenuParser.getMenu(pluginContext, "menus/layer_menu.xml"));
-        metaShape.setMetaString("menu", "menus/grg_menu.xml");
+        metaShape.setMetaString("menu", PluginMenuParser.getMenu(plugin, "menus/layer_menu.xml"));
+//        metaShape.setMetaString("menu", "menus/grg_menu.xml");  // use this to get default menu.
 //        bitmap.recycle();
     }
 

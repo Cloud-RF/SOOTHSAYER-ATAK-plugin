@@ -10,7 +10,8 @@
     </broadcast>
     
     <broadcast>
-        <action>com.atakmap.android.plugintemplate.LAYER_DELETE</action>
+<!--        <action>com.atakmap.android.plugintemplate.LAYER_DELETE</action>-->
+        <action>com.atakmap.android.grg.DELETE</action>
         <extras>
             <string key='uid'>${uid}</string>
         </extras>

@@ -266,6 +266,9 @@ class PluginDropDownReceiver(
             etApiKey?.text?.trim()?.isEmpty() == true -> {
                 pluginContext.getString(R.string.empty_api_key)
             }
+            (etApiKey?.text?.trim()?.length ?: 0) < 32 -> {
+                pluginContext.getString(R.string.unauthorized_error)
+            }
             else -> {
                 null
             }

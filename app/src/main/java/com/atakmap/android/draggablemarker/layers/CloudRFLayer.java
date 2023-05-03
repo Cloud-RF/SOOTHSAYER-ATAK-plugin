@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.atakmap.android.draggablemarker.interfaces.CloudRFLayerListener;
 import com.atakmap.android.draggablemarker.plugin.R;
 import com.atakmap.android.maps.MetaShape;
 import com.atakmap.coremap.log.Log;
@@ -31,14 +32,19 @@ public class CloudRFLayer extends AbstractLayer {
     final GeoPoint lowerLeft;
 
     final Bitmap bitmap;
-    final String description;
+    public final String description;
 
     private final MetaShape metaShape;
+    public final String fileUri;
 
-    public CloudRFLayer(Context plugin, final String name, final String description, final String uri, final List<Double> bounds) {
+    public final CloudRFLayerListener cloudRFLayerListener;
+
+    public CloudRFLayer(Context plugin, final String name, final String description, final String uri, final List<Double> bounds, final CloudRFLayerListener listener) {
         super(name);
 
         this.description = description;
+        this.fileUri = uri;
+        this.cloudRFLayerListener = listener;
 
         this.upperLeft = GeoPoint.createMutable();
         this.upperRight = GeoPoint.createMutable();

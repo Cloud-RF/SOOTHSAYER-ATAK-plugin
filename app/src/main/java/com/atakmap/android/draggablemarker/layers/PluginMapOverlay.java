@@ -2,20 +2,28 @@
 package com.atakmap.android.draggablemarker.layers;
 
 import android.content.Context;
+import android.content.Intent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.atakmap.android.draggablemarker.plugin.R;
+import com.atakmap.android.hierarchy.HierarchyListAdapter;
 import com.atakmap.android.hierarchy.HierarchyListFilter;
 import com.atakmap.android.hierarchy.HierarchyListItem;
+import com.atakmap.android.hierarchy.HierarchyListReceiver;
 import com.atakmap.android.hierarchy.action.GoTo;
 import com.atakmap.android.hierarchy.action.Search;
 import com.atakmap.android.hierarchy.action.Visibility;
 import com.atakmap.android.hierarchy.action.Visibility2;
 import com.atakmap.android.hierarchy.items.AbstractHierarchyListItem2;
 import com.atakmap.android.hierarchy.items.MapItemUser;
+import com.atakmap.android.ipc.AtakBroadcast;
 import com.atakmap.android.maps.DeepMapItemQuery;
 import com.atakmap.android.maps.DefaultMapGroup;
 import com.atakmap.android.maps.MapGroup;
@@ -140,11 +148,12 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
 //    }
 
     public class PluginListModel extends AbstractHierarchyListItem2
-            implements Search, Visibility2, View.OnClickListener {
+            implements Search, Visibility2, View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
 //        private final static String TAG = "PluginListModel";
 
-//        private View _header, _footer;
+        private View _footer;
+        private ToggleButton _vizBtn, _outlineBtn;
 
         public PluginListModel() {
             this.asyncRefresh = true;
@@ -201,7 +210,31 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
 //                        .setOnClickListener(this);
 //            }
 //            return _footer;
-            return super.getFooterView();
+//            return super.getFooterView();
+
+            if (_footer == null) {
+                _footer = LayoutInflater.from(_plugin).inflate(
+                        R.layout.overlay_footer, _mapView, false);
+                _vizBtn = _footer.findViewById(R.id.grg_visible_toggle);
+                _outlineBtn = _footer.findViewById(R.id.layer_outline_toggle);
+            }
+
+            _outlineBtn.setOnCheckedChangeListener(null);
+//            _outlineBtn.setChecked(_prefs.get("grgs.outlines-visible", true));
+            _outlineBtn.setOnCheckedChangeListener(this);
+
+            int viz = getVisibility();
+            _vizBtn.setOnCheckedChangeListener(null);
+            if (viz != Visibility2.INVISIBLE) {
+                String text = _plugin.getString(viz == Visibility2.VISIBLE
+                        ? R.string.visible_on
+                        : R.string.visible_partial);
+                _vizBtn.setTextOn(text);
+            }
+            _vizBtn.setChecked(viz != Visibility2.INVISIBLE);
+            _vizBtn.setOnCheckedChangeListener(this);
+
+            return _footer;
         }
 
         @Override
@@ -275,10 +308,26 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
                         ((Button) v).getText(),
                         Toast.LENGTH_LONG).show();
         }
+
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            int id = buttonView.getId();
+            if (id == R.id.layer_outline_toggle) {
+//                List<CloudRFLayer> layers = getLayers();
+//                if(!layers.isEmpty()) {
+//                    layers.get(0).cloudRFLayerListener.toggleVisibility(isChecked, layers);
+//                }
+            } else if (id == R.id.grg_visible_toggle) {
+                setVisible(isChecked);
+            }
+            getFooterView();
+            AtakBroadcast.getInstance().sendBroadcast(new Intent(
+                    HierarchyListReceiver.REFRESH_HIERARCHY));
+        }
     }
 
     private class LayerHierarchyListItem extends AbstractHierarchyListItem2
-            implements Visibility, GoTo, MapItemUser {
+            implements Visibility, GoTo, MapItemUser, View.OnClickListener {
 
         private final CloudRFLayer _layer;
         private final String _description;
@@ -294,6 +343,31 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
 //            _multilayer = multilayer;
 //            _layer = null;
 //        }
+
+        @Override
+        public View getExtraView(View convertView, ViewGroup parent) {
+            ExtraHolder holder = convertView != null && convertView.getTag() instanceof ExtraHolder
+                    ? (ExtraHolder) convertView.getTag()
+                    : null;
+            if (holder == null) {
+                holder = new ExtraHolder();
+                convertView = LayoutInflater.from(_plugin).inflate(
+                        R.layout.overlay_list_item_extra, parent, false);
+                holder.delete = convertView.findViewById(R.id.grg_delete);
+                convertView.setTag(holder);
+            }
+            if (this.listener instanceof HierarchyListAdapter
+                    && ((HierarchyListAdapter) this.listener)
+                    .getSelectHandler() != null) {
+                // Hide delete buttons when selecting
+                convertView.setVisibility(View.GONE);
+                holder.delete.setOnClickListener(null);
+            } else {
+                convertView.setVisibility(View.VISIBLE);
+                holder.delete.setOnClickListener(this);
+            }
+            return convertView;
+        }
 
         @Override
         public String getTitle() {
@@ -411,7 +485,17 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
 //            }
             return false;
         }
+
+        @Override
+        public void onClick(View v) {
+            int i = v.getId();
+            if (i == R.id.grg_delete) {
+                _layer.cloudRFLayerListener.delete(_layer);
+            }
+        }
     }
+
+
 
     private class PluginDeepMapItemQuery implements DeepMapItemQuery {
 
@@ -482,5 +566,9 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
 //            }
             return ret;
         }
+    }
+
+    private static class ExtraHolder {
+        View delete, send;
     }
 }

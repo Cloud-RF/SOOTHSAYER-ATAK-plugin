@@ -15,6 +15,7 @@ import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
+import com.atakmap.android.draggablemarker.interfaces.CloudRFLayerListener
 import com.atakmap.android.draggablemarker.layers.CloudRFLayer
 import com.atakmap.android.draggablemarker.layers.GLCloudRFLayer
 import com.atakmap.android.draggablemarker.layers.PluginMapOverlay
@@ -30,8 +31,10 @@ import com.atakmap.android.draggablemarker.recyclerview.RecyclerViewAdapter
 import com.atakmap.android.draggablemarker.util.*
 import com.atakmap.android.dropdown.DropDown.OnStateListener
 import com.atakmap.android.dropdown.DropDownReceiver
+import com.atakmap.android.grg.GRGMapComponent
 import com.atakmap.android.hierarchy.HierarchyListReceiver
 import com.atakmap.android.importexport.ImportExportMapComponent
+import com.atakmap.android.importexport.ImportReceiver
 import com.atakmap.android.ipc.AtakBroadcast
 import com.atakmap.android.maps.MapEvent
 import com.atakmap.android.maps.MapItem
@@ -325,8 +328,8 @@ class PluginDropDownReceiver(
                     MapEvent.ITEM_DRAG_DROPPED -> {
 //                        val latitude = mapItem.clickPoint.latitude
 //                        val longitude = mapItem.clickPoint.longitude
-                        val latitude =   marker.geoPointMetaData.get().latitude
-                        val longitude =   marker.geoPointMetaData.get().longitude
+                        val latitude = marker.geoPointMetaData.get().latitude
+                        val longitude = marker.geoPointMetaData.get().longitude
                         Log.d(
                             TAG,
                             "DragDropped latitude: $latitude Longitude: $longitude Marker_id: ${mapItem.uid} actual uid = $uid"
@@ -623,7 +626,11 @@ class PluginDropDownReceiver(
                 layerName,
                 pluginContext.getString(R.string.layer, layerName),
                 file.absolutePath,
-                bounds
+                bounds, object : CloudRFLayerListener {
+                    override fun delete(layer: CloudRFLayer) {
+                        promptDelete(layer)
+                    }
+                }
             )
         }
         // Add the layer to the map
@@ -661,7 +668,17 @@ class PluginDropDownReceiver(
             GLLayerFactory.register(GLCloudRFLayer.SPI)
             val layerName = pluginContext.getString(R.string.multisite_layer)
             cloudRFLayer =
-                CloudRFLayer(pluginContext, layerName, layerName, file.absolutePath, bounds)
+                CloudRFLayer(
+                    pluginContext,
+                    layerName,
+                    layerName,
+                    file.absolutePath,
+                    bounds,
+                    object : CloudRFLayerListener {
+                        override fun delete(layer: CloudRFLayer) {
+                            promptDelete(layer)
+                        }
+                    })
         }
         // Add the layer to the map
         cloudRFLayer?.let {
@@ -754,62 +771,111 @@ class PluginDropDownReceiver(
                 if (l != null) {
                     l.isVisible = !l.isVisible
                 }
-                AtakBroadcast.getInstance()
-                    .sendBroadcast( Intent(
-                        HierarchyListReceiver.REFRESH_HIERARCHY
-                    ))
+                AtakBroadcast.getInstance().sendBroadcast(Intent(HierarchyListReceiver.REFRESH_HIERARCHY))
             }
-           GRG_DELETE, LAYER_DELETE -> {
+            GRG_DELETE, LAYER_DELETE -> {
                 Log.d(
                     TAG,
                     "used the custom action to delete the layer on: "
                             + intent
                         .getStringExtra("uid")
                 )
-                val l = mapOverlay.findLayer(
-                    intent
-                        .getStringExtra("uid")
-                )
+                val l = mapOverlay.findLayer(intent.getStringExtra("uid"))
                 if (l != null) {
                     promptDelete(l)
                 }
 
-           }
-            GRG_BRIGHTNESS ->{
+            }
+            GRG_BRIGHTNESS -> {
 
             }
-            GRG_COLOR ->{
+            GRG_COLOR -> {
 
             }
-            GRG_TRANSPARENCY ->{
+            GRG_TRANSPARENCY -> {
 
             }
         }
 
     }
 
-    private fun promptDelete(layer:CloudRFLayer) {
-        val context = mapView.context
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle(com.atakmap.app.R.string.delete_grg)
+//    private fun promptDelete(layer:CloudRFLayer) {
+//        val context = mapView.context
+//        val builder = AlertDialog.Builder(context)
+//        builder.setTitle(CloudRFLayer.TAG)
+//        builder.setIcon(com.atakmap.app.R.drawable.ic_menu_delete)
+//        builder.setMessage(
+//            context.getString(com.atakmap.app.R.string.delete) + layer.metaShape.getMetaString("shapeName", "KMZ Layer")
+//                    + context.getString(com.atakmap.app.R.string.question_mark_symbol)
+//        )
+//        builder.setNegativeButton(com.atakmap.app.R.string.cancel, null)
+//        builder.setPositiveButton(
+//            com.atakmap.app.R.string.ok
+//        ) { dialog, i ->
+//            mapView.removeLayer(
+//                RenderStack.MAP_SURFACE_OVERLAYS,
+//                layer
+//            )
+//            mapOverlay.PluginListModel()
+//            AtakBroadcast.getInstance().sendBroadcast(Intent(ImportExportMapComponent.ACTION_DELETE_DATA)) // not working
+//            dialog.dismiss()
+//        }
+//        builder.show()
+//    }
+
+    private fun promptDelete(layer: CloudRFLayer) {
+        val builder = AlertDialog.Builder(mapView.context)
+        builder.setTitle(pluginContext.getString(R.string.civ_delete_layer))
         builder.setIcon(com.atakmap.app.R.drawable.ic_menu_delete)
         builder.setMessage(
-            context.getString(com.atakmap.app.R.string.delete) + layer.metaShape.getMetaString("shapeName", "KMZ Layer")
-                    + context.getString(com.atakmap.app.R.string.question_mark_symbol)
+            "${pluginContext.getString(R.string.delete)}${layer.description}${
+                pluginContext.getString(
+                    R.string.question_mark_symbol
+                )
+            }"
         )
-        builder.setNegativeButton(com.atakmap.app.R.string.cancel, null)
+        builder.setNegativeButton(pluginContext.getString(R.string.cancel), null)
         builder.setPositiveButton(
-            com.atakmap.app.R.string.ok
-        ) { dialog, i ->
-            mapView.removeLayer(
-                RenderStack.MAP_SURFACE_OVERLAYS,
-                layer
-            )
-            mapOverlay.PluginListModel()
-            AtakBroadcast.getInstance().sendBroadcast(Intent(ImportExportMapComponent.ACTION_DELETE_DATA)) // not working
-            dialog.dismiss()
+            pluginContext.getString(R.string.ok_txt)
+        ) { _, _ ->
+            delete(layer)
+            AtakBroadcast.getInstance()
+                .sendBroadcast(Intent(HierarchyListReceiver.REFRESH_HIERARCHY))
         }
         builder.show()
+    }
+
+    private fun delete(layer: CloudRFLayer?) {
+        if (layer?.fileUri == null) return
+
+        // remove layer from map
+        mapView.removeLayer(
+            RenderStack.MAP_SURFACE_OVERLAYS,
+            layer
+        )
+        mapOverlay.PluginListModel()
+
+        val pathsToDelete: ArrayList<String> = ArrayList()
+        pathsToDelete.add(layer.fileUri) // kmz img uri.
+        val fileName = File(layer.fileUri).name.substringBeforeLast('.', "")
+        val kmzFilePath = File(KMZ_FOLDER, "$fileName$KMZ_FILE").absolutePath
+        pathsToDelete.add(kmzFilePath) // kmz file uri.
+        for (path in pathsToDelete) {
+            Log.d(TAG, "Deleting at $path")
+            val intent = Intent(
+                ImportExportMapComponent.ACTION_DELETE_DATA
+            )
+            intent.putExtra(
+                ImportReceiver.EXTRA_CONTENT,
+                GRGMapComponent.IMPORTER_CONTENT_TYPE
+            )
+            intent.putExtra(
+                ImportReceiver.EXTRA_MIME_TYPE,
+                GRGMapComponent.IMPORTER_DEFAULT_MIME_TYPE
+            )
+            intent.putExtra(ImportReceiver.EXTRA_URI, path)
+            AtakBroadcast.getInstance().sendBroadcast(intent)
+        }
     }
 
     override fun onDropDownSelectionRemoved() {}

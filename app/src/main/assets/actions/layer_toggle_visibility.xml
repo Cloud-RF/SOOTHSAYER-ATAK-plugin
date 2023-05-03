@@ -1,6 +1,7 @@
 <set>
     <broadcast>
-        <action>com.atakmap.android.plugintemplate.LAYER_VISIBILITY</action>
+<!--        <action>com.atakmap.android.plugintemplate.LAYER_VISIBILITY</action>-->
+        <action>com.atakmap.android.grg.TOGGLE_VISIBILITY</action>
         <extras>
             <string key='uid'>${uid}</string>
         </extras>

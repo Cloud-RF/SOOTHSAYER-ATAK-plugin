@@ -4,12 +4,33 @@
               android:layout_width="wrap_content"
               android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/footer_button"
+    <ToggleButton
+        android:id="@+id/grg_visible_toggle"
+        style="@style/darkButton"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="6dp"
-        android:text="@string/example_footer"
-        style="@style/darkButton"/>
+        android:textStyle="bold"
+        android:checked="true"
+        android:textOff="@string/visible_off"
+        android:textOn="@string/visible_on" />
+
+    <ToggleButton
+        android:id="@+id/layer_outline_toggle"
+        style="@style/darkButton"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:checked="true"
+        android:visibility="gone"
+        android:textOff="@string/outlines_off"
+        android:textOn="@string/outlines_on" />
 
 </LinearLayout>

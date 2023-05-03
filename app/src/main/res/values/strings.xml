@@ -43,6 +43,18 @@
     <string name="layer">%1$s Layer</string>
     <string name="multisite_layer">Multisite Layer</string>
 
+    <!--Prompt Dialog strings-->
+    <string name="civ_delete_layer">Delete CloudRF Layer</string>
+    <string name="delete">Delete</string>
+    <string name="question_mark_symbol">\?</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="visible_off">visible: off</string>
+    <string name="visible_on">visible: on</string>
+    <string name="visible_partial">visible: partial</string>
+    <string name="outlines_on">outlines: on</string>
+    <string name="outlines_off">outlines: off</string>
+
     <string-array name="tbc_option_arrays">
         <item>Enable</item>
         <item>Disable</item>

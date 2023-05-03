@@ -28,7 +28,7 @@ data class Antenna(
     val pol: String,
     val tlt: Int,
     val txg: Double,
-    val txl: Int,
+    val txl: Double,
     val vbw: Int
 ): Serializable
 
@@ -57,8 +57,8 @@ data class Output(
     val mod: Int,
     val nf: Int,
     val `out`: Int,
-    val rad: Int,
-    val res: Int,
+    val rad: Double,
+    val res: Double,
     val units: String
 ): Serializable
 
@@ -66,7 +66,7 @@ data class Receiver(
     val alt: Int,
     var lat: Double,
     var lon: Double,
-    val rxg: Int,
+    val rxg: Double,
     val rxs: Int
 ): Serializable
 
@@ -81,9 +81,9 @@ data class Template(
 data class Transmitter(
     val alt: Int,
     val bwi: Double,
-    val frq: Int,
+    val frq: Double,
     var lat: Double,
     var lon: Double,
     val powerUnit: String,
-    val txw: Int
+    val txw: Double
 ): Serializable

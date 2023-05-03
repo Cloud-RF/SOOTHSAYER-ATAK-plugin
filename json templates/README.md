@@ -2,6 +2,8 @@
 
 These templates can be downloaded from the web interface at CloudRF.com or your SOOTHSAYER server. Save your settings as a template then look for the download link in the top left next to the template select box.
 
+Be careful not to add bad .json files as these can break the plugin. As a minimum you should validate it is proper JSON with jsonlint.com or similar.
+
 ## CPU and GPU 
 
 The "engine" parameter in the template determines whether it is CPU (2) or GPU (1). If you do not have a GPU plan or server, you will need to use engine = 2.
@@ -87,3 +89,95 @@ A GPU server can model LiDAR coverage faster and perform multisite calculations.
 https://cloudrf.com/documentation/developer/
 
 https://docs.cloudrf.com
+
+## Bad templates
+
+Strict type parsing is applied based on this model so for example, an antenna azimuth cannot be 45.5 it must be 45 because it is an Int not a double.
+
+```
+data class TemplateDataModel(
+    val antenna: Antenna,
+    val coordinates: Int,
+    val engine: Int,
+    val environment: Environment,
+    val feeder: Feeder,
+    val model: Model,
+    val network: String,
+    val output: Output,
+    val `receiver`: Receiver,
+    val reference: String,
+    val site: String,
+    val template: Template,
+    var transmitter: Transmitter?,
+    val version: String
+): Serializable
+
+data class Antenna(
+    val ant: Int,
+    val azi: Int,
+    val fbr: Double,
+    val hbw: Int,
+    val mode: String,
+    val pol: String,
+    val tlt: Int,
+    val txg: Double,
+    val txl: Double,
+    val vbw: Int
+): Serializable
+
+data class Environment(
+    val cll: Int,
+    val clm: Int,
+    val clt: String
+): Serializable
+
+data class Feeder(
+    val fcc: Int,
+    val fll: Int,
+    val flt: Int
+): Serializable
+
+data class Model(
+    val ked: Int,
+    val pe: Int,
+    val pm: Int,
+    val rel: Int
+): Serializable
+
+data class Output(
+    val ber: Int,
+    val col: String,
+    val mod: Int,
+    val nf: Int,
+    val `out`: Int,
+    val rad: Double,
+    val res: Double,
+    val units: String
+): Serializable
+
+data class Receiver(
+    val alt: Int,
+    var lat: Double,
+    var lon: Double,
+    val rxg: Double,
+    val rxs: Int
+): Serializable
+
+data class Template(
+    val bom_value: Int,
+    val created_at: String,
+    val name: String,
+    val owner: Int,
+    val service: String
+): Serializable
+
+data class Transmitter(
+    val alt: Int,
+    val bwi: Double,
+    val frq: Double,
+    var lat: Double,
+    var lon: Double,
+    val powerUnit: String,
+    val txw: Double
+): Serializable
+```

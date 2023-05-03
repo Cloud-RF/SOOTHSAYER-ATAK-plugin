@@ -92,6 +92,9 @@ fun getTemplatesFromFolder(): ArrayList<TemplateDataModel> {
                     )
                 }
             } catch (e: Exception) {
+                Log.d(
+                        PluginDropDownReceiver.TAG,
+                        "Bad template: ${file.name}")
                 Log.e(PluginDropDownReceiver.TAG, e.stackTrace.toString())
             }
         }

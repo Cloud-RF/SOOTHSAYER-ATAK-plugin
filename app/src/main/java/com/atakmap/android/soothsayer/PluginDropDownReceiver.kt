@@ -731,17 +731,21 @@ class PluginDropDownReceiver(
                     TAG,
                     "Pref Items: ${sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null)}"
                 )
-                val templateList: ArrayList<MarkerDataModel>? =
-                    Gson().fromJson(
-                        sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null),
-                        object : TypeToken<ArrayList<MarkerDataModel>>() {}.type
-                    )
+                try {
+                    val templateList: ArrayList<MarkerDataModel>? =
+                        Gson().fromJson(
+                            sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null),
+                            object : TypeToken<ArrayList<MarkerDataModel>>() {}.type
+                        )
 
-                val commonList = templateList?.filter { marker ->
-                    mapView.rootGroup.items.any { items -> marker.markerID == items.uid }
+                    val commonList = templateList?.filter { marker ->
+                        mapView.rootGroup.items.any { items -> marker.markerID == items.uid }
+                    }
+                    Log.d(TAG, "Group Items: commonList : $commonList")
+                } catch (e: java.lang.Exception) {
+                    Log.e(TAG, "error", e)
                 }
 
-                Log.d(TAG, "Group Items: commonList : $commonList")
                 setDataFromPref()
                 Constant.sServerUrl = etServerUrl?.text.toString()
                 Constant.sAccessToken = etApiKey?.text.toString()

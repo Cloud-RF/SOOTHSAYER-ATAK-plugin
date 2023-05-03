@@ -15,10 +15,10 @@ data class MultisiteRequest(
 data class MultiSiteTransmitter(
     val alt: Int,
     val bwi: Double,
-    val frq: Int,
+    val frq: Double,
     var lat: Double,
     var lon: Double,
     val powerUnit: String,
-    val txw: Int,
+    val txw: Double,
     val antenna: Antenna
 ): Serializable

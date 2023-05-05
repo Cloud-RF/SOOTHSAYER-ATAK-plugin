@@ -72,7 +72,7 @@ class PluginRepository {
     }
 
     fun downloadFile(url:String, downloadFolder :String,fileName :String, listener: (Boolean, String) -> Unit){
-        val client = OkHttpClient()
+        val client = RetrofitClient.getUnsafeOkHttpClient().build()
         val request = Request.Builder()
             .url(url)
             .build()

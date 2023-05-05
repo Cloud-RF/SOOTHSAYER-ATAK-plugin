@@ -56,7 +56,7 @@ object RetrofitClient {
         }
     }
 
-    private fun getUnsafeOkHttpClient(): OkHttpClient.Builder {
+    fun getUnsafeOkHttpClient(): OkHttpClient.Builder {
         try {
             // Create a trust manager that does not validate certificate chains
             val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {

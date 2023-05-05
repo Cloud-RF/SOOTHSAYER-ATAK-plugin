@@ -2,22 +2,22 @@
     "version": "CloudRF-API-v3.8.2",
     "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
     "template": {
-        "name": "Motorola DMR 5W 12m",
-        "service": "CloudRF https://api.cloudrf.com",
-        "created_at": "2023-04-12T06:36:09+00:00",
-        "owner": 1,
+        "name": "LOS_2km_2m_GPU",
+        "service": "SOOTHSAYER https://185.11.204.106",
+        "created_at": "2023-05-05T15:44:20+00:00",
+        "owner": 8,
         "bom_value": 0
     },
     "site": "Site",
-    "network": "MOTO",
-    "engine": 2,
+    "network": "TALON",
+    "engine": 1,
     "coordinates": 1,
     "transmitter": {
-        "lat": 51.96403,
-        "lon": -2.113952,
-        "alt": 12,
-        "frq": 700,
-        "txw": 5,
+        "lat": 50.806194,
+        "lon": -1.112117,
+        "alt": 2,
+        "frq": 1250,
+        "txw": 2,
         "bwi": 0.1,
         "powerUnit": "W"
     },
@@ -35,35 +35,35 @@
     },
     "antenna": {
         "mode": "template",
-        "txg": 2.15,
+        "txg": 2,
         "txl": 0,
         "ant": 39,
         "azi": 0,
         "tlt": 0,
         "hbw": 1,
         "vbw": 1,
-        "fbr": 2.15,
+        "fbr": 2,
         "pol": "v"
     },
     "model": {
-        "pm": 1,
+        "pm": 7,
         "pe": 2,
-        "ked": 1,
-        "rel": 95
+        "ked": 0,
+        "rel": 50
     },
     "environment": {
         "clm": 0,
         "cll": 0,
-        "clt": "Minimal.clt"
+        "clt": "Temperate.clt"
     },
     "output": {
         "units": "m",
-        "col": "LTE.dBm",
+        "col": "GREEN.dBm",
         "out": 2,
         "ber": 1,
         "mod": 0,
         "nf": -124,
-        "res": 5,
-        "rad": 8
+        "res": 2,
+        "rad": 2
     }
 }

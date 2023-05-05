@@ -11,12 +11,20 @@ import com.atakmap.coremap.log.Log
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+
 
 class PluginRepository {
 
@@ -71,11 +79,28 @@ class PluginRepository {
 
     }
 
+    // DANGER!
+    fun OkHttpClient.Builder.ignoreAllSSLErrors(): OkHttpClient.Builder {
+        val naiveTrustManager = object : X509TrustManager {
+            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+            override fun checkClientTrusted(certs: Array<X509Certificate>, authType: String) = Unit
+            override fun checkServerTrusted(certs: Array<X509Certificate>, authType: String) = Unit
+        }
+
+        val insecureSocketFactory = SSLContext.getInstance("TLSv1.2").apply {
+            val trustAllCerts = arrayOf<TrustManager>(naiveTrustManager)
+            init(null, trustAllCerts, SecureRandom())
+        }.socketFactory
+
+        sslSocketFactory(insecureSocketFactory, naiveTrustManager)
+        hostnameVerifier(HostnameVerifier { _, _ -> true })
+        return this
+    }
     fun downloadFile(url:String, downloadFolder :String,fileName :String, listener: (Boolean, String) -> Unit){
-        val client = OkHttpClient()
+        val client = RetrofitClient.getUnsafeOkHttpClient().build()
         val request = Request.Builder()
-            .url(url)
-            .build()
+                .url(url)
+                .build()
         val call = client.newCall(request)
         call.enqueue(object : okhttp3.Callback {
             override fun onFailure(call: okhttp3.Call, e: IOException) {
@@ -85,6 +110,8 @@ class PluginRepository {
 
             override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                 val inputStream = response.body?.byteStream()
+//                val path = FOLDER_PATH
+                // folder doesn't exists.
                 val folder = File(downloadFolder)
                 if (!folder.exists()) {
                     Log.d(PluginDropDownReceiver.TAG, "downloadFile creating  new folder....")
@@ -154,3 +181,4 @@ class PluginRepository {
     }
 
 }
+

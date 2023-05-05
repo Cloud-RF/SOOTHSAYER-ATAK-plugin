@@ -1,0 +1,69 @@
+{
+    "version": "CloudRF-API-v3.8.2",
+    "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
+    "template": {
+        "name": "LOS_2km_CPU",
+        "service": "SOOTHSAYER https://185.11.204.106",
+        "created_at": "2023-05-05T15:43:42+00:00",
+        "owner": 8,
+        "bom_value": 0
+    },
+    "site": "Site",
+    "network": "TALON",
+    "engine": 2,
+    "coordinates": 1,
+    "transmitter": {
+        "lat": 50.806335,
+        "lon": -1.112032,
+        "alt": 2,
+        "frq": 1250,
+        "txw": 2,
+        "bwi": 0.1,
+        "powerUnit": "W"
+    },
+    "receiver": {
+        "lat": 38.913,
+        "lon": 1.45,
+        "alt": 1,
+        "rxg": 2,
+        "rxs": -90
+    },
+    "feeder": {
+        "flt": 1,
+        "fll": 0,
+        "fcc": 0
+    },
+    "antenna": {
+        "mode": "template",
+        "txg": 2,
+        "txl": 0,
+        "ant": 39,
+        "azi": 0,
+        "tlt": 0,
+        "hbw": 1,
+        "vbw": 1,
+        "fbr": 2,
+        "pol": "v"
+    },
+    "model": {
+        "pm": 7,
+        "pe": 2,
+        "ked": 0,
+        "rel": 50
+    },
+    "environment": {
+        "clm": 0,
+        "cll": 0,
+        "clt": "Temperate.clt"
+    },
+    "output": {
+        "units": "m",
+        "col": "GREEN.dBm",
+        "out": 2,
+        "ber": 1,
+        "mod": 0,
+        "nf": -124,
+        "res": 5,
+        "rad": 2
+    }
+}

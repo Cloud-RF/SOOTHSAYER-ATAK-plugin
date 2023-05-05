@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:background="@drawable/et_background"
+    android:padding="@dimen/dp_4"
+    android:layout_marginBottom="@dimen/dp_2"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/ivMarker"
+        android:layout_centerVertical="true"
+        android:src="@drawable/marker_icon_svg"
+        android:layout_marginEnd="@dimen/dp_8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/app_name" />
+
+    <TextView
+        style="@style/TextStyle"
+        android:textColor="@color/darker_gray"
+        android:textStyle="normal"
+        android:textSize="@dimen/sp_14"
+        android:singleLine="false"
+        android:includeFontPadding="false"
+        android:id="@+id/tvMarkerDetails"
+        android:layout_toStartOf="@id/ivRemove"
+        android:layout_toEndOf="@id/ivMarker"
+        android:layout_width="match_parent"
+        tools:text="Motorola DMR 2W"/>
+
+    <TextView
+        style="@style/TextStyle"
+        android:textColor="@color/darker_gray"
+        android:textStyle="normal"
+        android:textSize="@dimen/sp_14"
+        android:id="@+id/tvLocation"
+        android:layout_below="@id/tvMarkerDetails"
+        android:includeFontPadding="false"
+        android:layout_toStartOf="@id/ivRemove"
+        android:layout_toEndOf="@id/ivMarker"
+        android:layout_width="match_parent"
+        tools:text="Location: 51.96403, -2.113952" />
+
+    <ImageView
+        android:id="@+id/ivRemove"
+        android:src="@drawable/ic_cross"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:padding="@dimen/dp_4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/app_name" />
+
+</RelativeLayout>

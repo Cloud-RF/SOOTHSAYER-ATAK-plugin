@@ -1,0 +1,18 @@
+<set>
+    <broadcast>
+<!--        <action>com.atakmap.android.plugintemplate.LAYER_VISIBILITY</action>-->
+        <action>com.atakmap.android.grg.TOGGLE_VISIBILITY</action>
+        <extras>
+            <string key='uid'>${uid}</string>
+        </extras>
+    </broadcast>
+    <broadcast>
+        <action>com.atakmap.android.maps.UNFOCUS</action>
+    </broadcast>
+    <broadcast>
+        <action>com.atakmap.android.maps.HIDE_DETAILS</action>
+    </broadcast>
+    <broadcast>
+        <action>com.atakmap.android.maps.HIDE_MENU</action>
+    </broadcast>
+</set>

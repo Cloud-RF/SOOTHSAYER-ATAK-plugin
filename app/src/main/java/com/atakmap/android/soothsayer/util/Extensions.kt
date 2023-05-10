@@ -142,5 +142,5 @@ fun Context.isConnected(): Boolean {
 }
 
 fun String.getFileName():String{
-   return "${SimpleDateFormat("dd HH:mm:SS", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
+   return "${SimpleDateFormat("ddHHmmSS", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
 }

@@ -76,3 +76,14 @@ takReleaseKeyPassword=android
 10. Open Tools, Device manager and create a Pixel 5 with Android Image version 28 (or whatever matches your build.gradle) and a VM heap of 512MB. Boot it up.
 11. Find atak.apk from the SDK folder and drag it onto the emulator to start installation. Complete the ATAK install wizard and approve all permissions.
 12. With ATAK running, run the plugin. Expect an ATAK prompt.
+
+## Third Party signing
+
+The tak.gov documentation has a bug at the time of writing which assumes the public have access to the maven repo.
+This command in particular does not work, don't worry about it:
+
+```
+./gradlew -Ptakrepo.force=true -Ptakrepo.url=https://artifacts.tak.gov/artifactory/maven ....
+```
+When you zip the code and upload it, expect to fail the first few times. Review the debug.log in the TPP page at tak.gov to find out why and if you can't get the solution, search for it in the `TAK Community` discord as it's been asked before!
+

@@ -71,7 +71,7 @@ object RetrofitClient {
             })
 
             // Install the all-trusting trust manager
-            val sslContext = SSLContext.getInstance("SSL")
+            val sslContext = SSLContext.getInstance("TLSv1.2")
             sslContext.init(null, trustAllCerts, java.security.SecureRandom())
             // Create an ssl socket factory with our all-trusting manager
             val sslSocketFactory = sslContext.socketFactory

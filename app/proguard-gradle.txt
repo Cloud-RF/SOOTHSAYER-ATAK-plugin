@@ -80,6 +80,26 @@
 ################################################################################################
 ################################################################################################
 
+# ATAK Forwarder Libraries
+-keep class com.google.** {*;}
+-keep class com.squareup.** {*;}
+-keep class org.jetbrains.** {*;}
+
+-dontwarn module-info
+-dontwarn java.awt.**
+-dontwarn org.xmlpull.**
+-dontwarn org.xml.sax.ContentHandler
+-dontwarn org.bouncycastle.**
+-dontwarn org.conscrypt.**
+-dontwarn org.openjsse.**
+-dontwarn android.net.**
+-dontwarn java.nio.ByteBuffer
+-dontwarn kotlin.jvm.internal.**
+-dontwarn kotlin.coroutines.jvm.internal.**
+-dontwarn kotlin.jvm.functions.**
+-dontwarn kotlin.coroutines.**
+-dontwarn kotlin.collections.**
+-dontwarn android.content.res.XmlResourceParser
 
 ################################################################################################
 ## Please change PluginTemplate to accurately reflect the name of your plugin

@@ -40,8 +40,7 @@ _________________________________________________________________
 COMPILATION
 
 1. Open Plugin folder in Android studio
-2. File > Sync project 
-3. Draw the rest of the owl
+2. Open a terminal and issue ./gradlew assembleCivDebug --info 
 
 _________________________________________________________________
 DEVELOPER NOTES
@@ -54,23 +53,23 @@ DEVELOPER NOTES
 6. Unzip the ATAK CIV release and rename the folder to include the version eg. mv atak-civ atak-civ-x.x
 7. Choose open project, navigate to atak-civ-x.x/plugin-examples/helloworld
 8. Edit app/build.gradle near line ~200 and move "getIsDefault().set(true)" into the civ {} block to default to ATAK CIV
-9. Make your signing key and add the path:
+9. Make your signing key and move the .jks key file into your app folder:
 
 ```
-keytool -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999
+keytool -genkey -v -keystore my-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias my-alias
 ```
 
 Set these strings within local.properties 
 
 ```
-takDebugKeyFile=/somepath/debug.keystore
+takDebugKeyFile=my-release-key.jks
 takDebugKeyFilePassword=android
-takDebugKeyAlias=androiddebugkey
+takDebugKeyAlias=my-alias
 takDebugKeyPassword=android
 
-takReleaseKeyFile=/somepath/debug.keystore
+takReleaseKeyFile=my-release-key.jks
 takReleaseKeyFilePassword=android
-takReleaseKeyAlias=androiddebugkey
+takReleaseKeyAlias=my-alias
 takReleaseKeyPassword=android
 ```
 

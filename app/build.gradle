@@ -85,8 +85,8 @@ apply plugin: 'atak-takdev-plugin'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion "28.0.1"
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
 
     dexOptions {
         jumboMode = true
@@ -107,7 +107,10 @@ android {
             def kp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyPassword')
 
             if (kf == null) {
-                 throw new GradleException("No signing key configured!")
+                kf = "${rootDir}/debug.keystore"
+                kfp = 'android'
+                ka = 'androiddebugkey'
+                kp = 'android'
             }
  
             storeFile file(kf)
@@ -124,8 +127,12 @@ android {
             def kfp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyFilePassword')
             def ka = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyAlias')
             def kp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyPassword')
+
             if (kf == null) {
-                 throw new GradleException("No signing key configured!")
+                kf = "${rootDir}/debug.keystore"
+                kfp = 'android'
+                ka = 'androiddebugkey'
+                kp = 'android'
             }
 
             storeFile file(kf)
@@ -151,63 +158,9 @@ android {
     flavorDimensions "application"
 
     productFlavors {
-        mil {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".MIL"]
-        }
         civ {
-            getIsDefault().set(true)
             dimension "application"
             manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".CIV"]
-        }
-        aus {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".AUS"]
-        }
-        nzl {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".NZL"]
-        }
-        prt {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".PRT"]
-        }
-        est {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".EST"]
-        }
-        nor {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".NOR"]
-        }
-        hun {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".HUN"]
-        }
-        bel {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".BEL"]
-        }
-        swe {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".SWE"]
-        }
-        natosof {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".NATOSOF"]
-        }
-        gbr {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".GBR"]
-        }
-        gov {
-            dimension "application"
-            // GOV builds are just CIV api builds with additional information in the strings file 
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".CIV"]
-        }
-        can {
-            dimension "application"
-            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".CAN"]
         }
     }
 
@@ -225,9 +178,6 @@ android {
             defaultConfig.versionName = PLUGIN_VERSION + " (" + getVersionName() + ") - [" + ATAK_VERSION + "]"
         }
 
-        gov.java.srcDirs 'src/gov/java'
-        gov.assets.srcDir 'src/gov/assets'
-        gov.res.srcDir 'src/gov/res'
 
         // Move the build types to build-types/<type>
         // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...
@@ -247,6 +197,7 @@ android {
         }
     }
 }
+
 
 ext {
     retrofitVersion = '2.9.0'

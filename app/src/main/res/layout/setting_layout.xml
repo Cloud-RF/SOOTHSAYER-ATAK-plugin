@@ -57,7 +57,7 @@
         android:textColor="@color/darker_gray"
         android:textCursorDrawable="@null"
         android:textSize="@dimen/sp_14"
-        tools:text="https://" />
+        tools:text="https://api.cloudrf.com" />
 
     <TextView
         android:id="@+id/tvApiKey"
@@ -81,7 +81,7 @@
         android:textColor="@color/darker_gray"
         android:textCursorDrawable="@null"
         android:textSize="@dimen/sp_14"
-        tools:text="ghhjdjshjshdjjhdskjashdjh gfgfgffggggfgfgfgggfggggdg" />
+        tools:text="hoofingdemokey" />
 
     <RelativeLayout
         android:layout_width="match_parent"

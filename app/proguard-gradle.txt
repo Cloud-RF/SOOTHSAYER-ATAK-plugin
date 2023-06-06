@@ -79,11 +79,7 @@
 ## User Section
 ################################################################################################
 ################################################################################################
-
-# ATAK Forwarder Libraries
--keep class com.google.** {*;}
--keep class com.squareup.** {*;}
--keep class org.jetbrains.** {*;}
+-keep class androidx.** { *; }
 
 -dontwarn module-info
 -dontwarn java.awt.**
@@ -100,12 +96,13 @@
 -dontwarn kotlin.coroutines.**
 -dontwarn kotlin.collections.**
 -dontwarn android.content.res.XmlResourceParser
+-dontwarn androidx.**
 
 ################################################################################################
 ## Please change PluginTemplate to accurately reflect the name of your plugin
 ################################################################################################
 
--repackageclasses atakplugin.PluginTemplate
+-repackageclasses atakplugin.soothsayer
 
 
 ################################################################################################

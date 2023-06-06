@@ -94,6 +94,9 @@ class PluginDropDownReceiver(
             if (sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, "")?.isEmpty() == true) {
                 etServerUrl?.setText(RetrofitClient.DEFAULT_URL)
             }
+            if (sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "")?.isEmpty() == true) {
+                etApiKey?.setText(RetrofitClient.DEFAULT_APIKEY)
+            }
             mainLayout.visibility = View.GONE
             settingView.visibility = View.VISIBLE
         }
@@ -259,7 +262,7 @@ class PluginDropDownReceiver(
             etApiKey?.text?.trim()?.isEmpty() == true -> {
                 pluginContext.getString(R.string.empty_api_key)
             }
-            (etApiKey?.text?.trim()?.length ?: 0) < 32 -> {
+            (etApiKey?.text?.trim()?.length ?: 0) < 12 -> {
                 pluginContext.getString(R.string.unauthorized_error)
             }
             else -> {
@@ -474,6 +477,7 @@ class PluginDropDownReceiver(
                                 TAG,
                                 "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
                             )
+
                             val message = when (responseCode) {
 //                                Constant.ApiErrorCodes.sUnAuthorized, Constant.ApiErrorCodes.sBadRequest -> {
                                 Constant.ApiErrorCodes.sUnAuthorized -> {

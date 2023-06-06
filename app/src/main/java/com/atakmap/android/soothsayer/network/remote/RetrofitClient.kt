@@ -21,6 +21,8 @@ object RetrofitClient {
     private const val mAuthorizationKey = "key"
 
     const val DEFAULT_URL = "https://api.cloudrf.com"
+    const val DEFAULT_APIKEY = "49553-866c50dd76f5712328c6c63a712f306ceed2b5ab" // ATAK DEMO ACCOUNT
+
     val BASE_URL = Constant.sServerUrl
 
     private val OK_HTTP_CLIENT by lazy {

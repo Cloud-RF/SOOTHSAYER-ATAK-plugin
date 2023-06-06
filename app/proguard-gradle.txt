@@ -100,6 +100,7 @@
 -dontwarn kotlin.coroutines.**
 -dontwarn kotlin.collections.**
 -dontwarn android.content.res.XmlResourceParser
+-dontwarn androidx.*
 
 ################################################################################################
 ## Please change PluginTemplate to accurately reflect the name of your plugin

@@ -79,7 +79,15 @@
 ## User Section
 ################################################################################################
 ################################################################################################
--keep class androidx.** { *; }
+-keep class com.atak.plugins.** { *; }
+-keep class com.atakmap.android.soothsayer.** { *; }
+-keep class com.atakmap.android.soothsayer.interfaces.** { *; }
+-keep class com.atakmap.android.soothsayer.layers.** { *; }
+-keep class com.atakmap.android.soothsayer.models.** { *; }
+-keep class com.atakmap.android.soothsayer.network.** { *; }
+-keep class com.atakmap.android.soothsayer.recyclerview.** { *; }
+-keep class com.atakmap.android.soothsayer.util.** { *; }
+-keep class com.atakmap.android.soothsayer.plugin.** { *; }
 
 -dontwarn module-info
 -dontwarn java.awt.**

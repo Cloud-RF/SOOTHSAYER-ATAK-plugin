@@ -13,6 +13,19 @@ import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
+import com.atakmap.android.dropdown.DropDown.OnStateListener
+import com.atakmap.android.dropdown.DropDownReceiver
+import com.atakmap.android.grg.GRGMapComponent
+import com.atakmap.android.hierarchy.HierarchyListReceiver
+import com.atakmap.android.importexport.ImportExportMapComponent
+import com.atakmap.android.importexport.ImportReceiver
+import com.atakmap.android.ipc.AtakBroadcast
+import com.atakmap.android.maps.MapEvent
+import com.atakmap.android.maps.MapItem
+import com.atakmap.android.maps.MapView
+import com.atakmap.android.maps.MapView.RenderStack
+import com.atakmap.android.maps.Marker
+import com.atakmap.android.preference.AtakPreferences
 import com.atakmap.android.soothsayer.interfaces.CloudRFLayerListener
 import com.atakmap.android.soothsayer.layers.CloudRFLayer
 import com.atakmap.android.soothsayer.layers.GLCloudRFLayer
@@ -27,19 +40,6 @@ import com.atakmap.android.soothsayer.network.repository.PluginRepository
 import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
 import com.atakmap.android.soothsayer.util.*
-import com.atakmap.android.dropdown.DropDown.OnStateListener
-import com.atakmap.android.dropdown.DropDownReceiver
-import com.atakmap.android.grg.GRGMapComponent
-import com.atakmap.android.hierarchy.HierarchyListReceiver
-import com.atakmap.android.importexport.ImportExportMapComponent
-import com.atakmap.android.importexport.ImportReceiver
-import com.atakmap.android.ipc.AtakBroadcast
-import com.atakmap.android.maps.MapEvent
-import com.atakmap.android.maps.MapItem
-import com.atakmap.android.maps.MapView
-import com.atakmap.android.maps.MapView.RenderStack
-import com.atakmap.android.maps.Marker
-import com.atakmap.android.preference.AtakPreferences
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.log.Log
 import com.atakmap.coremap.maps.assets.Icon
@@ -48,6 +48,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.*
 import java.util.*
+
 
 class PluginDropDownReceiver(
     mapView: MapView?,

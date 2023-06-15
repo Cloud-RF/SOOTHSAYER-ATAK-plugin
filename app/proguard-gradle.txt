@@ -21,6 +21,7 @@
 -keepattributes SourceFile,LineNumberTable
 
 -applymapping <atak.proguard.mapping>
+-repackageclasses atakplugin.soothsayer
 
 -keepattributes *Annotation*
 -keepattributes Signature, InnerClasses
@@ -40,8 +41,6 @@
     public static ** valueOf(java.lang.String);
 }
 
-
-
 # Preserve all native method names and the names of their classes.
 -keepclasseswithmembernames class * {
     native <methods>;
@@ -58,8 +57,6 @@
     public static ** valueOf(java.lang.String);
 }
 
-
-
 -keep class * extends transapps.maps.plugin.tool.Tool {
 }
 -keep class * implements transapps.maps.plugin.lifecycle.Lifecycle {
@@ -72,22 +69,28 @@
 ## Messing with any settings above this line will void the Warranty
 ################################################################################################
 
-
-
 ################################################################################################
 ################################################################################################
 ## User Section
 ################################################################################################
 ################################################################################################
--keep class com.atak.plugins.** { *; }
--keep class com.atakmap.android.soothsayer.** { *; }
--keep class com.atakmap.android.soothsayer.interfaces.** { *; }
--keep class com.atakmap.android.soothsayer.layers.** { *; }
--keep class com.atakmap.android.soothsayer.models.** { *; }
--keep class com.atakmap.android.soothsayer.network.** { *; }
--keep class com.atakmap.android.soothsayer.recyclerview.** { *; }
--keep class com.atakmap.android.soothsayer.util.** { *; }
--keep class com.atakmap.android.soothsayer.plugin.** { *; }
+#-keep class com.atak.plugins.** { *; }
+#-keep class com.atakmap.android.soothsayer.** { *; }
+-keepclassmembers class com.atakmap.android.soothsayer.interfaces.** { *; }
+-keepclassmembers class com.atakmap.android.soothsayer.layers.** { *; }
+-keepclassmembers class com.atakmap.android.soothsayer.models.** { *; }
+-keepclassmembers class com.atakmap.android.soothsayer.network.** { *; }
+-keepclassmembers class com.atakmap.android.soothsayer.recyclerview.** { *; }
+-keepclassmembers class com.atakmap.android.soothsayer.util.** { *; }
+-keepclassmembers class com.atakmap.android.soothsayer.plugin.** { *; }
+-keepclassmembers class com.atakmap.android.maps.** { *; }
+
+# this is from trying to sign for 4.8 / switching to ProGuard from R8
+-keep class kotlin.jvm.internal.** {*;}
+-keep class kotlin.coroutines.jvm.internal.** {*;}
+-keep class kotlin.jvm.functions.** {*;}
+-keep class kotlin.coroutines.** {*;}
+-keep class kotlin.collections.** {*;}
 
 -dontwarn module-info
 -dontwarn java.awt.**
@@ -110,7 +113,7 @@
 ## Please change PluginTemplate to accurately reflect the name of your plugin
 ################################################################################################
 
--repackageclasses atakplugin.soothsayer
+
 
 
 ################################################################################################

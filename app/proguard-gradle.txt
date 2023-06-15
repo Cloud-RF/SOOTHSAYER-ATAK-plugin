@@ -1,31 +1,21 @@
-################################################################################################
-## Skip down to the 'User Section'
-## Messing with any items in the 'System Section' will void the warranty
-################################################################################################
-
-
-################################################################################################
-################################################################################################
-## System Section
-################################################################################################
-################################################################################################
-
+# This works with ATAK release 4.8.1
+# Don't ask why we're packing and obfuscating an open source plugin - it works
 
 -dontskipnonpubliclibraryclasses
 -dontshrink
 -dontoptimize
 
-############### ACRA specifics
-# we need line numbers in our stack traces otherwise they are pretty useless
+# ACRA specifics
 -renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable
 
 -applymapping <atak.proguard.mapping>
+
+# Change soothsayer to your plugin name
 -repackageclasses atakplugin.soothsayer
 
 -keepattributes *Annotation*
 -keepattributes Signature, InnerClasses
-
 
 -keep class * implements android.os.Parcelable {
   public static final android.os.Parcelable$Creator *;
@@ -50,13 +40,13 @@
     @org.simpleframework.xml.* *;
 }
 
-
 # For enumeration classes, see http://proguard.sourceforge.net/manual/examples.html#enumerations
 -keepclassmembers enum * {
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
 
+# this is going in 4.9 apparently?
 -keep class * extends transapps.maps.plugin.tool.Tool {
 }
 -keep class * implements transapps.maps.plugin.lifecycle.Lifecycle {
@@ -65,17 +55,7 @@
 # overcome an existing bug in the gradle subsystem (3.5.x)
 -keep class module-info
 
-################################################################################################
-## Messing with any settings above this line will void the Warranty
-################################################################################################
-
-################################################################################################
-################################################################################################
-## User Section
-################################################################################################
-################################################################################################
-#-keep class com.atak.plugins.** { *; }
-#-keep class com.atakmap.android.soothsayer.** { *; }
+# Change soothsayer to your plugin name
 -keepclassmembers class com.atakmap.android.soothsayer.interfaces.** { *; }
 -keepclassmembers class com.atakmap.android.soothsayer.layers.** { *; }
 -keepclassmembers class com.atakmap.android.soothsayer.models.** { *; }
@@ -92,6 +72,7 @@
 -keep class kotlin.coroutines.** {*;}
 -keep class kotlin.collections.** {*;}
 
+# suppress warnings
 -dontwarn module-info
 -dontwarn java.awt.**
 -dontwarn org.xmlpull.**
@@ -108,15 +89,3 @@
 -dontwarn kotlin.collections.**
 -dontwarn android.content.res.XmlResourceParser
 -dontwarn androidx.**
-
-################################################################################################
-## Please change PluginTemplate to accurately reflect the name of your plugin
-################################################################################################
-
-
-
-
-################################################################################################
-## below you can add any rules specific to your plugin limited to dontwarn and keep directives
-################################################################################################
-

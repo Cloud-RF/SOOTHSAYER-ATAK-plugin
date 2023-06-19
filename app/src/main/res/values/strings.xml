@@ -38,7 +38,7 @@
     <string name="multiple">Multisite</string>
     <string name="help">Help</string>
     <string name="ok_txt">OK</string>
-    <string name="help_msg">This plugin requires a server and an account.\nYou can use either https://api.cloudrf.com or a private SOOTHSAYER server for a LAN.\nTo create a CloudRF account, visit cloudrf.com and order a plan\nYou will need to copy paste your API key into the settings and copy JSON radio templates to your SD card atak/SOOTHSAYER folder before you can use it.\nExample templates and issues/bugs at https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin\n\nFor help email support@cloudrf.com with your account.</string>
+    <string name="help_msg">This plugin generates radio coverage maps for user defined systems.\nIt requires a server with an account to function.\nYou can use https://api.cloudrf.com or a private SOOTHSAYER server for a LAN.\nTo create an account, visit cloudrf.com and order a plan to get you API key which you need to copy-paste into the settings.\nTo add radio systems, copy radio templates as .json files to your SD card's atak/SOOTHSAYER folder.\nDocs, videos and templates are at https://cloudrf.com/atak</string>
     <string name="soothsayer_layer">SOOTHSAYER Layer</string>
     <string name="layer">%1$s Layer</string>
     <string name="multisite_layer">Multisite Layer</string>

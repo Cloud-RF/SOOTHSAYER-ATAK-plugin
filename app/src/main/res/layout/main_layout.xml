@@ -18,29 +18,26 @@
 
             <ImageView
                 android:id="@+id/ivSettings"
-                android:layout_width="57dp"
-                android:layout_height="53dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:contentDescription="@string/app_name"
-                android:padding="@dimen/dp_8"
+                android:padding="5dp"
                 android:src="@drawable/ic_settings" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/btnAddMarker"
                 style="@style/darkButton"
-                android:layout_width="100dp"
+                android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_marginStart="@dimen/dp_8"
-                android:layout_marginRight="249dp"
-                android:drawableEnd="@drawable/marker_icon_svg"
-                android:drawablePadding="@dimen/dp_2"
-                android:paddingHorizontal="@dimen/dp_6"
-                android:paddingVertical="@dimen/dp_6"
-                android:paddingTop="10dp"
-                android:text="@string/add_marker"
-                android:textAppearance="@android:style/TextAppearance.Material.Medium"
-                android:textSize="24sp" />
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
+                android:padding="5dp"
+                android:src="@drawable/marker_icon_svg" />
+
 
         </RelativeLayout>
 

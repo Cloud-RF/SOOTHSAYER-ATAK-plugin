@@ -127,7 +127,7 @@ class PluginDropDownReceiver(
         }
 
         // add a marker on the map
-        val btnAddMarker = templateView.findViewById<Button>(R.id.btnAddMarker)
+        val btnAddMarker = templateView.findViewById<ImageButton>(R.id.btnAddMarker)
         btnAddMarker.setOnClickListener {
             if (URLUtil.isValidUrl(etServerUrl?.text.toString()) && etApiKey?.text?.trim()
                     ?.isNotEmpty() == true
@@ -440,7 +440,7 @@ class PluginDropDownReceiver(
 
                         override fun onSuccess(response: Any?) {
                             Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
-                            pluginContext.toast(pluginContext.getString(R.string.success_msg))
+                            //pluginContext.toast(pluginContext.getString(R.string.success_msg)) // gets annoying
                             if (response is ResponseModel) {
                                 // download PNG image
                                 repository.downloadFile(response.PNG_WGS84,
@@ -516,7 +516,7 @@ class PluginDropDownReceiver(
 
                         override fun onSuccess(response: Any?) {
                             Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
-                            pluginContext.toast(pluginContext.getString(R.string.success_msg))
+                            //pluginContext.toast(pluginContext.getString(R.string.success_msg))
                             if (response is ResponseModel) {
                                 // download PNG image
                                 repository.downloadFile(response.PNG_WGS84,
@@ -559,6 +559,9 @@ class PluginDropDownReceiver(
                                 }
                                 Constant.ApiErrorCodes.sNotFound -> {
                                     pluginContext.getString(R.string.not_found_url_error)
+                                }
+                                Constant.ApiErrorCodes.sInternalServerError -> {
+                                    pluginContext.getString(R.string.internal_server_error)
                                 }
                                 else -> {
                                     error ?: pluginContext.getString(R.string.error_msg)

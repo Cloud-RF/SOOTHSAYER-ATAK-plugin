@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER plugin v1.0 by CloudRF</string>
+    <string name="help_title">SOOTHSAYER plugin by CloudRF</string>
     <!-- description -->
     <string name="app_desc">Interface to the CloudRF/SOOTHSAYER API</string>
     <string name="example_layer_description">This is an example layer.</string>
@@ -31,6 +31,7 @@
     <string name="invalid_url_error">Please add a valid server url.</string>
     <string name="forbidden_url_error">Forbidden. Your account may require an upgrade to use this feature. See https://cloudrf.com/plans</string>
     <string name="not_found_url_error">URL not found</string>
+    <string name="internal_server_error">Calc failed likely due to size. Check FAQ at https://cloudrf.com/atak</string>
     <string name="marker_error">Please add a valid server URL starting https:// and an API key first.</string>
     <string name="empty_api_key">Please enter your API key.</string>
     <string name="api_mode">Operation mode \n(Multisite requires GPU)</string>
@@ -38,7 +39,11 @@
     <string name="multiple">Multisite</string>
     <string name="help">Help</string>
     <string name="ok_txt">OK</string>
-    <string name="help_msg">This plugin requires a server and an account.\nYou can use either https://api.cloudrf.com or a private SOOTHSAYER server for a LAN.\nTo create a CloudRF account, visit cloudrf.com and order a plan\nYou will need to copy paste your API key into the settings and copy JSON radio templates to your SD card atak/SOOTHSAYER folder before you can use it.\nExample templates and issues/bugs at https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin\n\nFor help email support@cloudrf.com with your account.</string>
+    <string name="help_msg">This plugin generates radio coverage maps for user defined radio systems.
+        \nIt requires a server with an account to function.
+        \nYou can use https://api.cloudrf.com or a private SOOTHSAYER server for a LAN.
+        \n\nTo create an account, visit cloudrf.com and order a plan to get you API key which you need to copy-paste into the settings.
+        \n\nTo add radio systems, copy radio templates as .json files to your SD cards atak/SOOTHSAYER folder.\nDocs, videos and templates are available at https://cloudrf.com/atak</string>
     <string name="soothsayer_layer">SOOTHSAYER Layer</string>
     <string name="layer">%1$s Layer</string>
     <string name="multisite_layer">Multisite Layer</string>

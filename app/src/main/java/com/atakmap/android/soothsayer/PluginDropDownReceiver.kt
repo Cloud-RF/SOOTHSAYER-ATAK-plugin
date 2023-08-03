@@ -13,6 +13,7 @@ import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
+import com.atakmap.android.drawing.mapItems.DrawingShape
 import com.atakmap.android.dropdown.DropDown.OnStateListener
 import com.atakmap.android.dropdown.DropDownReceiver
 import com.atakmap.android.grg.GRGMapComponent
@@ -20,19 +21,18 @@ import com.atakmap.android.hierarchy.HierarchyListReceiver
 import com.atakmap.android.importexport.ImportExportMapComponent
 import com.atakmap.android.importexport.ImportReceiver
 import com.atakmap.android.ipc.AtakBroadcast
-import com.atakmap.android.maps.MapEvent
-import com.atakmap.android.maps.MapItem
-import com.atakmap.android.maps.MapView
+import com.atakmap.android.maps.*
 import com.atakmap.android.maps.MapView.RenderStack
-import com.atakmap.android.maps.Marker
 import com.atakmap.android.preference.AtakPreferences
 import com.atakmap.android.soothsayer.interfaces.CloudRFLayerListener
 import com.atakmap.android.soothsayer.layers.CloudRFLayer
 import com.atakmap.android.soothsayer.layers.GLCloudRFLayer
 import com.atakmap.android.soothsayer.layers.PluginMapOverlay
 import com.atakmap.android.soothsayer.models.common.MarkerDataModel
+import com.atakmap.android.soothsayer.models.linksmodel.*
 import com.atakmap.android.soothsayer.models.request.MultiSiteTransmitter
 import com.atakmap.android.soothsayer.models.request.MultisiteRequest
+import com.atakmap.android.soothsayer.models.request.Receiver
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.atakmap.android.soothsayer.models.response.ResponseModel
 import com.atakmap.android.soothsayer.network.remote.RetrofitClient
@@ -43,11 +43,13 @@ import com.atakmap.android.soothsayer.util.*
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.log.Log
 import com.atakmap.coremap.maps.assets.Icon
+import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class PluginDropDownReceiver(
@@ -73,6 +75,9 @@ class PluginDropDownReceiver(
     private var sharedPrefs: AtakPreferences? = AtakPreferences(mapView?.context)
     private var cloudRFLayer: CloudRFLayer? = null
     private var singleSiteCloudRFLayer: CloudRFLayer? = null
+    private var markerLinkList: ArrayList<LinkDataModel> = ArrayList()
+    private var lineGroup: MapGroup? = null
+
 
     init {
         initViews()
@@ -146,6 +151,8 @@ class PluginDropDownReceiver(
             removeMarkerFromList(it)
             // remove marker from map
             removeMarkerFromMap(it)
+            // remove link lines from map if exists for that marker.
+            removeLinkLinesFromMap(it)
         })
         recyclerView.layoutManager = LinearLayoutManager(
             pluginContext,
@@ -320,7 +327,10 @@ class PluginDropDownReceiver(
                         val item: MarkerDataModel? = markersList.find { marker ->
                             marker.markerID == mapItem.uid
                         }
+                        // remove marker from list
                         removeMarkerFromList(item)
+                        // remove link lines from map if exists for that marker.
+                        removeLinkLinesFromMap(item)
                     }
                     MapEvent.ITEM_RELEASE -> {
                         Log.d(TAG, "mapItem : ITEM_RELEASE ")
@@ -391,6 +401,9 @@ class PluginDropDownReceiver(
                                 sendSingleSiteDataToServer(item.markerDetails)
                             }
                         }
+                        item?.let {
+                            updateLinkLinesOnMarkerDragging(item)
+                        }
                     }
                 }
             }
@@ -419,18 +432,154 @@ class PluginDropDownReceiver(
 
             saveMarkerListToPref()
             markerAdapter?.notifyItemInserted(markersList.indexOf(markerItem))
+            getLinksBetween(markerItem)
         }
 
         Log.d(TAG, "${markersList.size} listData : ${Gson().toJson(markersList)}")
     }
 
+    private fun getLinksBetween(marker: MarkerDataModel?) {
+        marker?.let {
+            val points: List<Point> = markersList.mapNotNull { data ->
+                if (data.markerID != marker.markerID) {
+                    Point(
+                        data.markerID,
+                        data.markerDetails.transmitter?.alt,
+                        data.markerDetails.transmitter?.lat,
+                        data.markerDetails.transmitter?.lon
+                    )
+                } else {
+                    null
+                }
+            }
+            Log.d(TAG, "getLinksBetween Points: ${Gson().toJson(points)}")
+                val linkRequest = LinkRequest(
+                    it.markerDetails.antenna,
+                    it.markerDetails.environment,
+                    it.markerDetails.model,
+                    it.markerDetails.network,
+                    it.markerDetails.output,
+                    points,
+                    it.markerDetails.receiver,
+                    it.markerDetails.site,
+                    it.markerDetails.transmitter
+                )
+                val linkDataModel = LinkDataModel(it.markerID, linkRequest, ArrayList(), null)
+
+                if (markerLinkList.isEmpty()) {
+                    Log.d(TAG, "getLinksBetween markerLinkList empty")
+                    markerLinkList.add(linkDataModel)
+                } else {
+                    Log.d(TAG, "getLinksBetween markerLinkList not empty")
+                    repository.getLinks(linkDataModel.linkRequest,
+                        object : PluginRepository.ApiCallBacks {
+                            override fun onLoading() {
+                                pluginContext.toast(pluginContext.getString(R.string.loading_link_msg))
+                            }
+
+                            override fun onSuccess(response: Any?) {
+                                linkDataModel.linkResponse = response as LinkResponse
+                                markerLinkList.add(linkDataModel)
+                                linkDataModel.linkRequest.transmitter?.let { transmitter ->
+                                    linkDataModel.linkResponse?.let { linkResponse ->
+                                        for (data in linkResponse.transmitters) {
+                                            pluginContext.getLineColor(data.signalPowerAtReceiverDBm)
+                                                ?.let { color ->
+                                                    drawLine(
+                                                        data.markerId,
+                                                        linkDataModel.links,
+                                                        GeoPoint(transmitter.lat, transmitter.lon),
+                                                        GeoPoint(data.latitude, data.longitude),
+                                                        color
+                                                    )
+                                                }
+                                        }
+                                    }
+                                }
+                                pluginContext.toast("Success")
+                            }
+
+                            override fun onFailed(error: String?, responseCode: Int?) {
+                                pluginContext.toast("onFailed creating link : $error")
+                            }
+
+                        })
+                }
+        }
+    }
+
+    private fun drawLine(
+        linkToId: String?, // marker id to which link is created
+        links: ArrayList<Link>,
+        startPoint: GeoPoint,
+        endPoint: GeoPoint,
+        lineColor: Int
+    ) {
+        val uid = UUID.randomUUID().toString()
+        val mapView = mapView
+        if(lineGroup == null) {
+            lineGroup = mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
+        }
+        val dslist: MutableList<DrawingShape> = ArrayList()
+        val dsUid =pluginContext.getString(R.string.drawing_shape_id, uid)
+        val ds = DrawingShape(mapView,dsUid)
+        ds.strokeColor = lineColor
+        ds.points = arrayOf(startPoint, endPoint)
+        dslist.add(ds)
+        val lineUid = pluginContext.getString(R.string.link_line_id, uid)
+        val mp = MultiPolyline(mapView, lineGroup, dslist, lineUid)
+        lineGroup?.addItem(mp)
+        mp.movable = true
+        links.add(Link(lineUid, startPoint, endPoint))
+        // add link item to links of other marker so that when we delete item it's link get deleted
+        for(item in markerLinkList){
+            if(item.markerId == linkToId){
+                Log.d(TAG, "drawLine linkToId found")
+                item.links.add(Link(lineUid, endPoint, startPoint))
+            }
+        }
+    }
+
+    private fun updateLinkLinesOnMarkerDragging(markerItem: MarkerDataModel){
+        // remove link lines from map if exists for that marker.
+        removeLinkLinesFromMap(markerItem)
+        // add new link lines
+        getLinksBetween(markerItem)
+    }
+
+    private fun getModifiedMarker(marker: TemplateDataModel): TemplateDataModel {
+        return TemplateDataModel(
+            marker.antenna,
+            marker.coordinates,
+            marker.engine,
+            marker.environment,
+            marker.feeder,
+            marker.model,
+            marker.network,
+            marker.output,
+            marker.receiver,
+            marker.reference,
+            marker.site,
+            marker.template,
+            marker.transmitter,
+            marker.version
+        )
+    }
+
+    private fun getModifiedReceiver(pReceiver: Receiver): Receiver {
+        return Receiver(pReceiver.alt, 0.0, 0.0, pReceiver.rxg, pReceiver.rxs)
+    }
+
     // Area API
-    private fun sendSingleSiteDataToServer(markerData: TemplateDataModel?) {
+    private fun sendSingleSiteDataToServer(marker: TemplateDataModel?) {
         // For an area call, the receiver lat and lon should be zero.
         if (pluginContext.isConnected()) {
-            markerData?.let {
-                markerData.receiver.lat = 0.0
-                markerData.receiver.lon = 0.0
+            marker?.let {
+                // creating deep copy so that it would not modify the actual object.
+                Log.d(TAG, "sendSingleSiteDataToServer: old:$marker")
+                val markerData = getModifiedMarker(marker)
+                markerData.receiver = getModifiedReceiver(marker.receiver)
+                Log.d(TAG, "sendSingleSiteDataToServer: old:$marker \n request: ${Gson().toJson(markerData)}")
                 repository.sendSingleSiteMarkerData(
                     markerData,
                     object : PluginRepository.ApiCallBacks {
@@ -447,9 +596,6 @@ class PluginDropDownReceiver(
                                     FOLDER_PATH,
                                     PNG_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
-                                        /*Handler(Looper.getMainLooper()).post {
-                                            pluginContext.toast("DownloadFile success: $isDownloaded , message: $filePath")
-                                        }*/
                                         if (isDownloaded) {
                                             //adding layer using image
                                             addSingleKMZLayer(
@@ -523,9 +669,6 @@ class PluginDropDownReceiver(
                                     FOLDER_PATH,
                                     PNG_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
-                                        /*Handler(Looper.getMainLooper()).post {
-                                            pluginContext.toast("DownloadFile success: $isDownloaded , message: $filePath")
-                                        }*/
                                         if (isDownloaded) {
                                             //adding layer using image file
                                             addKMZLayer(filePath, response.bounds)
@@ -594,6 +737,24 @@ class PluginDropDownReceiver(
                 mapItem.uid == it.markerID
             }
             mapView.rootGroup.removeItem(item)
+        }
+    }
+
+    private fun removeLinkLinesFromMap(marker: MarkerDataModel?) {
+        marker?.let {
+            val data = markerLinkList.find {
+                marker.markerID == it.markerId
+            }
+            data?.let {
+                for(link in data.links){
+                    val mapGroup = mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
+                    val item: MapItem? = mapGroup.items.find { mapItem ->
+                        mapItem.uid == link.linkId
+                    }
+                    mapGroup.removeItem(item)
+                }
+                markerLinkList.remove(it)
+            }
         }
     }
 

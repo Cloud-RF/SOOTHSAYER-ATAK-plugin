@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.atakmap.android.soothsayer.PluginDropDownReceiver
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
+import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.coremap.log.Log
 import com.google.gson.Gson
 import org.json.JSONObject
@@ -143,4 +144,20 @@ fun Context.isConnected(): Boolean {
 
 fun String.getFileName():String{
    return "${SimpleDateFormat("ddHHmmSS", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
+}
+
+fun Context.getLineColor(signalValue:Double): Int?{
+    Log.d(PluginDropDownReceiver.TAG, "getLineColor : $signalValue")
+    val colorId = when{
+        signalValue >= -80.0 -> R.color.green
+        signalValue >=-85.0 && signalValue < -80.0 -> R.color.orange
+        else -> null // signalValue < -90 -> null
+    }
+    return if(colorId == null){
+        null
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        this.resources.getColor(colorId, this.theme)
+    } else {
+        this.resources.getColor(colorId)
+    }
 }

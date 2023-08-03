@@ -24,6 +24,7 @@
     <string name="location_details">Location: %1$s, %2$s</string>
     <string name="success_msg">Loading overlay...</string>
     <string name="loading_msg">Calculating coverage...</string>
+    <string name="loading_link_msg">Finding Links…</string>
     <string name="error_msg">Something went wrong</string>
     <string name="internet_error">Please check your internet connection</string>
     <string name="unauthorized_error">API key is invalid. Do you have an account? https://cloudrf.com/plans</string>
@@ -65,6 +66,8 @@
         <item>Disable</item>
     </string-array>
 
-
-
+    <string name="drawing_shape_id">ds-%1$s</string>
+    <string name="link_line_id">link-%1$s</string>
+    <!--below is the name of group for drawing link lines on map-->
+    <string name="drawing_objects">Drawing Objects</string>
 </resources>

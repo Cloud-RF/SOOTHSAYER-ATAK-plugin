@@ -20,5 +20,7 @@ object Constant {
         const val sApiKey = "Api key"
         const val sMarkerList = "Marker list"
         const val sCalculationMode = "Calculation Mode"
+        const val sKmzVisibility = "KMZ Visibility"
+        const val sLinkLinesVisibility = "Link Lines Visibility"
     }
 }

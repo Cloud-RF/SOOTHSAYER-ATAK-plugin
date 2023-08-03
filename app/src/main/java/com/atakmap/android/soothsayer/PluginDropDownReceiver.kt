@@ -64,6 +64,8 @@ class PluginDropDownReceiver(
     private val mainLayout: LinearLayout = templateView.findViewById(R.id.llMain)
     private val settingView = templateView.findViewById<LinearLayout>(R.id.ilSettings)
     private val svMode: Switch = settingView.findViewById(R.id.svMode)
+    private val cbKmzLayer: CheckBox = settingView.findViewById(R.id.cbKmzLayer)
+    private val cbLinkLines: CheckBox = settingView.findViewById(R.id.cbLinkLines)
     private var etServerUrl: EditText? = null
     private var etApiKey: EditText? = null
     private var markersList: ArrayList<MarkerDataModel> = ArrayList()
@@ -86,6 +88,7 @@ class PluginDropDownReceiver(
 
     private fun initViews() {
         pluginContext.createAndStoreFiles(getAllFilesFromAssets())
+//        initCheckBoxListener()
         initSettings()
         initSpinner()
         initRecyclerview()
@@ -115,7 +118,12 @@ class PluginDropDownReceiver(
                 sharedPrefs?.set(Constant.PreferenceKey.sServerUrl, Constant.sServerUrl)
                 sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
                 sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
+                sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbKmzLayer.isChecked)
+                sharedPrefs?.set(Constant.PreferenceKey.sLinkLinesVisibility, cbLinkLines.isChecked)
                 moveBackToMainLayout()
+                handleLinkLineVisibility()
+                handleKmzLayerVisibility()
+                refreshView()
             }
         }
 
@@ -236,6 +244,17 @@ class PluginDropDownReceiver(
             false
         }
     }
+
+//    private fun initCheckBoxListener(){
+//        cbKmzLayer.setOnCheckedChangeListener { _, isChecked ->
+//            Log.d(TAG, "initCheckBoxListener cbKmzLayer : $isChecked")
+//            handleKmzLayerVisibility()
+//        }
+//        cbLinkLines.setOnCheckedChangeListener { _, isChecked ->
+//            Log.d(TAG, "initCheckBoxListener cbLinkLines : $isChecked")
+//            handleLinkLineVisibility()
+//        }
+//    }
 
     private fun initSettings() {
         etServerUrl = settingView.findViewById(R.id.etServerUrl)
@@ -453,58 +472,58 @@ class PluginDropDownReceiver(
                 }
             }
             Log.d(TAG, "getLinksBetween Points: ${Gson().toJson(points)}")
-                val linkRequest = LinkRequest(
-                    it.markerDetails.antenna,
-                    it.markerDetails.environment,
-                    it.markerDetails.model,
-                    it.markerDetails.network,
-                    it.markerDetails.output,
-                    points,
-                    it.markerDetails.receiver,
-                    it.markerDetails.site,
-                    it.markerDetails.transmitter
-                )
-                val linkDataModel = LinkDataModel(it.markerID, linkRequest, ArrayList(), null)
+            val linkRequest = LinkRequest(
+                it.markerDetails.antenna,
+                it.markerDetails.environment,
+                it.markerDetails.model,
+                it.markerDetails.network,
+                it.markerDetails.output,
+                points,
+                it.markerDetails.receiver,
+                it.markerDetails.site,
+                it.markerDetails.transmitter
+            )
+            val linkDataModel = LinkDataModel(it.markerID, linkRequest, ArrayList(), null)
 
-                if (markerLinkList.isEmpty()) {
-                    Log.d(TAG, "getLinksBetween markerLinkList empty")
-                    markerLinkList.add(linkDataModel)
-                } else {
-                    Log.d(TAG, "getLinksBetween markerLinkList not empty")
-                    repository.getLinks(linkDataModel.linkRequest,
-                        object : PluginRepository.ApiCallBacks {
-                            override fun onLoading() {
-                                pluginContext.toast(pluginContext.getString(R.string.loading_link_msg))
-                            }
+            if (markerLinkList.isEmpty()) {
+                Log.d(TAG, "getLinksBetween markerLinkList empty")
+                markerLinkList.add(linkDataModel)
+            } else {
+                Log.d(TAG, "getLinksBetween markerLinkList not empty")
+                repository.getLinks(linkDataModel.linkRequest,
+                    object : PluginRepository.ApiCallBacks {
+                        override fun onLoading() {
+                            pluginContext.toast(pluginContext.getString(R.string.loading_link_msg))
+                        }
 
-                            override fun onSuccess(response: Any?) {
-                                linkDataModel.linkResponse = response as LinkResponse
-                                markerLinkList.add(linkDataModel)
-                                linkDataModel.linkRequest.transmitter?.let { transmitter ->
-                                    linkDataModel.linkResponse?.let { linkResponse ->
-                                        for (data in linkResponse.transmitters) {
-                                            pluginContext.getLineColor(data.signalPowerAtReceiverDBm)
-                                                ?.let { color ->
-                                                    drawLine(
-                                                        data.markerId,
-                                                        linkDataModel.links,
-                                                        GeoPoint(transmitter.lat, transmitter.lon),
-                                                        GeoPoint(data.latitude, data.longitude),
-                                                        color
-                                                    )
-                                                }
-                                        }
+                        override fun onSuccess(response: Any?) {
+                            linkDataModel.linkResponse = response as LinkResponse
+                            markerLinkList.add(linkDataModel)
+                            linkDataModel.linkRequest.transmitter?.let { transmitter ->
+                                linkDataModel.linkResponse?.let { linkResponse ->
+                                    for (data in linkResponse.transmitters) {
+                                        pluginContext.getLineColor(data.signalPowerAtReceiverDBm)
+                                            ?.let { color ->
+                                                drawLine(
+                                                    data.markerId,
+                                                    linkDataModel.links,
+                                                    GeoPoint(transmitter.lat, transmitter.lon),
+                                                    GeoPoint(data.latitude, data.longitude),
+                                                    color
+                                                )
+                                            }
                                     }
                                 }
-                                pluginContext.toast("Success")
                             }
+                            pluginContext.toast("Success")
+                        }
 
-                            override fun onFailed(error: String?, responseCode: Int?) {
-                                pluginContext.toast("onFailed creating link : $error")
-                            }
+                        override fun onFailed(error: String?, responseCode: Int?) {
+                            pluginContext.toast("onFailed creating link : $error")
+                        }
 
-                        })
-                }
+                    })
+            }
         }
     }
 
@@ -532,12 +551,13 @@ class PluginDropDownReceiver(
         mp.movable = true
         links.add(Link(lineUid, startPoint, endPoint))
         // add link item to links of other marker so that when we delete item it's link get deleted
-        for(item in markerLinkList){
-            if(item.markerId == linkToId){
-                Log.d(TAG, "drawLine linkToId found")
+        for (item in markerLinkList) {
+            if (item.markerId == linkToId) {
+//                Log.d(TAG, "drawLine linkToId found")
                 item.links.add(Link(lineUid, endPoint, startPoint))
             }
         }
+        handleLinkLineVisibility()
     }
 
     private fun updateLinkLinesOnMarkerDragging(markerItem: MarkerDataModel){
@@ -768,6 +788,8 @@ class PluginDropDownReceiver(
         etServerUrl?.setText(sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, ""))
         etApiKey?.setText(sharedPrefs?.get(Constant.PreferenceKey.sApiKey, ""))
         svMode.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
+        cbKmzLayer.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sKmzVisibility, true) ?: true
+        cbLinkLines.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sLinkLinesVisibility, true) ?: true
     }
 
     // Add a layer. Previously KMZ..
@@ -806,13 +828,10 @@ class PluginDropDownReceiver(
                 mapView, singleSiteCloudRFLayer?.points,
                 mapView.width, mapView.height
             )*/
+            handleKmzLayerVisibility()
 
             // Refresh Overlay Manager
-            AtakBroadcast.getInstance().sendBroadcast(
-                Intent(
-                    HierarchyListReceiver.REFRESH_HIERARCHY
-                )
-            )
+            refreshView()
         }
     }
 
@@ -847,6 +866,7 @@ class PluginDropDownReceiver(
                 cloudRFLayer
             )
             cloudRFLayer?.isVisible = true
+            handleKmzLayerVisibility()
 
             // Pan and zoom to the layer
             /*ATAKUtilities.scaleToFit(
@@ -855,11 +875,7 @@ class PluginDropDownReceiver(
             )*/
 
             // Refresh Overlay Manager
-            AtakBroadcast.getInstance().sendBroadcast(
-                Intent(
-                    HierarchyListReceiver.REFRESH_HIERARCHY
-                )
-            )
+            refreshView()
         }
     }
 
@@ -934,7 +950,7 @@ class PluginDropDownReceiver(
                 if (l != null) {
                     l.isVisible = !l.isVisible
                 }
-                AtakBroadcast.getInstance().sendBroadcast(Intent(HierarchyListReceiver.REFRESH_HIERARCHY))
+                refreshView()
             }
             GRG_DELETE, LAYER_DELETE -> {
                 Log.d(
@@ -978,8 +994,7 @@ class PluginDropDownReceiver(
             pluginContext.getString(R.string.ok_txt)
         ) { _, _ ->
             delete(layer)
-            AtakBroadcast.getInstance()
-                .sendBroadcast(Intent(HierarchyListReceiver.REFRESH_HIERARCHY))
+            refreshView()
         }
         builder.show()
     }
@@ -1015,6 +1030,29 @@ class PluginDropDownReceiver(
             intent.putExtra(ImportReceiver.EXTRA_URI, path)
             AtakBroadcast.getInstance().sendBroadcast(intent)
         }
+    }
+
+    /**
+     * This method handle visibility of link lines together by it's "Drawing object" Group.
+     * */
+    private fun handleLinkLineVisibility() {
+        val mapGroup =
+            mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
+        mapGroup.visible = cbLinkLines.isChecked
+        refreshView()
+    }
+
+    /**
+     * This method handle visibility of kmz layer together by it's "SOOTHSAYER Layer" Name.
+     * */
+    private fun handleKmzLayerVisibility() {
+        if (mapOverlay.hideAllKmzLayer(pluginContext.getString(R.string.soothsayer_layer), cbKmzLayer.isChecked)) {
+           refreshView()
+        }
+    }
+
+    private fun refreshView(){
+        AtakBroadcast.getInstance().sendBroadcast(Intent(HierarchyListReceiver.REFRESH_HIERARCHY))
     }
 
     override fun onDropDownSelectionRemoved() {}

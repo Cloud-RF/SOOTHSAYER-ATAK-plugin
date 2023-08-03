@@ -70,4 +70,6 @@
     <string name="link_line_id">link-%1$s</string>
     <!--below is the name of group for drawing link lines on map-->
     <string name="drawing_objects">Drawing Objects</string>
+    <string name="kmzlayer">kmzLayer</string>
+    <string name="link_lines">Link Lines</string>
 </resources>

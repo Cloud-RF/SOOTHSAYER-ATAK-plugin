@@ -77,4 +77,9 @@
         layout="@layout/setting_layout"
         android:visibility="gone" />
 
+    <include
+        android:id="@+id/ilRadioSetting"
+        layout="@layout/radio_edit_layout"
+        android:visibility="gone" />
+
 </LinearLayout>

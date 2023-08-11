@@ -1,5 +1,6 @@
 package com.atakmap.android.soothsayer.util
 
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -10,6 +11,9 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Environment
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.AbsoluteSizeSpan
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.atakmap.android.soothsayer.PluginDropDownReceiver
@@ -160,4 +164,22 @@ fun Context.getLineColor(signalValue:Double): Int?{
     } else {
         this.resources.getColor(colorId)
     }
+}
+
+fun String.setSpannableText():SpannableStringBuilder{
+    val ssb = SpannableStringBuilder(this)
+    ssb.setSpan(AbsoluteSizeSpan(18, true), 0, 4, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+    ssb.setSpan(AbsoluteSizeSpan(14, true), 5, this.length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+    return ssb
+}
+
+fun Context.showAlert(title:String, message:String, positiveText:String, negativeText:String, listener: () -> Unit) {
+    val builder = AlertDialog.Builder(this)
+    builder.setTitle(title)
+    builder.setMessage(message)
+    builder.setNegativeButton(negativeText, null)
+    builder.setPositiveButton(positiveText) { _, _ ->
+        listener()
+    }
+    builder.show()
 }

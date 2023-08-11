@@ -21,7 +21,7 @@ data class TemplateDataModel(
 
 data class Antenna(
     val ant: Int,
-    val azi: Int,
+    var azi: Int, // azimuth
     val fbr: Double,
     val hbw: Int,
     val mode: String,
@@ -61,7 +61,7 @@ data class Output(
     val ber: Int,
     val col: String,
     val mod: Int,
-    val nf: Int,
+    var nf: Int, // noise floor
     val `out`: Int,
     val rad: Double,
     val res: Double,
@@ -85,11 +85,11 @@ data class Template(
 ): Serializable
 
 data class Transmitter(
-    val alt: Int,
-    val bwi: Double,
-    val frq: Double,
+    var alt: Int, // height
+    var bwi: Double, // bandwidth
+    var frq: Double, // frequency
     var lat: Double,
     var lon: Double,
     val powerUnit: String,
-    val txw: Double
+    var txw: Double // power
 ): Serializable

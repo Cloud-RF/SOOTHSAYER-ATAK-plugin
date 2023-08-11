@@ -23,6 +23,7 @@ import com.atakmap.android.importexport.ImportReceiver
 import com.atakmap.android.ipc.AtakBroadcast
 import com.atakmap.android.maps.*
 import com.atakmap.android.maps.MapView.RenderStack
+import com.atakmap.android.menu.PluginMenuParser
 import com.atakmap.android.preference.AtakPreferences
 import com.atakmap.android.soothsayer.interfaces.CloudRFLayerListener
 import com.atakmap.android.soothsayer.layers.CloudRFLayer
@@ -49,7 +50,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.*
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class PluginDropDownReceiver(
@@ -63,6 +63,7 @@ class PluginDropDownReceiver(
     )
     private val mainLayout: LinearLayout = templateView.findViewById(R.id.llMain)
     private val settingView = templateView.findViewById<LinearLayout>(R.id.ilSettings)
+    private val radioSettingView = templateView.findViewById<LinearLayout>(R.id.ilRadioSetting)
     private val svMode: Switch = settingView.findViewById(R.id.svMode)
     private val cbKmzLayer: CheckBox = settingView.findViewById(R.id.cbKmzLayer)
     private val cbLinkLines: CheckBox = settingView.findViewById(R.id.cbLinkLines)
@@ -79,6 +80,7 @@ class PluginDropDownReceiver(
     private var singleSiteCloudRFLayer: CloudRFLayer? = null
     private var markerLinkList: ArrayList<LinkDataModel> = ArrayList()
     private var lineGroup: MapGroup? = null
+    private var itemPositionForEdit: Int = -1
 
 
     init {
@@ -88,8 +90,8 @@ class PluginDropDownReceiver(
 
     private fun initViews() {
         pluginContext.createAndStoreFiles(getAllFilesFromAssets())
-//        initCheckBoxListener()
         initSettings()
+        initRadioSettingView()
         initSpinner()
         initRecyclerview()
     }
@@ -155,12 +157,11 @@ class PluginDropDownReceiver(
     private fun initRecyclerview() {
         val recyclerView: RecyclerView = templateView.findViewById(R.id.rvTemplates)
         markerAdapter = RecyclerViewAdapter(markersList, mapView, pluginContext, onItemRemove = {
-            // remove marker from list
-            removeMarkerFromList(it)
-            // remove marker from map
-            removeMarkerFromMap(it)
-            // remove link lines from map if exists for that marker.
-            removeLinkLinesFromMap(it)
+            removeMarker(it)
+        }, onItemSelected = { position, marker ->
+            itemPositionForEdit = position
+            setEditViewVisibility(true)
+            setEditViewData(marker)
         })
         recyclerView.layoutManager = LinearLayoutManager(
             pluginContext,
@@ -245,22 +246,55 @@ class PluginDropDownReceiver(
         }
     }
 
-//    private fun initCheckBoxListener(){
-//        cbKmzLayer.setOnCheckedChangeListener { _, isChecked ->
-//            Log.d(TAG, "initCheckBoxListener cbKmzLayer : $isChecked")
-//            handleKmzLayerVisibility()
-//        }
-//        cbLinkLines.setOnCheckedChangeListener { _, isChecked ->
-//            Log.d(TAG, "initCheckBoxListener cbLinkLines : $isChecked")
-//            handleLinkLineVisibility()
-//        }
-//    }
-
     private fun initSettings() {
         etServerUrl = settingView.findViewById(R.id.etServerUrl)
         etServerUrl?.setText(Constant.sServerUrl)
         etApiKey = settingView.findViewById(R.id.etApiKey)
         etApiKey?.setText(Constant.sAccessToken)
+    }
+
+    private fun initRadioSettingView() {
+        radioSettingView.apply {
+            val radioBack: ImageView = findViewById(R.id.ivRadioBack)
+            val etRadioHeight: EditText = findViewById(R.id.etRadioHeight)
+            val etRadioPower: EditText = findViewById(R.id.etRadioPower)
+            val etAntennaAzimuth: EditText = findViewById(R.id.etAntennaAzimuth)
+            val etFrequency: EditText = findViewById(R.id.etFrequency)
+            val etBandWidth: EditText = findViewById(R.id.etBandWidth)
+            val etOutputNoiseFloor: EditText = findViewById(R.id.etOutputNoiseFloor)
+            radioBack.setOnClickListener {
+                setEditViewVisibility(false)
+            }
+            findViewById<Button>(R.id.btnReCalculate).setOnClickListener {
+                if (markersList.isNotEmpty() && itemPositionForEdit != -1) {
+                    val marker = markersList[itemPositionForEdit].markerDetails
+                    Log.d(TAG, "initRadioSettingView : marker : $marker \nbefore update ${markersList[itemPositionForEdit]}")
+                    val isEdit =
+                        (marker.transmitter?.alt.toString() != etRadioHeight.text.toString() && etRadioHeight.text.isNotEmpty()) ||
+                                (marker.transmitter?.txw.toString() != etRadioPower.text.toString() && etRadioPower.text.isNotEmpty()) ||
+                                (marker.transmitter?.frq.toString() != etFrequency.text.toString() && etFrequency.text.isNotEmpty()) ||
+                                (marker.transmitter?.bwi.toString() != etBandWidth.text.toString() && etBandWidth.text.isNotEmpty()) ||
+                                (marker.output.nf.toString() != etOutputNoiseFloor.text.toString() && etOutputNoiseFloor.text.isNotEmpty()) ||
+                                (marker.antenna.azi.toString() != etAntennaAzimuth.text.toString() && etAntennaAzimuth.text.isNotEmpty())
+
+                    if (isEdit) {
+                        //change the marker data
+                        marker.transmitter?.let { transmitter ->
+                            etRadioHeight.text.toString().toIntOrNull()?.let { transmitter.alt = it }
+                            etRadioPower.text.toString().toDoubleOrNull()?.let { transmitter.txw = it }
+                            etFrequency.text.toString().toDoubleOrNull()?.let { transmitter.frq = it }
+                            etBandWidth.text.toString().toDoubleOrNull()?.let { transmitter.bwi = it }
+                        }
+                        etOutputNoiseFloor.text.toString().toIntOrNull()?.let { marker.output.nf = it }
+                        etAntennaAzimuth.text.toString().toIntOrNull()?.let { marker.antenna.azi = it }
+                        Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
+                        markerAdapter?.notifyDataSetChanged()
+                        itemPositionForEdit = -1
+                    }
+                }
+                setEditViewVisibility(false)
+            }
+        }
     }
 
     private fun showHelpDialog() {
@@ -278,6 +312,32 @@ class PluginDropDownReceiver(
     private fun moveBackToMainLayout() {
         mainLayout.visibility = View.VISIBLE
         settingView.visibility = View.GONE
+    }
+
+    private fun setEditViewVisibility(isEdit: Boolean) {
+        mainLayout.visibility = if (isEdit) View.GONE else View.VISIBLE
+        radioSettingView.visibility = if (isEdit) View.VISIBLE else View.GONE
+    }
+
+    /**
+     * Method is used to set data from selected marker to editView opened on right side.
+     * */
+    private fun setEditViewData(item: MarkerDataModel) {
+        val title = pluginContext.getString(R.string.radio_settings, item.markerDetails.template.name).setSpannableText()
+
+        val radioSettingView = radioSettingView
+        val transmitter = item.markerDetails.transmitter
+        val antenna = item.markerDetails.antenna
+
+        with(radioSettingView) {
+            findViewById<TextView>(R.id.tvRadioTitle).text = title
+            findViewById<EditText>(R.id.etRadioHeight).setText("${transmitter?.alt ?: ""}")
+            findViewById<EditText>(R.id.etRadioPower).setText("${transmitter?.txw ?: ""}")
+            findViewById<EditText>(R.id.etAntennaAzimuth).setText("${antenna.azi}")
+            findViewById<EditText>(R.id.etFrequency).setText("${transmitter?.frq ?: ""}")
+            findViewById<EditText>(R.id.etBandWidth).setText("${transmitter?.bwi ?: ""}")
+            findViewById<EditText>(R.id.etOutputNoiseFloor).setText("${item.markerDetails.output.nf}")
+        }
     }
 
     private fun isValidSettings(): Boolean {
@@ -318,6 +378,10 @@ class PluginDropDownReceiver(
         marker.setMetaBoolean("removable", true)
         marker.setMetaString("entry", "user")
         marker.setMetaString("callsign", selectedMarkerType?.template?.name ?: "Test Marker")
+        marker.setMetaString(
+            "menu",
+            PluginMenuParser.getMenu(pluginContext, "menus/radio_menu.xml")
+        )
         marker.title = selectedMarkerType?.template?.name ?: "Test Marker"
         marker.type = mItemType
 
@@ -965,6 +1029,37 @@ class PluginDropDownReceiver(
                 }
 
             }
+            RADIO_EDIT -> {
+                val id = intent.getStringExtra("uid")
+                val item = markersList.find {
+                    it.markerID == id
+                }
+                val position = if (item != null) markersList.indexOf(item) else -1
+                Log.d(
+                    TAG,
+                    "used the custom action to RADIO_EDIT the layer on: $id item:${
+                        Gson().toJson(item)
+                    } position:$position"
+                )
+                item?.let { marker ->
+                    itemPositionForEdit = position
+                    setEditViewVisibility(true)
+                    setEditViewData(marker)
+                }
+            }
+            RADIO_DELETE -> {
+                val id = intent.getStringExtra("uid")
+                val item = markersList.find {
+                    it.markerID == id
+                }
+                Log.d(TAG, "used the custom action to RADIO_EDIT the layer on: $id")
+                item?.let { marker ->
+                    mapView.context.showAlert(pluginContext.getString(R.string.alert_title), "${pluginContext.getString(R.string.delete)} ${marker.markerDetails.template.name}",
+                        pluginContext.getString(R.string.yes), pluginContext.getString(R.string.cancel)) {
+                        removeMarker(marker)
+                    }
+                }
+            }
             GRG_BRIGHTNESS -> {
 
             }
@@ -1055,6 +1150,15 @@ class PluginDropDownReceiver(
         AtakBroadcast.getInstance().sendBroadcast(Intent(HierarchyListReceiver.REFRESH_HIERARCHY))
     }
 
+    private fun removeMarker(marker:MarkerDataModel){
+        // remove marker from list
+        removeMarkerFromList(marker)
+        // remove marker from map
+        removeMarkerFromMap(marker)
+        // remove link lines from map if exists for that marker.
+        removeLinkLinesFromMap(marker)
+    }
+
     override fun onDropDownSelectionRemoved() {}
     override fun onDropDownVisible(v: Boolean) {}
 
@@ -1071,5 +1175,7 @@ class PluginDropDownReceiver(
         const val GRG_BRIGHTNESS = "com.atakmap.android.grg.BRIGHTNESS"
         const val GRG_COLOR = "com.atakmap.android.grg.COLOR"
         const val GRG_TRANSPARENCY = "com.atakmap.android.grg.TRANSPARENCY"
+        const val RADIO_EDIT = "com.atakmap.android.maps.EDIT_DETAILS"
+        const val RADIO_DELETE = "com.atakmap.android.soothsayer.RADIO_DELETE"
     }
 }

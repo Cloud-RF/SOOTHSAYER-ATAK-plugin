@@ -6,10 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.atakmap.android.soothsayer.models.common.MarkerDataModel
 import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.maps.MapView
+import com.atakmap.android.soothsayer.PluginDropDownReceiver
+import com.atakmap.android.soothsayer.util.base64StringToBitmap
+import com.atakmap.coremap.log.Log
 
 /**
  * Adapter used to display content in a RecyclerView
@@ -45,6 +49,14 @@ class RecyclerViewAdapter(
         holder.itemView.setOnClickListener {
             onItemSelected(position, list[position])
         }
+        Log.d(PluginDropDownReceiver.TAG, "onBindViewHolder : ${item.customIcon} ")
+        holder.ivMarker.apply {
+            if(item.customIcon == null){
+                setImageDrawable(ContextCompat.getDrawable(holder.ivMarker.context, R.drawable.marker_icon_svg))
+            }else{
+                setImageBitmap(item.customIcon.base64StringToBitmap())
+            }
+        }
     }
 
     override fun getItemCount(): Int {
@@ -55,11 +67,13 @@ class RecyclerViewAdapter(
         val markerDetails: TextView
         val tvLocation: TextView
         val ivRemove: ImageView
+        val ivMarker: ImageView
 
         init {
             markerDetails = view.findViewById(R.id.tvMarkerDetails)
             tvLocation = view.findViewById(R.id.tvLocation)
             ivRemove = view.findViewById(R.id.ivRemove)
+            ivMarker = view.findViewById(R.id.ivMarker)
         }
     }
 }

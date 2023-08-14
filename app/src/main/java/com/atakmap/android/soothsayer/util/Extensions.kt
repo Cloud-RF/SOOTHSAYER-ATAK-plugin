@@ -149,7 +149,6 @@ fun Context.isConnected(): Boolean {
 fun String.getFileName():String{
    return "${SimpleDateFormat("ddHHmmSS", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
 }
-
 fun Context.getLineColor(signalValue:Double): Int?{
     Log.d(PluginDropDownReceiver.TAG, "getLineColor : $signalValue")
     val colorId = when{
@@ -182,4 +181,9 @@ fun Context.showAlert(title:String, message:String, positiveText:String, negativ
         listener()
     }
     builder.show()
+}
+
+fun String.base64StringToBitmap():Bitmap{
+    val decodedString = android.util.Base64.decode(this.split(",")[1], android.util.Base64.DEFAULT)
+    return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
 }

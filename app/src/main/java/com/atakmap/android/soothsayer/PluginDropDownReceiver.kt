@@ -386,7 +386,7 @@ class PluginDropDownReceiver(
         marker.type = mItemType
 
         // Add custom icon. TODO: custom icons!
-        val icon: Bitmap? = pluginContext.getBitmap(R.drawable.marker_icon_svg)
+        val icon: Bitmap? = if(selectedMarkerType?.customIcon == null) pluginContext.getBitmap(R.drawable.marker_icon_svg) else selectedMarkerType?.customIcon?.base64StringToBitmap()
         val outputStream = ByteArrayOutputStream()
         icon?.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
         val b = outputStream.toByteArray()

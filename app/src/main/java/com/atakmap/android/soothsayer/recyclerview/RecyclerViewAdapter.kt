@@ -1,6 +1,7 @@
 package com.atakmap.android.soothsayer.recyclerview
 
 import android.content.Context
+import android.graphics.drawable.BitmapDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -51,11 +52,12 @@ class RecyclerViewAdapter(
         }
         Log.d(PluginDropDownReceiver.TAG, "onBindViewHolder : ${item.customIcon} ")
         holder.ivMarker.apply {
-            if(item.customIcon == null){
-                setImageDrawable(ContextCompat.getDrawable(holder.ivMarker.context, R.drawable.marker_icon_svg))
-            }else{
-                setImageBitmap(item.customIcon.base64StringToBitmap())
+            val drawable = if (item.customIcon == null) {
+                ContextCompat.getDrawable(holder.ivMarker.context, R.drawable.marker_icon_svg)
+            } else {
+                item.customIcon.base64StringToBitmap()?.let { BitmapDrawable(resources, it) }
             }
+            setImageDrawable(drawable ?: ContextCompat.getDrawable(holder.ivMarker.context, R.drawable.marker_icon_svg))
         }
     }
 

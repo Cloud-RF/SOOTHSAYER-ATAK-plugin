@@ -536,6 +536,17 @@ class PluginDropDownReceiver(
                 }
             }
             Log.d(TAG, "getLinksBetween Points: ${Gson().toJson(points)}")
+
+            // override receiver with this location
+            val thisRx = Receiver(
+                    marker.markerDetails.transmitter?.alt ?: 1,
+                    marker.markerDetails.transmitter?.lat ?: 0.0,
+                    marker.markerDetails.transmitter?.lon ?: 0.0,
+                   marker.markerDetails.antenna.txg,
+                   marker.markerDetails.receiver.rxs
+            )
+            it.markerDetails.receiver = thisRx;
+
             val linkRequest = LinkRequest(
                 it.markerDetails.antenna,
                 it.markerDetails.environment,
@@ -557,7 +568,7 @@ class PluginDropDownReceiver(
                 repository.getLinks(linkDataModel.linkRequest,
                     object : PluginRepository.ApiCallBacks {
                         override fun onLoading() {
-                            pluginContext.toast(pluginContext.getString(R.string.loading_link_msg))
+                            //pluginContext.toast(pluginContext.getString(R.string.loading_link_msg))
                         }
 
                         override fun onSuccess(response: Any?) {
@@ -566,20 +577,22 @@ class PluginDropDownReceiver(
                             linkDataModel.linkRequest.transmitter?.let { transmitter ->
                                 linkDataModel.linkResponse?.let { linkResponse ->
                                     for (data in linkResponse.transmitters) {
-                                        pluginContext.getLineColor(data.signalPowerAtReceiverDBm)
+                                        Log.d(TAG, "link SNR = "+data.signalToNoiseRatioDB)
+                                        pluginContext.getLineColor(data.signalToNoiseRatioDB)
                                             ?.let { color ->
                                                 drawLine(
                                                     data.markerId,
                                                     linkDataModel.links,
                                                     GeoPoint(transmitter.lat, transmitter.lon),
                                                     GeoPoint(data.latitude, data.longitude),
-                                                    color
+                                                    color,
+                                                    data.signalToNoiseRatioDB
                                                 )
                                             }
                                     }
                                 }
                             }
-                            pluginContext.toast("Success")
+                            //pluginContext.toast("Success")
                         }
 
                         override fun onFailed(error: String?, responseCode: Int?) {
@@ -596,23 +609,30 @@ class PluginDropDownReceiver(
         links: ArrayList<Link>,
         startPoint: GeoPoint,
         endPoint: GeoPoint,
-        lineColor: Int
+        lineColor: Int,
+        snr: Double
     ) {
-        val uid = UUID.randomUUID().toString()
+        val uid = snr
         val mapView = mapView
         if(lineGroup == null) {
             lineGroup = mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
         }
         val dslist: MutableList<DrawingShape> = ArrayList()
-        val dsUid =pluginContext.getString(R.string.drawing_shape_id, uid)
+        val dsUid = "${snr} dB"
         val ds = DrawingShape(mapView,dsUid)
         ds.strokeColor = lineColor
         ds.points = arrayOf(startPoint, endPoint)
+        ds.hideLabels(false)
+        ds.lineLabel = dsUid
         dslist.add(ds)
-        val lineUid = pluginContext.getString(R.string.link_line_id, uid)
+
+        val lineUid = "${snr} dB"
         val mp = MultiPolyline(mapView, lineGroup, dslist, lineUid)
         lineGroup?.addItem(mp)
         mp.movable = true
+        mp.title = lineUid
+        mp.lineLabel = lineUid
+        mp.hideLabels(false)
         links.add(Link(lineUid, startPoint, endPoint))
         // add link item to links of other marker so that when we delete item it's link get deleted
         for (item in markerLinkList) {
@@ -741,7 +761,7 @@ class PluginDropDownReceiver(
                     markerData,
                     object : PluginRepository.ApiCallBacks {
                         override fun onLoading() {
-                            pluginContext.toast(pluginContext.getString(R.string.loading_msg))
+                            //pluginContext.toast(pluginContext.getString(R.string.loading_msg))
                         }
 
                         override fun onSuccess(response: Any?) {
@@ -1179,3 +1199,5 @@ class PluginDropDownReceiver(
         const val RADIO_DELETE = "com.atakmap.android.soothsayer.RADIO_DELETE"
     }
 }
+
+

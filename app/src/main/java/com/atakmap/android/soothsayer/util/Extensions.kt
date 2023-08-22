@@ -153,9 +153,10 @@ fun String.getFileName():String{
 fun Context.getLineColor(signalValue:Double): Int?{
     Log.d(PluginDropDownReceiver.TAG, "getLineColor : $signalValue")
     val colorId = when{
-        signalValue >= -80.0 -> R.color.green
-        signalValue >=-85.0 && signalValue < -80.0 -> R.color.orange
-        else -> null // signalValue < -90 -> null
+        signalValue >= 30.0 -> R.color.green
+        signalValue >= 20.0 -> R.color.orange
+        signalValue >= 10.0 -> R.color.red
+        else -> null // no link!
     }
     return if(colorId == null){
         null

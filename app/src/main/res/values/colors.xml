@@ -8,5 +8,6 @@
     <color name="light_gray">#cccccc</color>
     <color name="green">#4CAF50</color>
     <color name="orange">#FF9800</color>
+    <color name="red">#FF0000</color>
 
 </resources>

@@ -44,7 +44,7 @@ data class Receiver(
     @SerializedName("Receiver gain dBd")
     val receiverGainDBd: Double,
     @SerializedName("Receiver gain dBi")
-    val receiverGainDBi: Int
+    val receiverGainDBi: Double
 )
 
 data class Transmitter(

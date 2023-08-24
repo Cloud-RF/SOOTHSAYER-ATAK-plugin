@@ -52,7 +52,7 @@ import java.io.*
 import java.util.*
 
 
-class PluginDropDownReceiver(
+class PluginDropDownReceiver (
     mapView: MapView?,
     private val pluginContext: Context, private val mapOverlay: PluginMapOverlay
 ) : DropDownReceiver(mapView), OnStateListener {
@@ -65,7 +65,7 @@ class PluginDropDownReceiver(
     private val settingView = templateView.findViewById<LinearLayout>(R.id.ilSettings)
     private val radioSettingView = templateView.findViewById<LinearLayout>(R.id.ilRadioSetting)
     private val svMode: Switch = settingView.findViewById(R.id.svMode)
-    private val cbKmzLayer: CheckBox = settingView.findViewById(R.id.cbKmzLayer)
+    private val cbCoverageLayer: CheckBox = settingView.findViewById(R.id.cbKmzLayer)
     private val cbLinkLines: CheckBox = settingView.findViewById(R.id.cbLinkLines)
     private var etServerUrl: EditText? = null
     private var etApiKey: EditText? = null
@@ -117,10 +117,11 @@ class PluginDropDownReceiver(
             if (isValidSettings()) {
                 Constant.sServerUrl = etServerUrl?.text.toString()
                 Constant.sAccessToken = etApiKey?.text.toString()
+
                 sharedPrefs?.set(Constant.PreferenceKey.sServerUrl, Constant.sServerUrl)
                 sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
                 sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
-                sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbKmzLayer.isChecked)
+                sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbCoverageLayer.isChecked)
                 sharedPrefs?.set(Constant.PreferenceKey.sLinkLinesVisibility, cbLinkLines.isChecked)
                 moveBackToMainLayout()
                 handleLinkLineVisibility()
@@ -160,6 +161,7 @@ class PluginDropDownReceiver(
             removeMarker(it)
         }, onItemSelected = { position, marker ->
             itemPositionForEdit = position
+
             setEditViewVisibility(true)
             setEditViewData(marker)
         })
@@ -290,6 +292,40 @@ class PluginDropDownReceiver(
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
                         itemPositionForEdit = -1
+
+                        // trigger calc
+                         if (svMode.isChecked) {
+                             marker.let { template ->
+                                 val list: List<MultiSiteTransmitter> =
+                                     markersList.mapNotNull { marker ->
+                                         marker.markerDetails.transmitter?.run {
+                                             MultiSiteTransmitter(
+                                                 alt,
+                                                 bwi,
+                                                 frq,
+                                                 lat,
+                                                 lon,
+                                                 powerUnit,
+                                                 txw,
+                                                 marker.markerDetails.antenna
+                                             )
+                                         }
+                                     }
+
+                                 val request = MultisiteRequest(
+                                     template.site,
+                                     template.network,
+                                     list,
+                                     template.receiver,
+                                     template.model,
+                                     template.environment,
+                                     template.output
+                                 )
+                                 if (cbCoverageLayer.isChecked) {
+                                     sendMultiSiteDataToServer(request)
+                                 }
+                             }
+                        }
                     }
                 }
                 setEditViewVisibility(false)
@@ -410,10 +446,45 @@ class PluginDropDownReceiver(
                         val item: MarkerDataModel? = markersList.find { marker ->
                             marker.markerID == mapItem.uid
                         }
+
                         // remove marker from list
                         removeMarkerFromList(item)
                         // remove link lines from map if exists for that marker.
                         removeLinkLinesFromMap(item)
+
+                        // update coverage layer - WIP
+                       /* if (svMode.isChecked) {
+                            item?.markerDetails?.let { template ->
+                                val list: List<MultiSiteTransmitter> =
+                                    markersList.mapNotNull { marker ->
+                                        marker.markerDetails.transmitter?.run {
+                                            MultiSiteTransmitter(
+                                                alt,
+                                                bwi,
+                                                frq,
+                                                lat,
+                                                lon,
+                                                powerUnit,
+                                                txw,
+                                                marker.markerDetails.antenna
+                                            )
+                                        }
+                                    }
+
+                                val request = MultisiteRequest(
+                                    template.site,
+                                    template.network,
+                                    list,
+                                    template.receiver,
+                                    template.model,
+                                    template.environment,
+                                    template.output
+                                )
+                                if (cbCoverageLayer.isChecked) {
+                                    sendMultiSiteDataToServer(request)
+                                }
+                            }
+                        }*/
                     }
                     MapEvent.ITEM_RELEASE -> {
                         Log.d(TAG, "mapItem : ITEM_RELEASE ")
@@ -475,17 +546,23 @@ class PluginDropDownReceiver(
                                     template.environment,
                                     template.output
                                 )
-                                sendMultiSiteDataToServer(request)
+                                if(cbCoverageLayer.isChecked){
+                                    sendMultiSiteDataToServer(request)
+                                }
                             }
                         } else {
 //                            For single site api
                             item?.let {
                                 // send marker position changed data to server.
-                                sendSingleSiteDataToServer(item.markerDetails)
+                                if(cbCoverageLayer.isChecked) {
+                                    sendSingleSiteDataToServer(item.markerDetails)
+                                }
                             }
                         }
                         item?.let {
-                            updateLinkLinesOnMarkerDragging(item)
+                            if(cbLinkLines.isChecked) {
+                                updateLinkLinesOnMarkerDragging(item)
+                            }
                         }
                     }
                 }
@@ -586,7 +663,7 @@ class PluginDropDownReceiver(
                                                     GeoPoint(transmitter.lat, transmitter.lon),
                                                     GeoPoint(data.latitude, data.longitude),
                                                     color,
-                                                    data.signalToNoiseRatioDB
+                                                    data.signalToNoiseRatioDB.toInt()
                                                 )
                                             }
                                     }
@@ -610,7 +687,7 @@ class PluginDropDownReceiver(
         startPoint: GeoPoint,
         endPoint: GeoPoint,
         lineColor: Int,
-        snr: Double
+        snr: Int
     ) {
         val uid = snr
         val mapView = mapView
@@ -618,21 +695,23 @@ class PluginDropDownReceiver(
             lineGroup = mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
         }
         val dslist: MutableList<DrawingShape> = ArrayList()
-        val dsUid = "${snr} dB"
+        val dsUid = UUID.randomUUID().toString()
         val ds = DrawingShape(mapView,dsUid)
         ds.strokeColor = lineColor
         ds.points = arrayOf(startPoint, endPoint)
-        ds.hideLabels(false)
-        ds.lineLabel = dsUid
+        ds.hideLabels(true)
+        //ds.marker.setShowLabel(true)
+        ds.lineLabel = "${snr} dB"
         dslist.add(ds)
 
-        val lineUid = "${snr} dB"
+        val lineUid = UUID.randomUUID().toString()
         val mp = MultiPolyline(mapView, lineGroup, dslist, lineUid)
         lineGroup?.addItem(mp)
         mp.movable = true
-        mp.title = lineUid
-        mp.lineLabel = lineUid
-        mp.hideLabels(false)
+        mp.title = "${snr} dB"
+        mp.lineLabel = "${snr} dB"
+        mp.hideLabels(true)
+        //mp.marker.setShowLabel(true)
         links.add(Link(lineUid, startPoint, endPoint))
         // add link item to links of other marker so that when we delete item it's link get deleted
         for (item in markerLinkList) {
@@ -761,7 +840,7 @@ class PluginDropDownReceiver(
                     markerData,
                     object : PluginRepository.ApiCallBacks {
                         override fun onLoading() {
-                            //pluginContext.toast(pluginContext.getString(R.string.loading_msg))
+                            pluginContext.toast(pluginContext.getString(R.string.loading_msg))
                         }
 
                         override fun onSuccess(response: Any?) {
@@ -872,7 +951,7 @@ class PluginDropDownReceiver(
         etServerUrl?.setText(sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, ""))
         etApiKey?.setText(sharedPrefs?.get(Constant.PreferenceKey.sApiKey, ""))
         svMode.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
-        cbKmzLayer.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sKmzVisibility, true) ?: true
+        cbCoverageLayer.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sKmzVisibility, true) ?: true
         cbLinkLines.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sLinkLinesVisibility, true) ?: true
     }
 
@@ -1061,11 +1140,17 @@ class PluginDropDownReceiver(
                         Gson().toJson(item)
                     } position:$position"
                 )
+
                 item?.let { marker ->
                     itemPositionForEdit = position
                     setEditViewVisibility(true)
                     setEditViewData(marker)
                 }
+
+                PluginLayoutInflater.inflate(
+                    pluginContext,
+                    R.layout.setting_layout, null
+                )
             }
             RADIO_DELETE -> {
                 val id = intent.getStringExtra("uid")
@@ -1161,7 +1246,7 @@ class PluginDropDownReceiver(
      * This method handle visibility of kmz layer together by it's "SOOTHSAYER Layer" Name.
      * */
     private fun handleKmzLayerVisibility() {
-        if (mapOverlay.hideAllKmzLayer(pluginContext.getString(R.string.soothsayer_layer), cbKmzLayer.isChecked)) {
+        if (mapOverlay.hideAllKmzLayer(pluginContext.getString(R.string.soothsayer_layer), cbCoverageLayer.isChecked)) {
            refreshView()
         }
     }
@@ -1187,9 +1272,9 @@ class PluginDropDownReceiver(
 
     companion object {
         val TAG: String? = PluginDropDownReceiver::class.java.simpleName
-        const val SHOW_PLUGIN = "com.atakmap.android.plugintemplate.SHOW_PLUGIN"
-        const val LAYER_VISIBILITY = "com.atakmap.android.plugintemplate.LAYER_VISIBILITY"
-        const val LAYER_DELETE = "com.atakmap.android.plugintemplate.LAYER_DELETE"
+        const val SHOW_PLUGIN = "com.atakmap.android.soothsayer.SHOW_PLUGIN"
+        const val LAYER_VISIBILITY = "com.atakmap.android.soothsayer.LAYER_VISIBILITY"
+        const val LAYER_DELETE = "com.atakmap.android.soothsayer.LAYER_DELETE"
         const val GRG_DELETE = "com.atakmap.android.grg.DELETE"
         const val GRG_TOGGLE_VISIBILITY = "com.atakmap.android.grg.TOGGLE_VISIBILITY"
         const val GRG_BRIGHTNESS = "com.atakmap.android.grg.BRIGHTNESS"

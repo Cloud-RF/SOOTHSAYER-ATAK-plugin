@@ -421,6 +421,7 @@ class PluginDropDownReceiver (
         )
         marker.title = selectedMarkerType?.template?.name ?: "Test Marker"
         marker.type = mItemType
+//        marker.setShowLabel(false)
 
         // Add custom icon. TODO: custom icons!
         val icon: Bitmap? = pluginContext.getBitmap(R.drawable.marker_icon_svg)
@@ -700,8 +701,7 @@ class PluginDropDownReceiver (
         val ds = DrawingShape(mapView,dsUid)
         ds.strokeColor = lineColor
         ds.points = arrayOf(startPoint, endPoint)
-        ds.hideLabels(true)
-        //ds.marker.setShowLabel(true)
+        ds.hideLabels(false)
         ds.lineLabel = "${snr} dB"
         dslist.add(ds)
 
@@ -711,13 +711,13 @@ class PluginDropDownReceiver (
         mp.movable = true
         mp.title = "${snr} dB"
         mp.lineLabel = "${snr} dB"
-        mp.hideLabels(true)
-        //mp.marker.setShowLabel(true)
+        mp.hideLabels(false)
+        // this "toggleMetaData" is set to true if we want to display label by default.
+        mp.toggleMetaData("labels_on", true)
         links.add(Link(lineUid, startPoint, endPoint))
         // add link item to links of other marker so that when we delete item it's link get deleted
         for (item in markerLinkList) {
             if (item.markerId == linkToId) {
-//                Log.d(TAG, "drawLine linkToId found")
                 item.links.add(Link(lineUid, endPoint, startPoint))
             }
         }

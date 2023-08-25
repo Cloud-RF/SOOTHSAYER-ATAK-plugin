@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.*
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
@@ -1129,6 +1130,14 @@ class PluginDropDownReceiver (
 
             }
             RADIO_EDIT -> {
+                // show dropdown if it is not visible
+                if(!this.isVisible) {
+                    showDropDown(
+                        templateView, HALF_WIDTH, FULL_HEIGHT, FULL_WIDTH,
+                        HALF_HEIGHT, false, this
+                    )
+                }
+
                 val id = intent.getStringExtra("uid")
                 val item = markersList.find {
                     it.markerID == id
@@ -1157,7 +1166,7 @@ class PluginDropDownReceiver (
                 val item = markersList.find {
                     it.markerID == id
                 }
-                Log.d(TAG, "used the custom action to RADIO_EDIT the layer on: $id")
+                Log.d(TAG, "used the custom action to RADIO_DELETE the layer on: $id")
                 item?.let { marker ->
                     mapView.context.showAlert(pluginContext.getString(R.string.alert_title), "${pluginContext.getString(R.string.delete)} ${marker.markerDetails.template.name}",
                         pluginContext.getString(R.string.yes), pluginContext.getString(R.string.cancel)) {

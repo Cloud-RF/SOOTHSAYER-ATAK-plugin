@@ -1,5 +1,6 @@
 package com.atakmap.android.soothsayer.util
 
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -10,10 +11,14 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Environment
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.AbsoluteSizeSpan
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.atakmap.android.soothsayer.PluginDropDownReceiver
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
+import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.coremap.log.Log
 import com.google.gson.Gson
 import org.json.JSONObject
@@ -143,4 +148,40 @@ fun Context.isConnected(): Boolean {
 
 fun String.getFileName():String{
    return "${SimpleDateFormat("ddHHmmSS", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
+}
+
+fun Context.getLineColor(signalValue:Double): Int?{
+    Log.d(PluginDropDownReceiver.TAG, "getLineColor : $signalValue")
+    val colorId = when{
+        signalValue >= 40.0 -> R.color.blue
+        signalValue >= 30.0 -> R.color.green
+        signalValue >= 20.0 -> R.color.yellow
+        signalValue >= 10.0 -> R.color.red
+        else -> null // no link!
+    }
+    return if(colorId == null){
+        null
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        this.resources.getColor(colorId, this.theme)
+    } else {
+        this.resources.getColor(colorId)
+    }
+}
+
+fun String.setSpannableText():SpannableStringBuilder{
+    val ssb = SpannableStringBuilder(this)
+    ssb.setSpan(AbsoluteSizeSpan(18, true), 0, 4, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+    ssb.setSpan(AbsoluteSizeSpan(14, true), 5, this.length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+    return ssb
+}
+
+fun Context.showAlert(title:String, message:String, positiveText:String, negativeText:String, listener: () -> Unit) {
+    val builder = AlertDialog.Builder(this)
+    builder.setTitle(title)
+    builder.setMessage(message)
+    builder.setNegativeButton(negativeText, null)
+    builder.setPositiveButton(positiveText) { _, _ ->
+        listener()
+    }
+    builder.show()
 }

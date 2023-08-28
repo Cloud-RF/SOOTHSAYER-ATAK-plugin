@@ -3,6 +3,7 @@ package com.atakmap.android.soothsayer.layers;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +44,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -117,6 +119,16 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
                 return l;
         }
         return null;
+    }
+
+    public Boolean hideAllKmzLayer(String layerType, Boolean isVisible) {
+        Boolean isNeedToRefresh = false;
+        for (CloudRFLayer l : getLayers()) {
+            if (Objects.equals(l.getMetaShape().getType(), layerType)) {
+                l.setVisible(isVisible);
+            }
+        }
+        return isNeedToRefresh;
     }
 
     public class PluginListModel extends AbstractHierarchyListItem2

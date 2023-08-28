@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<menu
+    buttonBg='bgs/button.xml'
+    buttonRadius='65'
+    buttonSpan='180'
+    buttonWidth='90' >
+    <button
+        onClick="actions/radio_delete.xml"
+        icon="icons/delete.png" />
+    <button
+        onClick="actions/radio_edit.xml"
+        icon="icons/edit2.png"/>
+</menu>

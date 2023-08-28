@@ -32,7 +32,7 @@ public class PluginMapComponent extends DropDownMapComponent {
         view.getMapOverlayManager().addOverlay(this.mapOverlay);
         ddr = new PluginDropDownReceiver(
                 view, context, mapOverlay);
-
+        // below filters are used to handle custom menu options.
         Log.d(TAG, "registering the plugin filter");
         DocumentedIntentFilter ddFilter = new DocumentedIntentFilter();
         ddFilter.addAction(PluginDropDownReceiver.SHOW_PLUGIN);
@@ -40,6 +40,10 @@ public class PluginMapComponent extends DropDownMapComponent {
                 "Toggle visibility of kmz layer");
         ddFilter.addAction(PluginDropDownReceiver.GRG_DELETE,
                 "Delete kmz layer");
+        ddFilter.addAction(PluginDropDownReceiver.RADIO_EDIT,
+                "Edit marker");
+        ddFilter.addAction(PluginDropDownReceiver.RADIO_DELETE,
+                "Delete marker");
         registerDropDownReceiver(ddr, ddFilter);
     }
 

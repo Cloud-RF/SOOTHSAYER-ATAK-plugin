@@ -17,7 +17,6 @@ import javax.security.cert.CertificateException
 object RetrofitClient {
     private const val mContentType = "Content-type"
     private const val mContentTypeJson = "application/json"
-    private const val mCookie = "Cookie"
     private const val mAuthorizationKey = "key"
 
     const val DEFAULT_URL = "https://api.cloudrf.com"

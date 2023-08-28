@@ -2,6 +2,8 @@ package com.atakmap.android.soothsayer.network.repository
 
 import android.webkit.URLUtil
 import com.atakmap.android.soothsayer.PluginDropDownReceiver
+import com.atakmap.android.soothsayer.models.linksmodel.LinkRequest
+import com.atakmap.android.soothsayer.models.linksmodel.LinkResponse
 import com.atakmap.android.soothsayer.models.request.MultisiteRequest
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.atakmap.android.soothsayer.models.response.ResponseModel
@@ -11,7 +13,6 @@ import com.atakmap.coremap.log.Log
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -172,6 +173,63 @@ class PluginRepository {
             callback?.onFailed("", Constant.ApiErrorCodes.sForbidden)
         }
 
+    }
+
+    fun getLinks(request: LinkRequest, callback: ApiCallBacks? = null){
+        callback?.onLoading()
+        if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
+            Log.d(PluginDropDownReceiver.TAG, "sendLinks Request :${Gson().toJson(request)}")
+
+            RetrofitClient.apiService?.getLinks(request = request)
+                ?.enqueue(object : Callback<LinkResponse> {
+                    override fun onResponse(
+                        call: Call<LinkResponse>, response: Response<LinkResponse>
+                    ) {
+                        if (response.isSuccessful) {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "sendLinks success :${response.raw()} \nbody: ${response.body()}"
+                            )
+                            // below part is setting markerId in response object's transmitter so that we can use that id in link creation.
+                            response.body()?.transmitters?.let { transmitters ->
+                                for(transmitter in transmitters){
+                                    for( point in request.points){
+                                        if(point.lat == transmitter.latitude && point.lon == transmitter.longitude){
+                                            transmitter.markerId = point.markerId
+                                        }
+                                    }
+                                }
+                            }
+                            callback?.onSuccess(response.body())
+                        } else {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "sendLinks onFailed called ${response.code()} ${response.raw()}"
+                            )
+                            callback?.onFailed(response.message(), response.code())
+                        }
+                    }
+
+                    override fun onFailure(call: Call<LinkResponse>, t: Throwable) {
+                        try {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "sendLinks onFailed called ${call.request()}  \n Error: ${t.localizedMessage}"
+                            )
+                            callback?.onFailed(t.message)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            callback?.onFailed(e.printStackTrace().toString())
+                        }
+                    }
+                })
+        } else {
+            Log.d(
+                PluginDropDownReceiver.TAG,
+                "forbidden"
+            )
+            callback?.onFailed("", Constant.ApiErrorCodes.sForbidden)
+        }
     }
 
     interface ApiCallBacks {

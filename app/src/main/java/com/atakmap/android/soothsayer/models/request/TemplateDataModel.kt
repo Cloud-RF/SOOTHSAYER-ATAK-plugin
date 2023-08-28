@@ -11,7 +11,7 @@ data class TemplateDataModel(
     val model: Model,
     val network: String,
     val output: Output,
-    val `receiver`: Receiver,
+    var `receiver`: Receiver,
     val reference: String,
     val site: String,
     val template: Template,
@@ -20,8 +20,8 @@ data class TemplateDataModel(
 ): Serializable
 
 data class Antenna(
-    val ant: Int,
-    val azi: Int,
+    var ant: Int,
+    var azi: Int, // azimuth
     val fbr: Double,
     val hbw: Int,
     val mode: String,
@@ -35,7 +35,11 @@ data class Antenna(
 data class Environment(
     val cll: Int,
     val clm: Int,
-    val clt: String
+    val clt: String,
+    val buildings: Int?,
+    val elevation: Int?,
+    val landcover: Int?,
+    val obstacles: Int?
 ): Serializable
 
 data class Feeder(
@@ -48,14 +52,16 @@ data class Model(
     val ked: Int,
     val pe: Int,
     val pm: Int,
-    val rel: Int
+    val rel: Int,
+    val cli: Int?,
+    val ter: Int?
 ): Serializable
 
 data class Output(
     val ber: Int,
     val col: String,
     val mod: Int,
-    val nf: Int,
+    var nf: Int, // noise floor
     val `out`: Int,
     val rad: Double,
     val res: Double,
@@ -63,11 +69,11 @@ data class Output(
 ): Serializable
 
 data class Receiver(
-    val alt: Int,
+    var alt: Int,
     var lat: Double,
     var lon: Double,
-    val rxg: Double,
-    val rxs: Int
+    var rxg: Double,
+    var rxs: Int
 ): Serializable
 
 data class Template(
@@ -79,11 +85,11 @@ data class Template(
 ): Serializable
 
 data class Transmitter(
-    val alt: Int,
-    val bwi: Double,
-    val frq: Double,
+    var alt: Int, // height
+    var bwi: Double, // bandwidth
+    var frq: Double, // frequency
     var lat: Double,
     var lon: Double,
     val powerUnit: String,
-    val txw: Double
+    var txw: Double // power
 ): Serializable

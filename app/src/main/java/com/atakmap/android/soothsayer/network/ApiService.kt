@@ -1,5 +1,7 @@
 package com.atakmap.android.soothsayer.network
 
+import com.atakmap.android.soothsayer.models.linksmodel.LinkRequest
+import com.atakmap.android.soothsayer.models.linksmodel.LinkResponse
 import com.atakmap.android.soothsayer.models.request.MultisiteRequest
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.atakmap.android.soothsayer.models.response.ResponseModel
@@ -27,4 +29,9 @@ interface ApiService {
     @Streaming
     @GET
     fun downloadFile(@Url fileUrl: String?): Call<ResponseBody>
+
+    @POST("/points")
+    fun getLinks(
+        @Body request: LinkRequest? = null
+    ): Call<LinkResponse>
 }

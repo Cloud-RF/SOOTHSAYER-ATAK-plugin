@@ -18,12 +18,12 @@ class RecyclerViewAdapter(
     private val list: ArrayList<MarkerDataModel>,
     pMapView: MapView,
     plugin: Context?,
-    private val onItemRemove: (MarkerDataModel) -> Unit
+    private val onItemRemove: (MarkerDataModel) -> Unit,
+    private val onItemSelected: (Int, MarkerDataModel) -> Unit,
 ) :
     RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder?>() {
     private val mapView: MapView
     private val inflater: LayoutInflater
-//    private val _items: MutableList<MarkerDataModel?> = ArrayList()
 
     init {
         mapView = pMapView
@@ -41,6 +41,9 @@ class RecyclerViewAdapter(
             item.transmitter?.lon ?: "")
         holder.ivRemove.setOnClickListener {
             onItemRemove(list[position])
+        }
+        holder.itemView.setOnClickListener {
+            onItemSelected(position, list[position])
         }
     }
 

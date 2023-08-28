@@ -149,12 +149,15 @@ fun Context.isConnected(): Boolean {
 fun String.getFileName():String{
    return "${SimpleDateFormat("ddHHmmSS", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
 }
+
 fun Context.getLineColor(signalValue:Double): Int?{
     Log.d(PluginDropDownReceiver.TAG, "getLineColor : $signalValue")
     val colorId = when{
-        signalValue >= -80.0 -> R.color.green
-        signalValue >=-85.0 && signalValue < -80.0 -> R.color.orange
-        else -> null // signalValue < -90 -> null
+        signalValue >= 40.0 -> R.color.blue
+        signalValue >= 30.0 -> R.color.green
+        signalValue >= 20.0 -> R.color.yellow
+        signalValue >= 10.0 -> R.color.red
+        else -> null // no link!
     }
     return if(colorId == null){
         null
@@ -181,7 +184,7 @@ fun Context.showAlert(title:String, message:String, positiveText:String, negativ
         listener()
     }
     builder.show()
-}
+    }
 
 fun String.base64StringToBitmap():Bitmap?{
     val decodedString = android.util.Base64.decode(this.split(",")[1], android.util.Base64.DEFAULT)
@@ -190,4 +193,4 @@ fun String.base64StringToBitmap():Bitmap?{
     }catch (e:Exception){
         null
     }
-}
+ }

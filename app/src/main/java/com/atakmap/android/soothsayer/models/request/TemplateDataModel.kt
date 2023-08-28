@@ -23,7 +23,7 @@ data class TemplateDataModel(
 ): Serializable
 
 data class Antenna(
-    val ant: Int,
+    var ant: Int,
     var azi: Int, // azimuth
     val fbr: Double,
     val hbw: Int,

@@ -6,7 +6,10 @@
     <color name="darker_gray">#121212</color>
     <color name="transparent">#00000000</color>
     <color name="light_gray">#cccccc</color>
-    <color name="green">#4CAF50</color>
+    <color name="green">#31FE7F</color>
     <color name="orange">#FF9800</color>
+    <color name="red">#FE4848</color>
+    <color name="blue">#2583FF</color>
+    <color name="yellow">#DAFE3C</color>
 
 </resources>

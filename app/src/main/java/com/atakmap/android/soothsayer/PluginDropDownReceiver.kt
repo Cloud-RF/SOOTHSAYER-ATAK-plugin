@@ -292,6 +292,13 @@ class PluginDropDownReceiver (
                         etAntennaAzimuth.text.toString().toIntOrNull()?.let { marker.antenna.azi = it }
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
+
+                        if(cbLinkLines.isChecked) {
+                            // UPDATE MARKER
+                            markersList[itemPositionForEdit].markerDetails = marker
+                            updateLinkLinesOnMarkerDragging(markersList[itemPositionForEdit])
+                        }
+
                         itemPositionForEdit = -1
 
                         // trigger calc
@@ -617,6 +624,7 @@ class PluginDropDownReceiver (
             Log.d(TAG, "getLinksBetween Points: ${Gson().toJson(points)}")
 
             // override receiver with this location
+            // This is the dragged marker. During this test, the gains used for Rx come from the subject's Tx block
             val thisRx = Receiver(
                     marker.markerDetails.transmitter?.alt ?: 1,
                     marker.markerDetails.transmitter?.lat ?: 0.0,
@@ -626,8 +634,11 @@ class PluginDropDownReceiver (
             )
             it.markerDetails.receiver = thisRx;
 
+            var omni = it.markerDetails.antenna
+            omni.ant = 1
+
             val linkRequest = LinkRequest(
-                it.markerDetails.antenna,
+                omni,
                 it.markerDetails.environment,
                 it.markerDetails.model,
                 it.markerDetails.network,

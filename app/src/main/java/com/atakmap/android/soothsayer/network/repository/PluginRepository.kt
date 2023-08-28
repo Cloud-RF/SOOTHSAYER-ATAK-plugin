@@ -179,6 +179,7 @@ class PluginRepository {
         callback?.onLoading()
         if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
             Log.d(PluginDropDownReceiver.TAG, "sendLinks Request :${Gson().toJson(request)}")
+
             RetrofitClient.apiService?.getLinks(request = request)
                 ?.enqueue(object : Callback<LinkResponse> {
                     override fun onResponse(

@@ -184,4 +184,13 @@ fun Context.showAlert(title:String, message:String, positiveText:String, negativ
         listener()
     }
     builder.show()
-}
+    }
+
+fun String.base64StringToBitmap():Bitmap?{
+    val decodedString = android.util.Base64.decode(this.split(",")[1], android.util.Base64.DEFAULT)
+    return try {
+        BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+    }catch (e:Exception){
+        null
+    }
+ }

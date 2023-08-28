@@ -162,7 +162,6 @@ class PluginDropDownReceiver (
             removeMarker(it)
         }, onItemSelected = { position, marker ->
             itemPositionForEdit = position
-
             setEditViewVisibility(true)
             setEditViewData(marker)
         })
@@ -292,6 +291,9 @@ class PluginDropDownReceiver (
                         etAntennaAzimuth.text.toString().toIntOrNull()?.let { marker.antenna.azi = it }
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
+
+                        //itemPositionForEdit = -1
+
 
                         if(cbLinkLines.isChecked) {
                             // UPDATE MARKER
@@ -431,7 +433,7 @@ class PluginDropDownReceiver (
 //        marker.setShowLabel(false)
 
         // Add custom icon. TODO: custom icons!
-        val icon: Bitmap? = pluginContext.getBitmap(R.drawable.marker_icon_svg)
+        val icon: Bitmap? = if(selectedMarkerType?.customIcon == null) pluginContext.getBitmap(R.drawable.marker_icon_svg) else selectedMarkerType?.customIcon?.base64StringToBitmap()?:pluginContext.getBitmap(R.drawable.marker_icon_svg)
         val outputStream = ByteArrayOutputStream()
         icon?.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
         val b = outputStream.toByteArray()
@@ -494,6 +496,7 @@ class PluginDropDownReceiver (
                                 }
                             }
                         }*/
+
                     }
                     MapEvent.ITEM_RELEASE -> {
                         Log.d(TAG, "mapItem : ITEM_RELEASE ")
@@ -572,6 +575,9 @@ class PluginDropDownReceiver (
                             if(cbLinkLines.isChecked) {
                                 updateLinkLinesOnMarkerDragging(item)
                             }
+                        }
+                        item?.let {
+                            updateLinkLinesOnMarkerDragging(item)
                         }
                     }
                 }

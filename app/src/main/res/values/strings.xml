@@ -70,8 +70,10 @@
     <string name="link_line_id">link-%1$s</string>
     <!--below is the name of group for drawing link lines on map-->
     <string name="drawing_objects">Drawing Objects</string>
+
     <string name="kmzlayer">Coverage</string>
     <string name="link_lines">Links</string>
+
     <string name="radio_settings">Edit (%1$s)</string>
     <string name="radio_height">Height (alt)</string>
     <string name="radio_power">Power (txw)</string>

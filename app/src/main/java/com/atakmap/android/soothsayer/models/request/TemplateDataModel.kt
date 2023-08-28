@@ -1,5 +1,6 @@
 package com.atakmap.android.soothsayer.models.request
 
+import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
 data class TemplateDataModel(
@@ -16,7 +17,9 @@ data class TemplateDataModel(
     val site: String,
     val template: Template,
     var transmitter: Transmitter?,
-    val version: String
+    val version: String,
+    @SerializedName("custom_icon")
+    val customIcon: String?=null,
 ): Serializable
 
 data class Antenna(

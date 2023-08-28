@@ -13,8 +13,8 @@
         android:layout_centerVertical="true"
         android:src="@drawable/marker_icon_svg"
         android:layout_marginEnd="@dimen/dp_8"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/dp_20"
+        android:layout_height="@dimen/dp_20"
         android:contentDescription="@string/app_name" />
 
     <TextView

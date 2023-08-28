@@ -4,7 +4,7 @@
 
 This plugin is a client to the CloudRF / SOOTHSAYER radio planning API. 
 
-Presently it can task the `Area` and `Multisite` APIs to make heatmaps for RF propagation based upon system templates loaded from the SD card.
+Presently it can task the `Area`, `Multisite` and `Points` APIs to make heatmaps and links for RF propagation based upon system templates loaded from the SD card.
 
 ![SOOTHSAYER ATAK plugin](help/soothsayer_atak.jpg "SOOTHSAYER ATAK plugin")
 
@@ -29,7 +29,7 @@ For operation on a LAN you will require a SOOTHSAYER server on your network. For
 
 ## Equipment Supported
 
-ATAK 4.3+
+ATAK 4.8.1
 
 ## Compilation
 

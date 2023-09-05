@@ -463,40 +463,6 @@ class PluginDropDownReceiver (
                         // remove link lines from map if exists for that marker.
                         removeLinkLinesFromMap(item)
 
-                        // update coverage layer - WIP
-                       /* if (svMode.isChecked) {
-                            item?.markerDetails?.let { template ->
-                                val list: List<MultiSiteTransmitter> =
-                                    markersList.mapNotNull { marker ->
-                                        marker.markerDetails.transmitter?.run {
-                                            MultiSiteTransmitter(
-                                                alt,
-                                                bwi,
-                                                frq,
-                                                lat,
-                                                lon,
-                                                powerUnit,
-                                                txw,
-                                                marker.markerDetails.antenna
-                                            )
-                                        }
-                                    }
-
-                                val request = MultisiteRequest(
-                                    template.site,
-                                    template.network,
-                                    list,
-                                    template.receiver,
-                                    template.model,
-                                    template.environment,
-                                    template.output
-                                )
-                                if (cbCoverageLayer.isChecked) {
-                                    sendMultiSiteDataToServer(request)
-                                }
-                            }
-                        }*/
-
                     }
                     MapEvent.ITEM_RELEASE -> {
                         Log.d(TAG, "mapItem : ITEM_RELEASE ")
@@ -571,13 +537,11 @@ class PluginDropDownReceiver (
                                 }
                             }
                         }
+
                         item?.let {
                             if(cbLinkLines.isChecked) {
                                 updateLinkLinesOnMarkerDragging(item)
                             }
-                        }
-                        item?.let {
-                            updateLinkLinesOnMarkerDragging(item)
                         }
                     }
                 }
@@ -607,7 +571,7 @@ class PluginDropDownReceiver (
 
             saveMarkerListToPref()
             markerAdapter?.notifyItemInserted(markersList.indexOf(markerItem))
-            getLinksBetween(markerItem)
+
         }
 
         Log.d(TAG, "${markersList.size} listData : ${Gson().toJson(markersList)}")
@@ -638,7 +602,6 @@ class PluginDropDownReceiver (
                    marker.markerDetails.antenna.txg,
                    marker.markerDetails.receiver.rxs
             )
-            it.markerDetails.receiver = thisRx;
 
             var omni = it.markerDetails.antenna
             omni.ant = 1
@@ -650,7 +613,7 @@ class PluginDropDownReceiver (
                 it.markerDetails.network,
                 it.markerDetails.output,
                 points,
-                it.markerDetails.receiver,
+                thisRx,
                 it.markerDetails.site,
                 it.markerDetails.transmitter
             )

@@ -9,7 +9,8 @@
 buildscript {
 
     ext.PLUGIN_VERSION = "1.1.1"
-    ext.ATAK_VERSION = "4.8.1"
+//    ext.ATAK_VERSION = "4.8.1"
+    ext.ATAK_VERSION = "4.10.0"
 
     def takdevVersion = '2.+'
 
@@ -59,7 +60,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.2'
+        classpath 'com.android.tools.build:gradle:7.4.2'
         if(isDevKitEnabled()) {
             classpath "com.atakmap.gradle:atak-gradle-takdev:${takdevVersion}"
         } else {
@@ -85,7 +86,7 @@ apply plugin: 'atak-takdev-plugin'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
     buildToolsVersion "30.0.3"
 
     dexOptions {
@@ -192,6 +193,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
+        targetSdkVersion 33
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86"
         }

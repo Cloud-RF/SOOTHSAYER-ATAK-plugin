@@ -8,8 +8,7 @@
 
 buildscript {
 
-    ext.PLUGIN_VERSION = "1.1.1"
-//    ext.ATAK_VERSION = "4.8.1"
+    ext.PLUGIN_VERSION = "1.2"
     ext.ATAK_VERSION = "4.10.0"
 
     def takdevVersion = '2.+'
@@ -60,7 +59,12 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+
+        classpath('com.android.tools.build:gradle:4.2.2') {
+            exclude group: "net.sf.proguard", module:
+                    "proguard-gradle"
+        }
+        classpath 'com.guardsquare:proguard-gradle:7.2.2'
         if(isDevKitEnabled()) {
             classpath "com.atakmap.gradle:atak-gradle-takdev:${takdevVersion}"
         } else {
@@ -226,5 +230,6 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
+    implementation files('../atak-gradle-takdev.jar')
 }
 

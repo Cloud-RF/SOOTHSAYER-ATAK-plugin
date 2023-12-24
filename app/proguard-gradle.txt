@@ -71,6 +71,8 @@
 -keep class kotlin.jvm.functions.** {*;}
 -keep class kotlin.coroutines.** {*;}
 -keep class kotlin.collections.** {*;}
+-keep class * implements gov.tak.api.plugin.IPlugin {
+}
 
 # suppress warnings
 -dontwarn module-info

@@ -3,7 +3,7 @@ package com.atakmap.android.soothsayer.plugin;
 
 import com.atak.plugins.impl.AbstractPluginTool;
 import com.atakmap.android.soothsayer.PluginDropDownReceiver;
-import com.atakmap.util.Disposable;
+import gov.tak.api.util.Disposable;
 
 import android.content.Context;
 

@@ -2,9 +2,10 @@
 package com.atakmap.android.soothsayer.plugin;
 
 
-import com.atak.plugins.impl.AbstractPluginLifecycle;
+import com.atak.plugins.impl.AbstractPlugin;
+import com.atak.plugins.impl.PluginContextProvider;
 import com.atakmap.android.soothsayer.PluginMapComponent;
-import android.content.Context;
+import gov.tak.api.plugin.IServiceController;
 
 
 /**
@@ -12,13 +13,20 @@ import android.content.Context;
  *     Support for versions prior to 4.5.1 can make use of a copy of AbstractPluginLifeCycle shipped with
  *     the plugin.
  */
-public class PluginLifecycle extends AbstractPluginLifecycle {
+//public class PluginLifecycle extends AbstractPluginLifecycle {
+//
+//    private final static String TAG = "PluginTemplateLifecycle";
+//
+//    public PluginLifecycle(Context ctx) {
+//        super(ctx, new PluginMapComponent());
+//        PluginNativeLoader.init(ctx);
+//    }
+//
+//}
 
-    private final static String TAG = "PluginTemplateLifecycle";
+public class PluginLifecycle  extends AbstractPlugin {
 
-    public PluginLifecycle(Context ctx) {
-        super(ctx, new PluginMapComponent());
-        PluginNativeLoader.init(ctx);
+    public PluginLifecycle(IServiceController serviceController) {
+        super(serviceController, new PluginToolDescriptor(serviceController.getService(PluginContextProvider.class).getPluginContext()), new PluginMapComponent());
     }
-
 }

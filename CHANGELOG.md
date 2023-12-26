@@ -1,10 +1,31 @@
 # CHANGELOG
 
-## v1.0 03/05/2023
+## 1.2 22/12/2023
+- Improvement: Built for ATAK 4.10 SDK
 
-- Area API integration
-- Multisite API integration
-- Mode choice (Default single / Area)
-- JSON template load
-- KMZ save
-- Rudimentary layer management
+## 1.1.1 05/09/2023
+
+- Bugfix: Receiver height corruption when switching tools
+- Improvement: DTC templates with custom icons
+
+## 1.1 28/08/2023
+
+- Feature: Link lines with SNR label
+- Feature: Coverage layer and/or link lines toggle
+- Feature: Custom icon as base 64 PNG
+
+## 1.0.1 21/06/2023
+
+- Improvement: More JSON templates
+- Improvement: Expanded help dialog
+- Improvement: Removed annoying 'great success' toast
+
+## 1.0 15/06/2023
+
+- Feature: Area and Multisite coverage layer
+- Feature: JSON template load
+- Feature: Supports self signed SSL for SOOTHSAYER servers
+- Feature: KMZ save
+- Feature: Mode choice (Default single / Area)
+
+

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/dp_20">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/ivLoginBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/app_name"
+            android:padding="@dimen/dp_4"
+            android:src="@drawable/back_arrow" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/login_title"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_18" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:layout_margin="3dp"
+        android:background="@android:color/white" />
+
+    <RelativeLayout
+        android:layout_marginTop="@dimen/dp_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/tvLoginServerUrl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/server_txt"
+        android:layout_marginEnd="@dimen/dp_4"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/sp_14" />
+
+    <!-- For all usages of Spinners in plugins one must make
+             use of the PluginSpinner class supplied with the SDK -->
+    <com.atakmap.android.gui.PluginSpinner
+        android:id="@+id/spServerType"
+        android:layout_toEndOf="@id/tvLoginServerUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/et_background"
+        android:prompt="@string/server" />
+    </RelativeLayout>
+
+    <EditText
+        android:id="@+id/etLoginServerUrl"
+        style="@style/EditTextStyle"
+        android:imeOptions="actionNext"
+        android:labelFor="@id/etLoginServerUrl"
+        tools:text="https://api.cloudrf.com"
+        tools:ignore="Autofill,TextFields" />
+
+    <TextView
+        android:id="@+id/tvUserName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/username"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/sp_14" />
+
+    <EditText
+        android:id="@+id/etUserName"
+        style="@style/EditTextStyle"
+        android:labelFor="@id/etUserName"
+        tools:text="@string/username"
+        android:hint="@string/username"
+        android:importantForAutofill="no" />
+
+    <TextView
+        android:id="@+id/tvPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/password"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/sp_14" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/etPassword"
+            style="@style/EditTextStyle"
+            android:labelFor="@id/etPassword"
+            tools:text="@string/password"
+            android:hint="@string/password"
+            android:imeOptions="actionDone"
+            android:inputType="textPassword"
+            android:importantForAutofill="no" />
+
+        <ImageView
+            android:id="@+id/ivPasswordToggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_eye_closed"
+            android:layout_marginEnd="@dimen/dp_4"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/password" />
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/btnLogin"
+        style="@style/darkButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/login" />
+
+</LinearLayout>

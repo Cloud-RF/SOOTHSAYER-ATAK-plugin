@@ -156,6 +156,19 @@
             android:paddingVertical="8dp"
             android:layout_alignParentBottom="true"
             android:text="@string/save" />
+
+        <Button
+            android:id="@+id/btnSettingLogin"
+            style="@style/darkButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:text="@string/login" />
     </RelativeLayout>
 
 </LinearLayout>

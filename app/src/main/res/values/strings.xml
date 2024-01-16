@@ -84,4 +84,15 @@
     <string name="radio_recalculate">Recalculate</string>
     <string name="alert_title">Are you sure?</string>
     <string name="yes">Yes</string>
+    <!--Login strings-->
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="password_hint">.....</string>
+    <string name="cloud_rf">CloudRF.com</string>
+    <string name="server_txt">Server : </string>
+    <string name="login">Login</string>
+    <string name="login_title">SOOTHSAYER login</string>
+    <string name="empty_user_name">Please enter username.</string>
+    <string name="empty_password">Please enter password.</string>
+    <string name="login_loading">Please wait while login.....</string>
 </resources>

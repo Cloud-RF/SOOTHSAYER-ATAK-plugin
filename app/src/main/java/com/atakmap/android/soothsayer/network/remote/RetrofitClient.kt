@@ -1,7 +1,9 @@
 package com.atakmap.android.soothsayer.network.remote
 
+import android.util.Log
 import com.atakmap.android.soothsayer.network.ApiService
 import com.atakmap.android.soothsayer.util.Constant
+import com.google.gson.Gson
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -20,6 +22,7 @@ object RetrofitClient {
     private const val mAuthorizationKey = "key"
 
     const val DEFAULT_URL = "https://api.cloudrf.com"
+    const val CLOUD_RF_URL = "https://cloudrf.com"
     const val DEFAULT_APIKEY = "49553-866c50dd76f5712328c6c63a712f306ceed2b5ab" // ATAK DEMO ACCOUNT
 
     var BASE_URL = Constant.sServerUrl

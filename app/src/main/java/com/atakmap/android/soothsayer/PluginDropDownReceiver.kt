@@ -4,13 +4,18 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.text.InputType
 import android.util.Base64
 import android.util.Log
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.*
+import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -37,6 +42,7 @@ import com.atakmap.android.soothsayer.models.request.MultiSiteTransmitter
 import com.atakmap.android.soothsayer.models.request.MultisiteRequest
 import com.atakmap.android.soothsayer.models.request.Receiver
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
+import com.atakmap.android.soothsayer.models.response.LoginResponse
 import com.atakmap.android.soothsayer.models.response.ResponseModel
 import com.atakmap.android.soothsayer.network.remote.RetrofitClient
 import com.atakmap.android.soothsayer.network.repository.PluginRepository
@@ -68,6 +74,10 @@ class PluginDropDownReceiver (
     private val svMode: Switch = settingView.findViewById(R.id.svMode)
     private val cbCoverageLayer: CheckBox = settingView.findViewById(R.id.cbKmzLayer)
     private val cbLinkLines: CheckBox = settingView.findViewById(R.id.cbLinkLines)
+    private val loginView = templateView.findViewById<LinearLayout>(R.id.ilLogin)
+    private var etLoginServerUrl: EditText? = null
+    private var etUsername: EditText? = null
+    private var etPassword: EditText? = null
     private var etServerUrl: EditText? = null
     private var etApiKey: EditText? = null
     private var markersList: ArrayList<MarkerDataModel> = ArrayList()
@@ -82,6 +92,7 @@ class PluginDropDownReceiver (
     private var markerLinkList: ArrayList<LinkDataModel> = ArrayList()
     private var lineGroup: MapGroup? = null
     private var itemPositionForEdit: Int = -1
+    private val serverTypes: ArrayList<String> = ArrayList()
 
 
     init {
@@ -94,6 +105,7 @@ class PluginDropDownReceiver (
         initSettings()
         initRadioSettingView()
         initSpinner()
+        initLoginView()
         initRecyclerview()
     }
 
@@ -152,6 +164,11 @@ class PluginDropDownReceiver (
             } else {
                 pluginContext.toast(pluginContext.getString(R.string.marker_error))
             }
+        }
+
+        val btnSettingLogin = settingView.findViewById<TextView>(R.id.btnSettingLogin)
+        btnSettingLogin.setOnClickListener {
+            setLoginViewVisibility(false)
         }
     }
 
@@ -245,6 +262,70 @@ class PluginDropDownReceiver (
             }
             false
         }
+
+        //
+        val spServerType: Spinner = loginView.findViewById(R.id.spServerType)
+        serverTypes.add(pluginContext.getString(R.string.cloud_rf))
+        serverTypes.add(pluginContext.getString(R.string.app_name))
+        val adapterServerType: ArrayAdapter<String> = object :
+            ArrayAdapter<String>(
+                pluginContext,
+                R.layout.spinner_item_layout,
+                serverTypes
+            ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val textView = super.getView(position, convertView, parent) as TextView
+                textView.setPadding(6,0,0,0)
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, pluginContext.resources.getDimension(R.dimen.sp_14))
+                textView.gravity = Gravity.CENTER_VERTICAL
+                val item: String? = getItem(position)
+                if (item != null) {
+                    textView.text = item
+                    etLoginServerUrl?.alpha = if(item == pluginContext.getString(R.string.cloud_rf)) 0.5F else 1F
+                    etLoginServerUrl?.isEnabled = item != pluginContext.getString(R.string.cloud_rf)
+                    etLoginServerUrl?.setText(if(item == pluginContext.getString(R.string.cloud_rf)) RetrofitClient.CLOUD_RF_URL else RetrofitClient.DEFAULT_URL)
+                }
+                return textView
+            }
+
+            override fun getDropDownView(
+                position: Int,
+                convertView: View?,
+                parent: ViewGroup
+            ): View {
+                val textView = super.getDropDownView(position, convertView, parent) as TextView
+                val item: String? = getItem(position)
+                if (item != null) {
+                    textView.text = item
+                }
+                return textView
+            }
+        }
+        adapterServerType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spServerType.adapter = adapterServerType
+        spServerType.setSelection(0)
+        spServerType.onItemSelectedListener = object : SimpleItemSelectedListener() {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View,
+                position: Int, id: Long
+            ) {
+//                selectedMarkerType = templateItems[position]
+            }
+        }
+
+        spServerType.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+
+                }
+                MotionEvent.ACTION_UP -> {
+                    // tap was detected, perform click
+                    spServerType.performClick()
+                }
+            }
+            false
+        }
     }
 
     private fun initSettings() {
@@ -252,6 +333,46 @@ class PluginDropDownReceiver (
         etServerUrl?.setText(Constant.sServerUrl)
         etApiKey = settingView.findViewById(R.id.etApiKey)
         etApiKey?.setText(Constant.sAccessToken)
+    }
+
+    private fun initLoginView() {
+        etLoginServerUrl = loginView.findViewById(R.id.etLoginServerUrl)
+        etUsername = loginView.findViewById(R.id.etUserName)
+        val btnLogin = loginView.findViewById<Button>(R.id.btnLogin)
+        btnLogin.setOnClickListener {
+            loginUser()
+        }
+        val btnLoginBack = loginView.findViewById<ImageView>(R.id.ivLoginBack)
+        btnLoginBack.setOnClickListener {
+            setLoginViewVisibility(true)
+            Constant.sServerUrl = etServerUrl?.text.toString()
+        }
+
+        etPassword = loginView.findViewById(R.id.etPassword)
+        val passwordToggleIcon: ImageView = loginView.findViewById(R.id.ivPasswordToggle)
+        passwordToggleIcon.setOnClickListener {
+            etPassword?.let {
+                it.inputType = if (it.inputType == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
+                    InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                } else {
+                    InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                }
+                passwordToggleIcon.setImageResource(
+                    if (it.inputType == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
+                        R.drawable.ic_eye_open
+                    } else {
+                        R.drawable.ic_eye_closed
+                    }
+                )
+                it.setSelection(it.text.length) // Move cursor to end
+            }
+        }
+    }
+
+    private fun setLoginViewVisibility(isMoveBack: Boolean,isAfterLogin:Boolean=false) {
+        settingView.visibility = if (!isMoveBack || isAfterLogin) View.GONE else View.VISIBLE
+        loginView.visibility = if (isMoveBack || isAfterLogin) View.GONE else View.VISIBLE
+        mainLayout.visibility = if (isAfterLogin) View.VISIBLE else View.GONE
     }
 
     private fun initRadioSettingView() {
@@ -396,6 +517,29 @@ class PluginDropDownReceiver (
             }
             (etApiKey?.text?.trim()?.length ?: 0) < 12 -> {
                 pluginContext.getString(R.string.unauthorized_error)
+            }
+            else -> {
+                null
+            }
+        }
+        message?.let {
+            isValid = false
+            pluginContext.toast(message)
+        }
+        return isValid
+    }
+
+    private fun isValidLogin(): Boolean {
+        var isValid = true
+        val message = when {
+            !URLUtil.isValidUrl(etLoginServerUrl?.text.toString()) -> {
+                pluginContext.getString(R.string.invalid_url_error)
+            }
+            etUsername?.text?.trim()?.isEmpty() == true -> {
+                pluginContext.getString(R.string.empty_user_name)
+            }
+            etPassword?.text?.trim()?.isEmpty() == true -> {
+                pluginContext.getString(R.string.empty_password)
             }
             else -> {
                 null
@@ -1019,6 +1163,52 @@ class PluginDropDownReceiver (
 
             // Refresh Overlay Manager
             refreshView()
+        }
+    }
+
+    private fun loginUser(){
+        if(isValidLogin()) {
+            if (pluginContext.isConnected()) {
+                repository.loginUser(
+                    etLoginServerUrl?.text.toString(),
+                    etUsername?.text.toString(),
+                    etPassword?.text.toString(),
+                    object : PluginRepository.ApiCallBacks {
+                        override fun onLoading() {
+                            Log.d(TAG, "onLoading: user login")
+                            pluginContext.shortToast(pluginContext.getString(R.string.login_loading))
+                        }
+
+                        override fun onSuccess(response: Any?) {
+                            if (response is LoginResponse) {
+                                response.apiKey?.let {
+                                    Constant.sAccessToken = it
+                                    sharedPrefs?.set(
+                                        Constant.PreferenceKey.sApiKey,
+                                        Constant.sAccessToken
+                                    )
+                                    etApiKey?.setText(
+                                        sharedPrefs?.get(
+                                            Constant.PreferenceKey.sApiKey,
+                                            ""
+                                        )
+                                    )
+                                    setLoginViewVisibility(isMoveBack = false, isAfterLogin = true)
+                                    Constant.sServerUrl = etServerUrl?.text.toString()
+                                }
+                            }
+                        }
+
+                        override fun onFailed(error: String?, responseCode: Int?) {
+                            pluginContext.toast(
+                                error ?: pluginContext.getString(R.string.error_msg)
+                            )
+                        }
+
+                    })
+            }else{
+                pluginContext.toast(pluginContext.getString(R.string.internet_error))
+            }
         }
     }
 

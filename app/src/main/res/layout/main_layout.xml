@@ -82,4 +82,9 @@
         layout="@layout/radio_edit_layout"
         android:visibility="gone" />
 
+    <include
+        android:id="@+id/ilLogin"
+        layout="@layout/login_layout"
+        android:visibility="gone" />
+
 </LinearLayout>

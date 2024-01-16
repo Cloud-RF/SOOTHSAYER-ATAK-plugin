@@ -4,14 +4,11 @@ import com.atakmap.android.soothsayer.models.linksmodel.LinkRequest
 import com.atakmap.android.soothsayer.models.linksmodel.LinkResponse
 import com.atakmap.android.soothsayer.models.request.MultisiteRequest
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
+import com.atakmap.android.soothsayer.models.response.LoginResponse
 import com.atakmap.android.soothsayer.models.response.ResponseModel
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Streaming
-import retrofit2.http.Url
+import retrofit2.http.*
 
 
 interface ApiService {
@@ -34,4 +31,11 @@ interface ApiService {
     fun getLinks(
         @Body request: LinkRequest? = null
     ): Call<LinkResponse>
+
+    @FormUrlEncoded
+    @POST("/ui/login?external=true")
+    fun loginUser(
+        @Field("user") userName: String?,
+        @Field("pass") password: String?
+    ): Call<LoginResponse?>?
 }

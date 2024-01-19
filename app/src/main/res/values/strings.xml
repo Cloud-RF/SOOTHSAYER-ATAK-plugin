@@ -95,4 +95,5 @@
     <string name="empty_user_name">Please enter username.</string>
     <string name="empty_password">Please enter password.</string>
     <string name="login_loading">Please wait while login.....</string>
+    <string name="template_downloading">Please wait while downloading templates.....</string>
 </resources>

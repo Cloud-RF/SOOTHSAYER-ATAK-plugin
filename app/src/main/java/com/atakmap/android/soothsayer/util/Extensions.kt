@@ -14,16 +14,17 @@ import android.os.Environment
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.AbsoluteSizeSpan
+import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.atakmap.android.soothsayer.PluginDropDownReceiver
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.atakmap.android.soothsayer.plugin.R
-import com.atakmap.coremap.log.Log
 import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
+import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.round
@@ -77,6 +78,19 @@ fun Context.createAndStoreFiles(fileList: List<String>?) {
         inputStream.close()
         outputStream.close()
     }
+}
+
+fun createAndStoreDownloadedFile(data: TemplateDataModel){
+    val folder = File(TEMPLATES_PATH)
+    if (!folder.exists()) {
+        Log.d(PluginDropDownReceiver.TAG, "createAndStoreFiles creating  new folder....")
+        folder.mkdirs()
+    }
+    val json = Gson().toJson(data)
+    val file = File(folder, "${data.template.name}.json")
+    val writer = FileWriter(file)
+    writer.write(json)
+    writer.close()
 }
 
 fun getTemplatesFromFolder(): ArrayList<TemplateDataModel> {

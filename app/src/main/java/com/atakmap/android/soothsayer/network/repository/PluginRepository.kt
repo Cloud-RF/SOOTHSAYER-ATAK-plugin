@@ -1,5 +1,6 @@
 package com.atakmap.android.soothsayer.network.repository
 
+import android.util.Log
 import android.webkit.URLUtil
 import com.atakmap.android.soothsayer.PluginDropDownReceiver
 import com.atakmap.android.soothsayer.models.linksmodel.LinkRequest
@@ -9,7 +10,6 @@ import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.atakmap.android.soothsayer.models.response.ResponseModel
 import com.atakmap.android.soothsayer.network.remote.RetrofitClient
 import com.atakmap.android.soothsayer.util.Constant
-import com.atakmap.coremap.log.Log
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -41,7 +41,7 @@ class PluginRepository {
     fun sendSingleSiteMarkerData(request: TemplateDataModel, callback: ApiCallBacks? = null) {
         callback?.onLoading()
         if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
-            RetrofitClient.apiService?.sendSingleSiteDataToServer(request = request)
+            RetrofitClient.apiService()?.sendSingleSiteDataToServer(request = request)
                 ?.enqueue(object : Callback<ResponseModel> {
                     override fun onResponse(
                         call: Call<ResponseModel>, response: Response<ResponseModel>
@@ -136,7 +136,7 @@ class PluginRepository {
                 PluginDropDownReceiver.TAG,
                 "sendMultiSiteMarkerData request ${Gson().toJson(request)}"
             )
-            RetrofitClient.apiService?.sendMultiSiteDataToServer(request = request)
+            RetrofitClient.apiService()?.sendMultiSiteDataToServer(request = request)
                 ?.enqueue(object : Callback<ResponseModel> {
                     override fun onResponse(
                         call: Call<ResponseModel>, response: Response<ResponseModel>
@@ -179,7 +179,7 @@ class PluginRepository {
         callback?.onLoading()
         if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
             Log.d(PluginDropDownReceiver.TAG, "sendLinks Request :${Gson().toJson(request)}")
-            RetrofitClient.apiService?.getLinks(request = request)
+            RetrofitClient.apiService()?.getLinks(request = request)
                 ?.enqueue(object : Callback<LinkResponse> {
                     override fun onResponse(
                         call: Call<LinkResponse>, response: Response<LinkResponse>

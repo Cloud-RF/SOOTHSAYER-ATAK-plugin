@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.util.Base64
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -43,7 +44,6 @@ import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
 import com.atakmap.android.soothsayer.util.*
 import com.atakmap.android.util.SimpleItemSelectedListener
-import com.atakmap.coremap.log.Log
 import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.map.layer.opengl.GLLayerFactory
@@ -118,7 +118,6 @@ class PluginDropDownReceiver (
             if (isValidSettings()) {
                 Constant.sServerUrl = etServerUrl?.text.toString()
                 Constant.sAccessToken = etApiKey?.text.toString()
-
                 sharedPrefs?.set(Constant.PreferenceKey.sServerUrl, Constant.sServerUrl)
                 sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
                 sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)

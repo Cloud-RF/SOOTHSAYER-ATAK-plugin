@@ -22,7 +22,7 @@ object RetrofitClient {
     const val DEFAULT_URL = "https://api.cloudrf.com"
     const val DEFAULT_APIKEY = "49553-866c50dd76f5712328c6c63a712f306ceed2b5ab" // ATAK DEMO ACCOUNT
 
-    val BASE_URL = Constant.sServerUrl
+    var BASE_URL = Constant.sServerUrl
 
     private val OK_HTTP_CLIENT by lazy {
         OkHttpClient.Builder()
@@ -31,8 +31,9 @@ object RetrofitClient {
             .readTimeout(120, TimeUnit.SECONDS)
     }
 
-    private val RETROFIT by lazy {
-        Retrofit.Builder()
+    private fun RETROFIT():Retrofit {
+        getUpdatedBaseUrl() // used to get the updated baseurl upon changing it from settings
+        return Retrofit.Builder()
             .baseUrl(BASE_URL)
 //            .client(OK_HTTP_CLIENT.build())
             .client(getUnsafeOkHttpClient().build())
@@ -40,7 +41,14 @@ object RetrofitClient {
             .build()
     }
 
-    val apiService: ApiService? by lazy { RETROFIT.create(ApiService::class.java) }
+    private fun getUpdatedBaseUrl(){
+        BASE_URL = Constant.sServerUrl
+    }
+
+
+    fun apiService(): ApiService? {
+        return RETROFIT().create(ApiService::class.java)
+    }
 
     private class AuthorizationInterceptor : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {

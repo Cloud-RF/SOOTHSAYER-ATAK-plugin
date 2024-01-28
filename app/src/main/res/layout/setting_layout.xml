@@ -35,53 +35,6 @@
         android:layout_margin="3dp"
         android:background="@android:color/white" />
 
-    <TextView
-        android:id="@+id/tvServerUrl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/server"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/sp_14" />
-
-    <EditText
-        android:id="@+id/etServerUrl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/et_background"
-        android:imeOptions="actionNext"
-        android:inputType="textUri"
-        android:labelFor="@id/etServerUrl"
-        android:padding="8dp"
-        android:textColor="@color/darker_gray"
-        android:textCursorDrawable="@null"
-        android:textSize="@dimen/sp_14"
-        tools:text="https://api.cloudrf.com" />
-
-    <TextView
-        android:id="@+id/tvApiKey"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/api_key"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/sp_14" />
-
-    <EditText
-        android:id="@+id/etApiKey"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/et_background"
-        android:imeOptions="actionDone"
-        android:inputType="text"
-        android:labelFor="@id/etServerUrl"
-        android:padding="8dp"
-        android:textColor="@color/darker_gray"
-        android:textCursorDrawable="@null"
-        android:textSize="@dimen/sp_14"
-        tools:text="hoofingdemokey" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -156,6 +109,19 @@
             android:paddingVertical="8dp"
             android:layout_alignParentBottom="true"
             android:text="@string/save" />
+
+        <Button
+            android:id="@+id/btnSettingLogin"
+            style="@style/darkButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:text="@string/login" />
     </RelativeLayout>
 
 </LinearLayout>

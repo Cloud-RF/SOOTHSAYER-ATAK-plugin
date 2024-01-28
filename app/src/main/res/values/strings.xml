@@ -30,10 +30,10 @@
     <string name="unauthorized_error">API key is invalid. Do you have an account? https://cloudrf.com/plans</string>
     <string name="host_not_resolved">Unable to resolve host</string>
     <string name="invalid_url_error">Please add a valid server url.</string>
-    <string name="forbidden_url_error">Forbidden. Your account may require an upgrade to use this feature. See https://cloudrf.com/plans</string>
+    <string name="forbidden_url_error">Your account cannot use this feature. See https://cloudrf.com/plans</string>
     <string name="not_found_url_error">URL not found</string>
     <string name="internal_server_error">Calc failed likely due to size. Check FAQ at https://cloudrf.com/atak</string>
-    <string name="marker_error">Please add a valid server URL starting https:// and an API key first.</string>
+    <string name="marker_error">Please login to the server first.</string>
     <string name="empty_api_key">Please enter your API key.</string>
     <string name="api_mode">Operation mode</string>
     <string name="single">Single</string>
@@ -84,4 +84,15 @@
     <string name="radio_recalculate">Recalculate</string>
     <string name="alert_title">Are you sure?</string>
     <string name="yes">Yes</string>
+    <!--Login strings-->
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="password_hint">.....</string>
+    <string name="cloud_rf">CloudRF.com (Public)</string>
+    <string name="server_txt">Service</string>
+    <string name="login">Login</string>
+    <string name="login_title">SOOTHSAYER login</string>
+    <string name="empty_user_name">Please enter username.</string>
+    <string name="empty_password">Please enter password.</string>
+    <string name="login_loading">Attempting login..</string>
 </resources>

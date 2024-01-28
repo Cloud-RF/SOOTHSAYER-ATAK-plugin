@@ -7,12 +7,14 @@ import com.atakmap.android.soothsayer.models.linksmodel.LinkRequest
 import com.atakmap.android.soothsayer.models.linksmodel.LinkResponse
 import com.atakmap.android.soothsayer.models.request.MultisiteRequest
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
+import com.atakmap.android.soothsayer.models.response.LoginResponse
 import com.atakmap.android.soothsayer.models.response.ResponseModel
 import com.atakmap.android.soothsayer.network.remote.RetrofitClient
 import com.atakmap.android.soothsayer.util.Constant
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -229,6 +231,63 @@ class PluginRepository {
             )
             callback?.onFailed("", Constant.ApiErrorCodes.sForbidden)
         }
+    }
+
+    fun loginUser(url:String, username: String, password :String, callback: ApiCallBacks? = null) {
+        callback?.onLoading()
+        Constant.sServerUrl = url // to set the server url for login
+        Log.d("PluginDropDownReceiver", "intercept: $url BASE_URL: ${RetrofitClient.BASE_URL}")
+        if (URLUtil.isValidUrl(url)) {
+            RetrofitClient.apiService()?.loginUser(username, password)
+                ?.enqueue(object : Callback<LoginResponse?> {
+                    override fun onResponse(
+                        call: Call<LoginResponse?>, response: Response<LoginResponse?>
+                    ) {
+                        if (response.isSuccessful) {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "loginUser success :${response.raw()}"
+                            )
+                            callback?.onSuccess(response.body())
+                        } else {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "loginUser onFailed called ${response.code()} ${response.raw()} error: ${response.body()} "
+                            )
+                            try {
+                                val errorObject = JSONObject(response.errorBody()!!.string())
+                                val errorMessage = errorObject.getString("error")
+                                Log.d(
+                                    PluginDropDownReceiver.TAG,
+                                    "loginUser onFailed called error: $errorMessage"
+                                )
+                                callback?.onFailed(errorMessage, response.code())
+                            } catch (e: java.lang.Exception) {
+                                e.printStackTrace()
+                                callback?.onFailed(response.message(), response.code())
+                            }
+
+//                            callback?.onFailed(response.message(), response.code())
+                        }
+                    }
+
+                    override fun onFailure(call: Call<LoginResponse?>, t: Throwable) {
+                        try {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "loginUser override fun onFailure called Request ${call.request()}  \n Error: ${t.localizedMessage}"
+                            )
+                            callback?.onFailed(t.message)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            callback?.onFailed(e.printStackTrace().toString())
+                        }
+                    }
+                })
+        } else {
+            callback?.onFailed("", Constant.ApiErrorCodes.sForbidden)
+        }
+
     }
 
     interface ApiCallBacks {

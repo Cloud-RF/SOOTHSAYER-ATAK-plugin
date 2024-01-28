@@ -94,5 +94,6 @@
     <string name="login_title">SOOTHSAYER login</string>
     <string name="empty_user_name">Please enter username.</string>
     <string name="empty_password">Please enter password.</string>
+    <string name="template_downloading">Synchronising templates..</string>
     <string name="login_loading">Attempting login..</string>
 </resources>

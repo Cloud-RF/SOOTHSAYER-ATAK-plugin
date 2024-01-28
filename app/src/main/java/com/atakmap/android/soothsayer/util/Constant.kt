@@ -5,6 +5,7 @@ import com.atakmap.android.soothsayer.network.remote.RetrofitClient.DEFAULT_URL
 object Constant {
     var sServerUrl = DEFAULT_URL
     var sAccessToken = ""
+    var sUsername = ""
     const val TEMPLATE_FORMAT = ".json"
 
     object ApiErrorCodes{
@@ -16,6 +17,7 @@ object Constant {
     }
 
     object PreferenceKey{
+        const val etUsername = ""
         const val sServerUrl = "Server url"
         const val sApiKey = "Api key"
         const val sMarkerList = "Marker list"

@@ -79,7 +79,6 @@ class PluginDropDownReceiver (
     private var etUsername: EditText? = null
     private var etPassword: EditText? = null
     private var etServerUrl: EditText? = null
-    private var etApiKey: EditText? = null
     private var markersList: ArrayList<MarkerDataModel> = ArrayList()
     private var selectedMarkerType: TemplateDataModel? = null
     private val templateItems: ArrayList<TemplateDataModel> = ArrayList()
@@ -115,23 +114,18 @@ class PluginDropDownReceiver (
         btnOpenSettings.setOnClickListener {
             // set views with the saved setting values
             setDataFromPref()
-            if (sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, "")?.isEmpty() == true) {
-                etServerUrl?.setText(RetrofitClient.DEFAULT_URL)
-            }
-            if (sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "")?.isEmpty() == true) {
-                etApiKey?.setText(RetrofitClient.DEFAULT_APIKEY)
-            }
             mainLayout.visibility = View.GONE
             settingView.visibility = View.VISIBLE
         }
 
         val btnSave = settingView.findViewById<Button>(R.id.btnSave)
         btnSave.setOnClickListener {
-            if (isValidSettings()) {
-                Constant.sServerUrl = etServerUrl?.text.toString()
-                Constant.sAccessToken = etApiKey?.text.toString()
+            //if (isValidSettings()) {
+                Constant.sServerUrl = etLoginServerUrl?.text.toString()
+
                 sharedPrefs?.set(Constant.PreferenceKey.sServerUrl, Constant.sServerUrl)
                 sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
+
                 sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
                 sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbCoverageLayer.isChecked)
                 sharedPrefs?.set(Constant.PreferenceKey.sLinkLinesVisibility, cbLinkLines.isChecked)
@@ -139,7 +133,7 @@ class PluginDropDownReceiver (
                 handleLinkLineVisibility()
                 handleKmzLayerVisibility()
                 refreshView()
-            }
+           // }
         }
 
         // open help dialog
@@ -154,12 +148,11 @@ class PluginDropDownReceiver (
             moveBackToMainLayout()
         }
 
+        //sAccessToken
         // add a marker on the map
         val btnAddMarker = templateView.findViewById<ImageButton>(R.id.btnAddMarker)
         btnAddMarker.setOnClickListener {
-            if (URLUtil.isValidUrl(etServerUrl?.text.toString()) && etApiKey?.text?.trim()
-                    ?.isNotEmpty() == true
-            ) {
+            if (Constant.sAccessToken != "") {
                 addCustomMarker()
             } else {
                 pluginContext.toast(pluginContext.getString(R.string.marker_error))
@@ -281,8 +274,8 @@ class PluginDropDownReceiver (
                 val item: String? = getItem(position)
                 if (item != null) {
                     textView.text = item
-                    etLoginServerUrl?.alpha = if(item == pluginContext.getString(R.string.cloud_rf)) 0.5F else 1F
-                    etLoginServerUrl?.isEnabled = item != pluginContext.getString(R.string.cloud_rf)
+                    //etLoginServerUrl?.alpha = if(item == pluginContext.getString(R.string.cloud_rf)) 0.5F else 1F
+                    //etLoginServerUrl?.isEnabled = item != pluginContext.getString(R.string.cloud_rf)
                     etLoginServerUrl?.setText(if(item == pluginContext.getString(R.string.cloud_rf)) RetrofitClient.CLOUD_RF_URL else RetrofitClient.DEFAULT_URL)
                 }
                 return textView
@@ -329,15 +322,27 @@ class PluginDropDownReceiver (
     }
 
     private fun initSettings() {
-        etServerUrl = settingView.findViewById(R.id.etServerUrl)
-        etServerUrl?.setText(Constant.sServerUrl)
-        etApiKey = settingView.findViewById(R.id.etApiKey)
-        etApiKey?.setText(Constant.sAccessToken)
+        etLoginServerUrl = settingView.findViewById(R.id.etLoginServerUrl)
+        etLoginServerUrl?.setText(Constant.sServerUrl)
+
+        etUsername = settingView.findViewById(R.id.etUserName)
+        etUsername?.setText(Constant.sUsername)
     }
 
     private fun initLoginView() {
         etLoginServerUrl = loginView.findViewById(R.id.etLoginServerUrl)
         etUsername = loginView.findViewById(R.id.etUserName)
+
+        val server: String? = sharedPrefs?.get(Constant.PreferenceKey.sServerUrl,"").toString()
+        val username: String? = sharedPrefs?.get(Constant.PreferenceKey.etUsername, "").toString()
+        val apiKey: String? = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "").toString()
+
+        etUsername?.setText(username)
+        etLoginServerUrl?.setText(server)
+        Constant.sAccessToken = apiKey.toString()
+        Log.d(TAG, "SOOTHSAYER saved server: "+server+" User: "+username+" apiKey: "+apiKey)
+
+
         val btnLogin = loginView.findViewById<Button>(R.id.btnLogin)
         btnLogin.setOnClickListener {
             loginUser()
@@ -345,7 +350,7 @@ class PluginDropDownReceiver (
         val btnLoginBack = loginView.findViewById<ImageView>(R.id.ivLoginBack)
         btnLoginBack.setOnClickListener {
             setLoginViewVisibility(true)
-            Constant.sServerUrl = etServerUrl?.text.toString()
+            Constant.sServerUrl = etLoginServerUrl?.text.toString()
         }
 
         etPassword = loginView.findViewById(R.id.etPassword)
@@ -508,19 +513,12 @@ class PluginDropDownReceiver (
 
     private fun isValidSettings(): Boolean {
         var isValid = true
+        val apiKey: String? = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "").toString()
         val message = when {
-            !URLUtil.isValidUrl(etServerUrl?.text.toString()) -> {
-                pluginContext.getString(R.string.invalid_url_error)
-            }
-            etApiKey?.text?.trim()?.isEmpty() == true -> {
-                pluginContext.getString(R.string.empty_api_key)
-            }
-            (etApiKey?.text?.trim()?.length ?: 0) < 12 -> {
-                pluginContext.getString(R.string.unauthorized_error)
-            }
-            else -> {
-                null
-            }
+            !URLUtil.isValidUrl(etServerUrl?.text.toString()) -> pluginContext.getString(R.string.invalid_url_error)
+            (apiKey?.isEmpty()) == true -> pluginContext.getString(R.string.empty_api_key)
+            (apiKey?.trim()?.length ?: 0) < 12 -> pluginContext.getString(R.string.unauthorized_error)
+            else -> null
         }
         message?.let {
             isValid = false
@@ -1072,8 +1070,6 @@ class PluginDropDownReceiver (
 
     // Fetch saved settings
     private fun setDataFromPref() {
-        etServerUrl?.setText(sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, ""))
-        etApiKey?.setText(sharedPrefs?.get(Constant.PreferenceKey.sApiKey, ""))
         svMode.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
         cbCoverageLayer.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sKmzVisibility, true) ?: true
         cbLinkLines.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sLinkLinesVisibility, true) ?: true
@@ -1169,32 +1165,51 @@ class PluginDropDownReceiver (
     private fun loginUser(){
         if(isValidLogin()) {
             if (pluginContext.isConnected()) {
+                /*
+                Public service has a UI on different subdomain to API
+                SOOTHSAYER has both UI & API on same server
+                 */
+                var loginUrl = "https://cloudrf.com"
+
+                if(etLoginServerUrl?.text.toString() != "https://api.cloudrf.com"){
+                    loginUrl =  etLoginServerUrl?.text.toString();
+                }
                 repository.loginUser(
-                    etLoginServerUrl?.text.toString(),
+                    loginUrl,
                     etUsername?.text.toString(),
                     etPassword?.text.toString(),
                     object : PluginRepository.ApiCallBacks {
                         override fun onLoading() {
                             Log.d(TAG, "onLoading: user login")
-                            pluginContext.shortToast(pluginContext.getString(R.string.login_loading))
+                            pluginContext.shortToast("Signing in to "+etLoginServerUrl?.text.toString()+"..")
                         }
 
                         override fun onSuccess(response: Any?) {
                             if (response is LoginResponse) {
                                 response.apiKey?.let {
+                                    /*
+                                    Take API key and save it. Also save creds since they work
+                                     */
+                                    Log.d(TAG, "SOOTHSAYER API key: "+response.apiKey)
                                     Constant.sAccessToken = it
+
                                     sharedPrefs?.set(
                                         Constant.PreferenceKey.sApiKey,
-                                        Constant.sAccessToken
+                                            response.apiKey
                                     )
-                                    etApiKey?.setText(
-                                        sharedPrefs?.get(
-                                            Constant.PreferenceKey.sApiKey,
-                                            ""
-                                        )
+                                    sharedPrefs?.set(
+                                            Constant.PreferenceKey.sServerUrl,
+                                            etLoginServerUrl?.text.toString()
                                     )
+                                    sharedPrefs?.set(
+                                            Constant.PreferenceKey.etUsername,
+                                            etUsername?.text.toString()
+                                    )
+
                                     setLoginViewVisibility(isMoveBack = false, isAfterLogin = true)
-                                    Constant.sServerUrl = etServerUrl?.text.toString()
+                                    Constant.sServerUrl = etLoginServerUrl?.text.toString()
+                                    Constant.sUsername = etUsername?.text.toString()
+
                                 }
                             }
                         }
@@ -1265,8 +1280,8 @@ class PluginDropDownReceiver (
                 }
 
                 setDataFromPref()
-                Constant.sServerUrl = etServerUrl?.text.toString()
-                Constant.sAccessToken = etApiKey?.text.toString()
+                Constant.sServerUrl = etLoginServerUrl?.text.toString()
+                Constant.sAccessToken = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "").toString()
 
             }
             GRG_TOGGLE_VISIBILITY, LAYER_VISIBILITY -> {

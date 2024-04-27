@@ -1181,7 +1181,7 @@ class PluginDropDownReceiver (
                     object : PluginRepository.ApiCallBacks {
                         override fun onLoading() {
                             Log.d(TAG, "onLoading: user login")
-                            pluginContext.shortToast("Signing in to "+etLoginServerUrl?.text.toString()+"..")
+                            pluginContext.shortToast("Logging in to "+etLoginServerUrl?.text.toString()+"..")
                         }
 
                         override fun onSuccess(response: Any?) {
@@ -1258,15 +1258,16 @@ class PluginDropDownReceiver (
         }
 
         val item: TemplatesResponseItem = items.removeAt(0)
-        downloadTemplateDetail(item.id, items)
+        Log.d(TAG, item.name);
+        downloadTemplateDetail(item.id, item.name, items)
     }
 
-    private fun downloadTemplateDetail(id:Int, items: TemplatesResponse){
+    private fun downloadTemplateDetail(id:Int, name:String, items: TemplatesResponse){
         repository.downloadTemplateDetail(id,
             object : PluginRepository.ApiCallBacks {
                 override fun onLoading() {
                     Log.d(TAG, "onLoading: downloadTemplateDetail")
-                    pluginContext.shortToast("Loading detail of id: $id .........")
+                    pluginContext.shortToast("Downloading template: $name...")
                 }
 
                 override fun onSuccess(response: Any?) {

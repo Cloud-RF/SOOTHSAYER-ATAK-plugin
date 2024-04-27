@@ -35,9 +35,9 @@
     <string name="internal_server_error">Calc failed likely due to size. Check FAQ at https://cloudrf.com/atak</string>
     <string name="marker_error">Please login to the server first.</string>
     <string name="empty_api_key">Please enter your API key.</string>
-    <string name="api_mode">Operation mode</string>
+    <string name="api_mode">Coverage layer</string>
     <string name="single">Single</string>
-    <string name="multiple">Multisite</string>
+    <string name="multiple">Multisite (GPU)</string>
     <string name="help">Help</string>
     <string name="ok_txt">OK</string>
     <string name="help_msg">This plugin generates radio coverage and/or links for user defined radio systems.
@@ -72,8 +72,8 @@
     <!--below is the name of group for drawing link lines on map-->
     <string name="drawing_objects">Drawing Objects</string>
 
-    <string name="kmzlayer">Coverage</string>
-    <string name="link_lines">Links</string>
+    <string name="kmzlayer">Show coverage</string>
+    <string name="link_lines">Show links</string>
 
     <string name="radio_settings">Edit (%1$s)</string>
     <string name="radio_height">Height (alt)</string>

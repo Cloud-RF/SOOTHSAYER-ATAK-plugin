@@ -153,6 +153,7 @@ class PluginDropDownReceiver (
         val btnAddMarker = templateView.findViewById<ImageButton>(R.id.btnAddMarker)
         btnAddMarker.setOnClickListener {
             if (Constant.sAccessToken != "") {
+                pluginContext.shortToast("Drag marker(s) to calculate")
                 addCustomMarker()
             } else {
                 pluginContext.toast(pluginContext.getString(R.string.marker_error))
@@ -637,6 +638,15 @@ class PluginDropDownReceiver (
                             )
                             markerAdapter?.notifyItemChanged(markersList.indexOf(item))
                         }
+
+                        // Links first. I'm not a slag..
+                        item?.let {
+                            if(cbLinkLines.isChecked) {
+                                updateLinkLinesOnMarkerDragging(item)
+                            }
+                        }
+
+                        // Multisite API (GPU)
                         if (svMode.isChecked) {
                             // For multisite api
                             item?.markerDetails?.let { template ->
@@ -670,7 +680,7 @@ class PluginDropDownReceiver (
                                 }
                             }
                         } else {
-//                            For single site api
+//                          // Area API (CPU / GPU)
                             item?.let {
                                 // send marker position changed data to server.
                                 if(cbCoverageLayer.isChecked) {
@@ -679,11 +689,6 @@ class PluginDropDownReceiver (
                             }
                         }
 
-                        item?.let {
-                            if(cbLinkLines.isChecked) {
-                                updateLinkLinesOnMarkerDragging(item)
-                            }
-                        }
                     }
                 }
             }

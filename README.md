@@ -23,13 +23,15 @@ Outgoing: TCP 443
 
 ## Equipment Required
 
-You will need a JSON template describing a radio. You can find examples in this repository and these must be placed on the SD card in the atak/SOOTHSAYER folder.
-
 For operation on a LAN you will require a SOOTHSAYER server on your network. For more information please consult https://cloudrf.com/soothsayer.
 
 ## Equipment Supported
 
-ATAK 4.8.1
+ATAK 4.8.x, 4.10.x, 5.1.x
+
+## Documentation
+
+https://cloudrf.com/documentation/06_atak_plugin.html
 
 ## Compilation
 

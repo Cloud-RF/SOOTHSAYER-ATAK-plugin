@@ -80,48 +80,43 @@
             android:id="@+id/cbLinkLines"
             android:text="@string/link_lines"
             android:checked="true"
-            android:layout_toEndOf="@id/cbKmzLayer"
-            android:layout_marginStart="@dimen/dp_8"
+            android:layout_below="@id/cbKmzLayer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <TextView
+        <ImageButton
             android:id="@+id/tvHelp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/help"
-            android:padding="@dimen/dp_4"
-            android:textStyle="bold"
+            style="@style/darkButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_alignParentBottom="true"
-            android:layout_centerVertical="true"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/sp_14" />
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:src="@android:drawable/ic_dialog_info" />
 
 
-        <Button
+        <ImageButton
             android:id="@+id/btnSave"
             style="@style/darkButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
             android:layout_centerInParent="true"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
-            android:layout_alignParentBottom="true"
-            android:text="@string/save" />
+            android:src="@android:drawable/stat_notify_sync" />
 
-        <Button
+        <ImageButton
             android:id="@+id/btnSettingLogin"
             style="@style/darkButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
             android:layout_centerInParent="true"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true"
-            android:text="@string/login" />
+            android:src="@drawable/account" />
     </RelativeLayout>
 
 </LinearLayout>

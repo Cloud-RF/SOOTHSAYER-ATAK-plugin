@@ -118,11 +118,26 @@ class PluginDropDownReceiver (
             settingView.visibility = View.VISIBLE
         }
 
-        val btnSave = settingView.findViewById<Button>(R.id.btnSave)
+        val btnsvMode = settingView.findViewById<Switch>(R.id.svMode);
+        btnsvMode.setOnClickListener{
+            sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
+        }
+
+        val coverageCB = settingView.findViewById<CheckBox>(R.id.cbKmzLayer);
+        coverageCB.setOnClickListener{
+            sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbCoverageLayer.isChecked)
+        }
+
+        val linksCB = settingView.findViewById<CheckBox>(R.id.cbLinkLines);
+        linksCB.setOnClickListener{
+            sharedPrefs?.set(Constant.PreferenceKey.sLinkLinesVisibility, cbLinkLines.isChecked)
+        }
+
+
+        val btnSave = settingView.findViewById<ImageButton>(R.id.btnSave)
         btnSave.setOnClickListener {
             //if (isValidSettings()) {
                 Constant.sServerUrl = etLoginServerUrl?.text.toString()
-
                 sharedPrefs?.set(Constant.PreferenceKey.sServerUrl, Constant.sServerUrl)
                 sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
 
@@ -137,7 +152,7 @@ class PluginDropDownReceiver (
         }
 
         // open help dialog
-        val tvHelp = settingView.findViewById<TextView>(R.id.tvHelp)
+        val tvHelp = settingView.findViewById<ImageButton>(R.id.tvHelp)
         tvHelp.setOnClickListener {
             showHelpDialog()
         }
@@ -153,13 +168,14 @@ class PluginDropDownReceiver (
         val btnAddMarker = templateView.findViewById<ImageButton>(R.id.btnAddMarker)
         btnAddMarker.setOnClickListener {
             if (Constant.sAccessToken != "") {
+                pluginContext.shortToast("Drag marker(s) to calculate")
                 addCustomMarker()
             } else {
                 pluginContext.toast(pluginContext.getString(R.string.marker_error))
             }
         }
 
-        val btnSettingLogin = settingView.findViewById<TextView>(R.id.btnSettingLogin)
+        val btnSettingLogin = settingView.findViewById<ImageButton>(R.id.btnSettingLogin)
         btnSettingLogin.setOnClickListener {
             setLoginViewVisibility(false)
         }
@@ -637,6 +653,15 @@ class PluginDropDownReceiver (
                             )
                             markerAdapter?.notifyItemChanged(markersList.indexOf(item))
                         }
+
+                        // Links first. I'm not a slag..
+                        item?.let {
+                            if(cbLinkLines.isChecked) {
+                                updateLinkLinesOnMarkerDragging(item)
+                            }
+                        }
+
+                        // Multisite API (GPU)
                         if (svMode.isChecked) {
                             // For multisite api
                             item?.markerDetails?.let { template ->
@@ -670,7 +695,7 @@ class PluginDropDownReceiver (
                                 }
                             }
                         } else {
-//                            For single site api
+//                          // Area API (CPU / GPU)
                             item?.let {
                                 // send marker position changed data to server.
                                 if(cbCoverageLayer.isChecked) {
@@ -679,11 +704,6 @@ class PluginDropDownReceiver (
                             }
                         }
 
-                        item?.let {
-                            if(cbLinkLines.isChecked) {
-                                updateLinkLinesOnMarkerDragging(item)
-                            }
-                        }
                     }
                 }
             }

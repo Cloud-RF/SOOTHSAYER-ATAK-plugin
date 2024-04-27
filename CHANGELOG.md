@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.3 27/04/2024
+- Improvement: Added login form for CloudRF/SOOTHSAYER user account
+- Improvement: Integrated templates API to fetch templates
+- Improvement: Changed add button icon to make it clearer
+- Improvement: Added toast to inform user to drag marker to calculate
+- Improvement: Links before coverage as its quicker
+
 ## 1.2 22/12/2023
 - Improvement: Built for ATAK 4.10 SDK
 

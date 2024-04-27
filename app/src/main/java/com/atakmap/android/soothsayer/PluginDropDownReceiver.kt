@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.text.InputType
 import android.util.Base64
 import android.util.Log
@@ -15,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.*
-import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,6 +42,8 @@ import com.atakmap.android.soothsayer.models.request.Receiver
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.atakmap.android.soothsayer.models.response.LoginResponse
 import com.atakmap.android.soothsayer.models.response.ResponseModel
+import com.atakmap.android.soothsayer.models.response.TemplatesResponse
+import com.atakmap.android.soothsayer.models.response.TemplatesResponseItem
 import com.atakmap.android.soothsayer.network.remote.RetrofitClient
 import com.atakmap.android.soothsayer.network.repository.PluginRepository
 import com.atakmap.android.soothsayer.plugin.R
@@ -1181,7 +1181,7 @@ class PluginDropDownReceiver (
                     object : PluginRepository.ApiCallBacks {
                         override fun onLoading() {
                             Log.d(TAG, "onLoading: user login")
-                            pluginContext.shortToast("Signing in to "+etLoginServerUrl?.text.toString()+"..")
+                            pluginContext.shortToast("Logging in to "+etLoginServerUrl?.text.toString()+"..")
                         }
 
                         override fun onSuccess(response: Any?) {
@@ -1207,9 +1207,9 @@ class PluginDropDownReceiver (
                                     )
 
                                     setLoginViewVisibility(isMoveBack = false, isAfterLogin = true)
-                                    Constant.sServerUrl = etLoginServerUrl?.text.toString()
+                                    Constant.sServerUrl = etServerUrl?.text.toString()
+                                    downloadTemplatesFromApi()
                                     Constant.sUsername = etUsername?.text.toString()
-
                                 }
                             }
                         }
@@ -1225,6 +1225,66 @@ class PluginDropDownReceiver (
                 pluginContext.toast(pluginContext.getString(R.string.internet_error))
             }
         }
+    }
+
+    private fun downloadTemplatesFromApi(){
+        repository.downloadTemplates(
+            object : PluginRepository.ApiCallBacks {
+                override fun onLoading() {
+                    Log.d(TAG, "onLoading: downloadTemplatesFromApi")
+                    pluginContext.shortToast(pluginContext.getString(R.string.template_downloading))
+                }
+
+                override fun onSuccess(response: Any?) {
+                    if (response is TemplatesResponse) {
+                        Log.d(TAG, "onLoading: fetchTemplateDetail")
+                        fetchTemplateDetail(response)
+                    }
+                }
+
+                override fun onFailed(error: String?, responseCode: Int?) {
+                    pluginContext.toast(
+                        error ?: pluginContext.getString(R.string.error_msg)
+                    )
+                }
+
+            })
+    }
+
+    private fun fetchTemplateDetail(items: TemplatesResponse){
+        if (items.isEmpty()) {
+            Log.d(TAG, "onLoading: fetchTemplateDetail no more items")
+            return  // when no more items
+        }
+
+        val item: TemplatesResponseItem = items.removeAt(0)
+        Log.d(TAG, item.name);
+        downloadTemplateDetail(item.id, item.name, items)
+    }
+
+    private fun downloadTemplateDetail(id:Int, name:String, items: TemplatesResponse){
+        repository.downloadTemplateDetail(id,
+            object : PluginRepository.ApiCallBacks {
+                override fun onLoading() {
+                    Log.d(TAG, "onLoading: downloadTemplateDetail")
+                    pluginContext.shortToast("Downloading template: $name...")
+                }
+
+                override fun onSuccess(response: Any?) {
+                    if (response is TemplateDataModel) {
+                        Log.d(TAG, "onLoading: fetchTemplateDetail id:$id response : $response")
+                        createAndStoreDownloadedFile(response)
+                        fetchTemplateDetail(items) // recursive call to this function to download details of other.
+                    }
+                }
+
+                override fun onFailed(error: String?, responseCode: Int?) {
+                    pluginContext.toast(
+                        error ?: pluginContext.getString(R.string.error_msg)
+                    )
+                }
+
+            })
     }
 
     public override fun disposeImpl() {

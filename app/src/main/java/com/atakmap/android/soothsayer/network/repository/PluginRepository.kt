@@ -9,6 +9,8 @@ import com.atakmap.android.soothsayer.models.request.MultisiteRequest
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.atakmap.android.soothsayer.models.response.LoginResponse
 import com.atakmap.android.soothsayer.models.response.ResponseModel
+import com.atakmap.android.soothsayer.models.response.TemplatesResponse
+import com.atakmap.android.soothsayer.models.response.TemplatesResponseItem
 import com.atakmap.android.soothsayer.network.remote.RetrofitClient
 import com.atakmap.android.soothsayer.util.Constant
 import com.google.gson.Gson
@@ -276,6 +278,116 @@ class PluginRepository {
                             Log.d(
                                 PluginDropDownReceiver.TAG,
                                 "loginUser override fun onFailure called Request ${call.request()}  \n Error: ${t.localizedMessage}"
+                            )
+                            callback?.onFailed(t.message)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            callback?.onFailed(e.printStackTrace().toString())
+                        }
+                    }
+                })
+        } else {
+            callback?.onFailed("", Constant.ApiErrorCodes.sForbidden)
+        }
+
+    }
+
+    fun downloadTemplates(callback: ApiCallBacks? = null) {
+        callback?.onLoading()
+        Constant.sServerUrl = "https://api.cloudrf.com" // to set the server url for login
+        Log.d("PluginDropDownReceiver", " BASE_URL: ${RetrofitClient.BASE_URL}")
+        if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
+            RetrofitClient.apiService()?.getUserTemplates()
+                ?.enqueue(object : Callback<TemplatesResponse?> {
+                    override fun onResponse(
+                        call: Call<TemplatesResponse?>, response: Response<TemplatesResponse?>
+                    ) {
+                        if (response.isSuccessful) {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "downloadTemplate success :${response.raw()}"
+                            )
+                            callback?.onSuccess(response.body())
+                        } else {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "downloadTemplate onFailed called ${response.code()} ${response.raw()} error: ${response.body()} "
+                            )
+                            try {
+                                val errorObject = JSONObject(response.errorBody()!!.string())
+                                val errorMessage = errorObject.getString("error")
+                                Log.d(
+                                    PluginDropDownReceiver.TAG,
+                                    "downloadTemplate onFailed called error: $errorMessage"
+                                )
+                                callback?.onFailed(errorMessage, response.code())
+                            } catch (e: java.lang.Exception) {
+                                e.printStackTrace()
+                                callback?.onFailed(response.message(), response.code())
+                            }
+                        }
+                    }
+
+                    override fun onFailure(call: Call<TemplatesResponse?>, t: Throwable) {
+                        try {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "downloadTemplate override fun onFailure called Request ${call.request()}  \n Error: ${t.localizedMessage}"
+                            )
+                            callback?.onFailed(t.message)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            callback?.onFailed(e.printStackTrace().toString())
+                        }
+                    }
+                })
+        } else {
+            callback?.onFailed("", Constant.ApiErrorCodes.sForbidden)
+        }
+
+    }
+
+    fun downloadTemplateDetail(id:Int, callback: ApiCallBacks? = null) {
+        callback?.onLoading()
+//        Constant.sServerUrl = url // to set the server url for login
+//        Log.d("PluginDropDownReceiver", "intercept: $url BASE_URL: ${RetrofitClient.BASE_URL}")
+        if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
+            RetrofitClient.apiService()?.getTemplateDetail(id)
+                ?.enqueue(object : Callback<TemplateDataModel?> {
+                    override fun onResponse(
+                        call: Call<TemplateDataModel?>, response: Response<TemplateDataModel?>
+                    ) {
+                        if (response.isSuccessful) {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "downloadTemplateDetail success :${response.raw()}"
+                            )
+                            callback?.onSuccess(response.body())
+                        } else {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "downloadTemplateDetail onFailed called ${response.code()} ${response.raw()} error: ${response.body()} "
+                            )
+                            try {
+                                val errorObject = JSONObject(response.errorBody()!!.string())
+                                val errorMessage = errorObject.getString("error")
+                                Log.d(
+                                    PluginDropDownReceiver.TAG,
+                                    "downloadTemplateDetail onFailed called error: $errorMessage"
+                                )
+                                callback?.onFailed(errorMessage, response.code())
+                            } catch (e: java.lang.Exception) {
+                                e.printStackTrace()
+                                callback?.onFailed(response.message(), response.code())
+                            }
+                        }
+                    }
+
+                    override fun onFailure(call: Call<TemplateDataModel?>, t: Throwable) {
+                        try {
+                            Log.d(
+                                PluginDropDownReceiver.TAG,
+                                "downloadTemplateDetail override fun onFailure called Request ${call.request()}  \n Error: ${t.localizedMessage}"
                             )
                             callback?.onFailed(t.message)
                         } catch (e: Exception) {

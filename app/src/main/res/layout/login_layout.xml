@@ -49,13 +49,6 @@
 
     <!-- For all usages of Spinners in plugins one must make
              use of the PluginSpinner class supplied with the SDK -->
-    <com.atakmap.android.gui.PluginSpinner
-        android:id="@+id/spServerType"
-        android:layout_toEndOf="@id/tvLoginServerUrl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/et_background"
-        android:prompt="@string/server" />
     </RelativeLayout>
 
     <EditText
@@ -63,8 +56,8 @@
         style="@style/EditTextStyle"
         android:imeOptions="actionNext"
         android:labelFor="@id/etLoginServerUrl"
-        tools:text="https://api.cloudrf.com"
-        tools:ignore="Autofill,TextFields" />
+        tools:ignore="Autofill,TextFields"
+        tools:text="https://api.cloudrf.com" />
 
     <TextView
         android:id="@+id/tvUserName"

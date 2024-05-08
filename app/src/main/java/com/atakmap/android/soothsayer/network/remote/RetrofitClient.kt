@@ -22,8 +22,6 @@ object RetrofitClient {
     private const val mAuthorizationKey = "key"
 
     const val DEFAULT_URL = "https://127.0.0.1"
-    const val CLOUD_RF_URL = "https://api.cloudrf.com"
-    const val DEFAULT_APIKEY = ""
 
     var BASE_URL = Constant.sServerUrl
 

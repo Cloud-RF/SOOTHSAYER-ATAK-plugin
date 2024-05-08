@@ -7,14 +7,11 @@ import android.graphics.Bitmap
 import android.text.InputType
 import android.util.Base64
 import android.util.Log
-import android.util.TypedValue
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.*
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
@@ -44,7 +41,6 @@ import com.atakmap.android.soothsayer.models.response.LoginResponse
 import com.atakmap.android.soothsayer.models.response.ResponseModel
 import com.atakmap.android.soothsayer.models.response.TemplatesResponse
 import com.atakmap.android.soothsayer.models.response.TemplatesResponseItem
-import com.atakmap.android.soothsayer.network.remote.RetrofitClient
 import com.atakmap.android.soothsayer.network.repository.PluginRepository
 import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
@@ -272,69 +268,7 @@ class PluginDropDownReceiver (
             false
         }
 
-        //
-        val spServerType: Spinner = loginView.findViewById(R.id.spServerType)
-        serverTypes.add(pluginContext.getString(R.string.cloud_rf))
-        serverTypes.add(pluginContext.getString(R.string.app_name))
-        val adapterServerType: ArrayAdapter<String> = object :
-            ArrayAdapter<String>(
-                pluginContext,
-                R.layout.spinner_item_layout,
-                serverTypes
-            ) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val textView = super.getView(position, convertView, parent) as TextView
-                textView.setPadding(6,0,0,0)
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, pluginContext.resources.getDimension(R.dimen.sp_14))
-                textView.gravity = Gravity.CENTER_VERTICAL
-                val item: String? = getItem(position)
-                if (item != null) {
-                    textView.text = item
-                    //etLoginServerUrl?.alpha = if(item == pluginContext.getString(R.string.cloud_rf)) 0.5F else 1F
-                    //etLoginServerUrl?.isEnabled = item != pluginContext.getString(R.string.cloud_rf)
-                    etLoginServerUrl?.setText(if(item == pluginContext.getString(R.string.cloud_rf)) RetrofitClient.CLOUD_RF_URL else RetrofitClient.DEFAULT_URL)
-                }
-                return textView
-            }
 
-            override fun getDropDownView(
-                position: Int,
-                convertView: View?,
-                parent: ViewGroup
-            ): View {
-                val textView = super.getDropDownView(position, convertView, parent) as TextView
-                val item: String? = getItem(position)
-                if (item != null) {
-                    textView.text = item
-                }
-                return textView
-            }
-        }
-        adapterServerType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spServerType.adapter = adapterServerType
-        spServerType.setSelection(0)
-        spServerType.onItemSelectedListener = object : SimpleItemSelectedListener() {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View,
-                position: Int, id: Long
-            ) {
-//                selectedMarkerType = templateItems[position]
-            }
-        }
-
-        spServerType.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-
-                }
-                MotionEvent.ACTION_UP -> {
-                    // tap was detected, perform click
-                    spServerType.performClick()
-                }
-            }
-            false
-        }
     }
 
     private fun initSettings() {
@@ -949,23 +883,7 @@ class PluginDropDownReceiver (
                                 TAG,
                                 "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
                             )
-
-                            val message = when (responseCode) {
-//                                Constant.ApiErrorCodes.sUnAuthorized, Constant.ApiErrorCodes.sBadRequest -> {
-                                Constant.ApiErrorCodes.sUnAuthorized -> {
-                                    pluginContext.getString(R.string.unauthorized_error)
-                                }
-                                Constant.ApiErrorCodes.sForbidden -> {
-                                    pluginContext.getString(R.string.forbidden_url_error)
-                                }
-                                Constant.ApiErrorCodes.sNotFound -> {
-                                    pluginContext.getString(R.string.not_found_url_error)
-                                }
-                                else -> {
-                                    error ?: pluginContext.getString(R.string.error_msg)
-                                }
-                            }
-                            pluginContext.toast(message)
+                            pluginContext.toast(error)
                         }
                     })
             }
@@ -1018,24 +936,9 @@ class PluginDropDownReceiver (
                                 TAG,
                                 "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
                             )
-                            val message = when (responseCode) {
-                                Constant.ApiErrorCodes.sUnAuthorized -> {
-                                    pluginContext.getString(R.string.unauthorized_error)
-                                }
-                                Constant.ApiErrorCodes.sForbidden -> {
-                                    pluginContext.getString(R.string.forbidden_url_error)
-                                }
-                                Constant.ApiErrorCodes.sNotFound -> {
-                                    pluginContext.getString(R.string.not_found_url_error)
-                                }
-                                Constant.ApiErrorCodes.sInternalServerError -> {
-                                    pluginContext.getString(R.string.internal_server_error)
-                                }
-                                else -> {
-                                    error ?: pluginContext.getString(R.string.error_msg)
-                                }
-                            }
-                            pluginContext.toast(message)
+                            if (error != null) {
+                                pluginContext.toast(error)
+                            };
                         }
                     })
             }

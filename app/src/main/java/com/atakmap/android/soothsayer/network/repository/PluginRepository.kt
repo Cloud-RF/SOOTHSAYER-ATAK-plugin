@@ -59,9 +59,9 @@ class PluginRepository {
                         } else {
                             Log.d(
                                 PluginDropDownReceiver.TAG,
-                                "sendMarkerData onFailed called ${response.code()} ${response.raw()}"
+                                "sendMarkerData onFailed called: ${response.code()} ${response.raw()}"
                             )
-                            callback?.onFailed(response.message(), response.code())
+                            callback?.onFailed(response.errorBody()?.string(), response.code())
                         }
                     }
 
@@ -156,7 +156,7 @@ class PluginRepository {
                                 PluginDropDownReceiver.TAG,
                                 "sendMultiSiteMarkerData onFailed called ${response.code()} ${response.raw()}"
                             )
-                            callback?.onFailed(response.message(), response.code())
+                            callback?.onFailed(response.errorBody()?.string(), response.code())
                         }
                     }
 
@@ -209,7 +209,7 @@ class PluginRepository {
                                 PluginDropDownReceiver.TAG,
                                 "sendLinks onFailed called ${response.code()} ${response.raw()}"
                             )
-                            callback?.onFailed(response.message(), response.code())
+                            callback?.onFailed(response.errorBody()?.string(), response.code())
                         }
                     }
 

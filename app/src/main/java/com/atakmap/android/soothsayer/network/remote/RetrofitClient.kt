@@ -20,10 +20,8 @@ object RetrofitClient {
     private const val mContentType = "Content-type"
     private const val mContentTypeJson = "application/json"
     private const val mAuthorizationKey = "key"
-
     const val DEFAULT_URL = "https://127.0.0.1"
-
-    var BASE_URL = Constant.sServerUrl
+    var BASE_URL = "https://127.0.0.1"
 
     private val OK_HTTP_CLIENT by lazy {
         OkHttpClient.Builder()
@@ -33,17 +31,12 @@ object RetrofitClient {
     }
 
     private fun RETROFIT():Retrofit {
-        getUpdatedBaseUrl() // used to get the updated baseurl upon changing it from settings
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
 //            .client(OK_HTTP_CLIENT.build())
             .client(getUnsafeOkHttpClient().build())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-    }
-
-    private fun getUpdatedBaseUrl(){
-        BASE_URL = Constant.sServerUrl
     }
 
 

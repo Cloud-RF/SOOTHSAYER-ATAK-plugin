@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER v1.3.1</string>
+    <string name="help_title">SOOTHSAYER v1.3.2</string>
     <!-- description -->
     <string name="app_desc">Interface to the CloudRF/SOOTHSAYER API</string>
     <string name="example_layer_description">This is an example layer.</string>
@@ -45,7 +45,8 @@
         \nYou can use https://api.cloudrf.com or a private SOOTHSAYER server for a LAN eg. https://192.168..
         \n\nTo create an account, visit cloudrf.com and order a plan to get you API key which you need to copy-paste into the settings.
         \n\nTo use: Click the add button to add a radio to the map then drag it to calculate coverage. You can test a single marker/radio or many at once using multisite mode (GPU required).
-        \n\nRadio templates are downloaded from the API or can be added manually as .json files to the SD card atak/SOOTHSAYER folder.\nDocs, videos and templates are available at https://cloudrf.com/atak</string>
+        \n\nRadio templates are downloaded from the API or can be added manually as .json files to the SD card atak/SOOTHSAYER folder.\nDocs, videos and templates are available at https://cloudrf.com/atak
+        \n\nMAKE THIS BETTER: Report bugs and request features at support@cloudrf.com</string>
     <string name="soothsayer_layer">SOOTHSAYER Layer</string>
     <string name="layer">%1$s Layer</string>
     <string name="multisite_layer">Multisite Layer</string>

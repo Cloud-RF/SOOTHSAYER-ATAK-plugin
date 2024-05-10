@@ -41,6 +41,7 @@ import com.atakmap.android.soothsayer.models.response.LoginResponse
 import com.atakmap.android.soothsayer.models.response.ResponseModel
 import com.atakmap.android.soothsayer.models.response.TemplatesResponse
 import com.atakmap.android.soothsayer.models.response.TemplatesResponseItem
+import com.atakmap.android.soothsayer.network.remote.RetrofitClient
 import com.atakmap.android.soothsayer.network.repository.PluginRepository
 import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
@@ -1092,11 +1093,16 @@ class PluginDropDownReceiver (
                 Public service has a UI on different subdomain to API
                 SOOTHSAYER has both UI & API on same server
                  */
-                var loginUrl = "https://cloudrf.com"
+                var loginUrl = "";
 
-                if(etLoginServerUrl?.text.toString() != "https://api.cloudrf.com"){
+                if(etLoginServerUrl?.text.toString() == "https://api.cloudrf.com"){
+                    loginUrl = "https://cloudrf.com";
+                    RetrofitClient.BASE_URL = "https://api.cloudrf.com";
+                }else{
                     loginUrl =  etLoginServerUrl?.text.toString();
+                    RetrofitClient.BASE_URL = loginUrl;
                 }
+
                 repository.loginUser(
                     loginUrl,
                     etUsername?.text.toString(),

@@ -237,7 +237,6 @@ class PluginRepository {
 
     fun loginUser(url:String, username: String, password :String, callback: ApiCallBacks? = null) {
         callback?.onLoading()
-        Constant.sServerUrl = url // to set the server url for login
         Log.d("PluginDropDownReceiver", "intercept: $url BASE_URL: ${RetrofitClient.BASE_URL}")
         if (URLUtil.isValidUrl(url)) {
             RetrofitClient.apiService()?.loginUser(username, password)
@@ -294,7 +293,6 @@ class PluginRepository {
 
     fun downloadTemplates(callback: ApiCallBacks? = null) {
         callback?.onLoading()
-        Constant.sServerUrl = "https://api.cloudrf.com" // to set the server url for login
         Log.d("PluginDropDownReceiver", " BASE_URL: ${RetrofitClient.BASE_URL}")
         if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
             RetrofitClient.apiService()?.getUserTemplates()
@@ -349,7 +347,6 @@ class PluginRepository {
 
     fun downloadTemplateDetail(id:Int, callback: ApiCallBacks? = null) {
         callback?.onLoading()
-//        Constant.sServerUrl = url // to set the server url for login
 //        Log.d("PluginDropDownReceiver", "intercept: $url BASE_URL: ${RetrofitClient.BASE_URL}")
         if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
             RetrofitClient.apiService()?.getTemplateDetail(id)

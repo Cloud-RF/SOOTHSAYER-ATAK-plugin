@@ -1089,22 +1089,10 @@ class PluginDropDownReceiver (
     private fun loginUser(){
         if(isValidLogin()) {
             if (pluginContext.isConnected()) {
-                /*
-                Public service has a UI on different subdomain to API
-                SOOTHSAYER has both UI & API on same server
-                 */
-                var loginUrl = "";
 
-                if(etLoginServerUrl?.text.toString() == "https://api.cloudrf.com"){
-                    loginUrl = "https://cloudrf.com";
-                    RetrofitClient.BASE_URL = "https://api.cloudrf.com";
-                }else{
-                    loginUrl =  etLoginServerUrl?.text.toString();
-                    RetrofitClient.BASE_URL = loginUrl;
-                }
+                RetrofitClient.BASE_URL = etLoginServerUrl?.text.toString();
 
                 repository.loginUser(
-                    loginUrl,
                     etUsername?.text.toString(),
                     etPassword?.text.toString(),
                     object : PluginRepository.ApiCallBacks {
@@ -1119,6 +1107,14 @@ class PluginDropDownReceiver (
                                     /*
                                     Take API key and save it. Also save creds since they work
                                      */
+
+                                    /*
+                                    Public service has a UI on different subdomain to API
+                                    SOOTHSAYER has both UI & API on same server
+                                     */
+                                    if(etLoginServerUrl?.text.toString() == "https://cloudrf.com"){
+                                        RetrofitClient.BASE_URL = "https://api.cloudrf.com";
+                                    }
                                     Log.d(TAG, "SOOTHSAYER API key: "+response.apiKey)
                                     Constant.sAccessToken = it
 

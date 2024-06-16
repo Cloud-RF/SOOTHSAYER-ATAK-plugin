@@ -59,7 +59,7 @@
     },
     "output": {
         "units": "m",
-        "col": "LTEBAD.dBm",
+        "col": "LTE.dBm",
         "out": 2,
         "ber": 1,
         "mod": 0,

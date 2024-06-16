@@ -235,10 +235,9 @@ class PluginRepository {
         }
     }
 
-    fun loginUser(url:String, username: String, password :String, callback: ApiCallBacks? = null) {
+    fun loginUser(username: String, password :String, callback: ApiCallBacks? = null) {
         callback?.onLoading()
-        Log.d("PluginDropDownReceiver", "intercept: $url BASE_URL: ${RetrofitClient.BASE_URL}")
-        if (URLUtil.isValidUrl(url)) {
+        if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
             RetrofitClient.apiService()?.loginUser(username, password)
                 ?.enqueue(object : Callback<LoginResponse?> {
                     override fun onResponse(

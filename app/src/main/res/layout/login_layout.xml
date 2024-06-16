@@ -57,7 +57,7 @@
         android:imeOptions="actionNext"
         android:labelFor="@id/etLoginServerUrl"
         tools:ignore="Autofill,TextFields"
-        tools:text="https://api.cloudrf.com" />
+        tools:text="https://cloudrf.com" />
 
     <TextView
         android:id="@+id/tvUserName"

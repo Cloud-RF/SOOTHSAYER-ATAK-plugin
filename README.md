@@ -1,20 +1,14 @@
 # SOOTHSAYER ATAK Plugin
 
-## Purpose and Capabilities
+This plugin is a tactical client to the CloudRF / SOOTHSAYER [radio planning API](https://cloudrf.com/documentation/developer/). 
 
-This plugin is a client to the CloudRF / SOOTHSAYER radio planning API. 
-
-Presently it can task the `Area`, `Multisite` and `Points` APIs to make heatmaps and links for RF propagation based upon system templates loaded from the SD card.
+Presently, users can task the `Area`, `Multisite` and `Points` APIs to make heatmaps and links for RF systems using templates from a user's account.
 
 ![SOOTHSAYER ATAK plugin](help/soothsayer_atak.jpg "SOOTHSAYER ATAK plugin")
 
-## Status
-
-Under active development.
-
 ## Points of Contact
 
-- Public issue board: https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin
+- Issue board: https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin
 - Developer email: [support@cloudrf.com](mailto:support@cloudrf.com)
 
 ## Ports Required
@@ -23,15 +17,35 @@ Outgoing: TCP 443
 
 ## Equipment Required
 
-For operation on a LAN you will require a SOOTHSAYER server on your network. For more information please consult https://cloudrf.com/soothsayer.
+An Android phone running ATAK-CIV [available in Play store](https://play.google.com/store/apps/details?id=com.atakmap.app.civ) and a [CloudRF account](https://cloudrf.com/my-account)
+
+For operation on a private LAN you will require a [SOOTHSAYER server](https://cloudrf.com/soothsayer) which can be hosted as a VM or a container. 
 
 ## Equipment Supported
 
-ATAK 4.8.x, 4.10.x, 5.1.x
+ATAK 5.1.x
 
 ## Documentation
 
 https://cloudrf.com/documentation/06_atak_plugin.html
+
+## Quickstart
+If you don't fancy building it from source, you can find a ready made APK release under the releases section. Copy the .apk file to your phone and install it.
+
+In ATAK, add and activate the plugin if it isn't already listed via the plugins menu.
+
+To use the plugin, login to your account first. For CloudRF the service should be `https://cloudrf.com` and for a SOOTHSAYER server it should be your server's IP/FQDN with https://
+
+Your templates from your account will download at this point. You may also side load templates as JSON files to your atak/SOOTHSAYER/templates folder on the SD card.
+
+To simulate coverage and layers click + and then drag the marker. For more information see the [user documentation](https://cloudrf.com/documentation/06_atak_plugin.html).
+
+![SOOTHSAYER ATAK plugin](help/soothsayer_atak_settings.jpg "SOOTHSAYER ATAK plugin settings")
+
+### Premium API features
+
+Some CloudRF API features require a Silver account such as Multisite which uses a GPU. If you want to evaluate the plugin with a free or Bronze account you can slide the coverage layer slider to `single` which will perform a slower single-site CPU calculation.
+A private server has no restrictions.
 
 ## Compilation
 
@@ -48,8 +62,8 @@ You can follow these notes to complete a build of the plugin and have it working
 4. Choose a standard setup and accept the terms for both packages, let it install APIs.
 5. Fetch an ATAK CIV SDK release from https://tak.gov. You can find this by logging in and then navigating to "Products" > "ATAK-CIV". Select your version (this has been tested with "ATAK-CIV 4.8.1"). Scroll down on the page to the "Downloadable Resources" section and click on the "Developer Resources" and then download the ZIP of the SDK for the version you just specified.
 6. Unzip the ATAK CIV release and you may wish to rename the folder to include the version eg. `mv atak-civ atak-civ-x.x`, this will allow you to better identify which version you are working with if you have multiple versions on your system.
-7. If a `plugin-examples` directory doesn't exist in the ATAK CIV release then create one.
-8. Copy a clone of this `SOOTHSAYER-ATAK-plugin` repository to the created `plugin-examples` directory.
+7. If a `samples` directory doesn't exist in the ATAK CIV release then create one.
+8. Copy a clone of this `SOOTHSAYER-ATAK-plugin` repository to the `samples` directory.
 9. Open the `SOOTHSAYER-ATAK-plugin` directory you just copied in Android Studio.
 10. If you have multiple Java versions on your system you may need to set the JDK version from the "File" > "Project Structure" menu.
 11. Allow several minutes for Android Studio to download all dependencies and external libraries.
@@ -70,7 +84,7 @@ You can follow these notes to complete a build of the plugin and have it working
 21. If all is working as expected then ATAK should be loaded and it should show "DEVELOPER BUILD" in red letters at the bottom of the viewer.
 22. In Android Studio select "Run" > "Run app". This will build and compile the plugin. After a successful build you will be prompted on ATAK "Load plugin: SOOTHSAYER. Would you like to load this installed plugin into ATAK? SOOTHSAYER".
 
-## Third-Party Signing
+### Third-Party Signing
 
 The tak.gov documentation has a bug at the time of writing which assumes the public have access to the maven repo.
 This command in particular does not work, don't worry about it:

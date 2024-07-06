@@ -34,7 +34,7 @@ data class LinkResponse(
 
 data class Receiver(
     @SerializedName("Antenna height m")
-    val antennaHeight: Int,
+    val antennaHeight: Double,
     @SerializedName("Ground elevation m")
     val groundElevation: Int,
     @SerializedName("Latitude")
@@ -53,7 +53,7 @@ data class Transmitter(
     @SerializedName("Antenna gain dBi")
     val antennaGainDBi: Double,
     @SerializedName("Antenna height m")
-    val antennaHeight: Int,
+    val antennaHeight: Double,
     @SerializedName("Azimuth to receiver deg")
     val azimuthToReceiverDeg: Double,
     @SerializedName("Bandwidth MHz")
@@ -105,7 +105,7 @@ data class Transmitter(
     @SerializedName("Polarisation")
     val polarisation: String,
     @SerializedName("Power W")
-    val powerW: Int,
+    val powerW: Double,
     @SerializedName("Power dBm")
     val powerDBm: Double,
     @SerializedName("RX voltage 50 ohm dipole dBuV")
@@ -117,11 +117,11 @@ data class Transmitter(
     @SerializedName("RX voltage 75 ohm dipole uV")
     val rXVoltage75OhmDipoleUV: Int,
     @SerializedName("Raise RX antenna for LOS")
-    val raiseRxAntennaForLOS: Int,
+    val raiseRxAntennaForLOS: Double,
     @SerializedName("Raise RX antenna for fresnel 60%")
-    val raiseRxAntennaForFresnel60 : Int,
+    val raiseRxAntennaForFresnel60 : Double,
     @SerializedName("Raise RX antenna for full fresnel")
-    val raiseRxAntennaForFullFresnel: Int,
+    val raiseRxAntennaForFullFresnel: Double,
     @SerializedName("Signal power at receiver dBm")
     val signalPowerAtReceiverDBm: Double,
     @SerializedName("Signal to Noise Ratio dB")

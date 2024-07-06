@@ -284,7 +284,7 @@ class PluginDropDownReceiver (
         etLoginServerUrl = loginView.findViewById(R.id.etLoginServerUrl)
         etUsername = loginView.findViewById(R.id.etUserName)
 
-        val server: String? = sharedPrefs?.get(Constant.PreferenceKey.sServerUrl,"").toString()
+        val server: String? = sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, "https://cloudrf.com").toString()
         val username: String? = sharedPrefs?.get(Constant.PreferenceKey.etUsername, "").toString()
         val apiKey: String? = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "").toString()
 
@@ -353,18 +353,18 @@ class PluginDropDownReceiver (
                                 (marker.transmitter?.frq.toString() != etFrequency.text.toString() && etFrequency.text.isNotEmpty()) ||
                                 (marker.transmitter?.bwi.toString() != etBandWidth.text.toString() && etBandWidth.text.isNotEmpty()) ||
                                 (marker.output.nf.toString() != etOutputNoiseFloor.text.toString() && etOutputNoiseFloor.text.isNotEmpty()) ||
-                                (marker.antenna.azi.toString() != etAntennaAzimuth.text.toString() && etAntennaAzimuth.text.isNotEmpty())
+                                (marker.antenna.azi != etAntennaAzimuth.text.toString() && etAntennaAzimuth.text.isNotEmpty())
 
                     if (isEdit) {
                         //change the marker data
                         marker.transmitter?.let { transmitter ->
-                            etRadioHeight.text.toString().toIntOrNull()?.let { transmitter.alt = it }
+                            etRadioHeight.text.toString().toDoubleOrNull()?.let { transmitter.alt = it }
                             etRadioPower.text.toString().toDoubleOrNull()?.let { transmitter.txw = it }
                             etFrequency.text.toString().toDoubleOrNull()?.let { transmitter.frq = it }
                             etBandWidth.text.toString().toDoubleOrNull()?.let { transmitter.bwi = it }
                         }
                         etOutputNoiseFloor.text.toString().toIntOrNull()?.let { marker.output.nf = it }
-                        etAntennaAzimuth.text.toString().toIntOrNull()?.let { marker.antenna.azi = it }
+                        etAntennaAzimuth.text.toString().let { marker.antenna.azi = it }
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
 
@@ -692,18 +692,15 @@ class PluginDropDownReceiver (
             // override receiver with this location
             // This is the dragged marker. During this test, the gains used for Rx come from the subject's Tx block
             val thisRx = Receiver(
-                    marker.markerDetails.transmitter?.alt ?: 1,
+                    marker.markerDetails.transmitter?.alt ?: 1.0,
                     marker.markerDetails.transmitter?.lat ?: 0.0,
                     marker.markerDetails.transmitter?.lon ?: 0.0,
                    marker.markerDetails.antenna.txg,
                    marker.markerDetails.receiver.rxs
             )
 
-            var omni = it.markerDetails.antenna
-            omni.ant = 1
 
-            val linkRequest = LinkRequest(
-                omni,
+            val linkRequest = LinkRequest(it.markerDetails.antenna,
                 it.markerDetails.environment,
                 it.markerDetails.model,
                 it.markerDetails.network,
@@ -884,7 +881,14 @@ class PluginDropDownReceiver (
                                 TAG,
                                 "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
                             )
-                            pluginContext.toast(error)
+
+                            val builderSingle = AlertDialog.Builder(mapView.context)
+                            builderSingle.setTitle("API error")
+                            builderSingle.setMessage(error)
+                            builderSingle.setNegativeButton(
+                                    pluginContext.getString(R.string.ok_txt)
+                            ) { dialog, _ -> dialog.dismiss() }
+                            builderSingle.show()
                         }
                     })
             }
@@ -938,7 +942,13 @@ class PluginDropDownReceiver (
                                 "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
                             )
                             if (error != null) {
-                                pluginContext.toast(error)
+                                val builderSingle = AlertDialog.Builder(mapView.context)
+                                builderSingle.setTitle("API error")
+                                builderSingle.setMessage(error)
+                                builderSingle.setNegativeButton(
+                                        pluginContext.getString(R.string.ok_txt)
+                                ) { dialog, _ -> dialog.dismiss() }
+                                builderSingle.show()
                             };
                         }
                     })
@@ -1191,8 +1201,8 @@ class PluginDropDownReceiver (
         repository.downloadTemplateDetail(id,
             object : PluginRepository.ApiCallBacks {
                 override fun onLoading() {
-                    Log.d(TAG, "onLoading: downloadTemplateDetail")
-                    pluginContext.shortToast("Downloading template: $name...")
+                    Log.d(TAG, "Downloading template: $name")
+                    //pluginContext.shortToast("Downloading template: $name...")
                 }
 
                 override fun onSuccess(response: Any?) {

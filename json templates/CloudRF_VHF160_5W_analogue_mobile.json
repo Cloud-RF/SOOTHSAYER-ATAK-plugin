@@ -1,23 +1,23 @@
 {
-    "version": "CloudRF-API-v3.8.2",
+    "version": "CloudRF-API-v3.8.4",
     "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
     "template": {
-        "name": "LOS_2km_2m_GPU",
-        "service": "SOOTHSAYER https://185.11.204.106",
-        "created_at": "2023-05-05T15:44:20+00:00",
-        "owner": 8,
+        "name": "VHF160_5W_analogue_mobile",
+        "service": "CloudRF https://api.cloudrf.com",
+        "created_at": "2023-06-19T14:28:39+00:00",
+        "owner": 1,
         "bom_value": 0
     },
     "site": "Site",
-    "network": "TALON",
+    "network": "VHF",
     "engine": 1,
     "coordinates": 1,
     "transmitter": {
-        "lat": 50.806194,
-        "lon": -1.112117,
+        "lat": 51.755735,
+        "lon": -2.364494,
         "alt": 2,
-        "frq": 1250,
-        "txw": 2,
+        "frq": 160,
+        "txw": 5,
         "bwi": 0.1,
         "powerUnit": "W"
     },
@@ -25,8 +25,8 @@
         "lat": 38.913,
         "lon": 1.45,
         "alt": 1,
-        "rxg": 2,
-        "rxs": -90
+        "rxg": 1,
+        "rxs": -100
     },
     "feeder": {
         "flt": 1,
@@ -35,35 +35,35 @@
     },
     "antenna": {
         "mode": "template",
-        "txg": 2,
+        "txg": 2.15,
         "txl": 0,
         "ant": 39,
-        "azi": 0,
+        "azi": 145,
         "tlt": 0,
         "hbw": 1,
         "vbw": 1,
-        "fbr": 2,
+        "fbr": 18,
         "pol": "v"
     },
     "model": {
-        "pm": 7,
+        "pm": 11,
         "pe": 2,
-        "ked": 0,
-        "rel": 50
+        "ked": 1,
+        "rel": 80
     },
     "environment": {
-        "clm": 0,
-        "cll": 0,
+        "clm": 1,
+        "cll": 1,
         "clt": "Temperate.clt"
     },
     "output": {
         "units": "m",
-        "col": "GREEN.dBm",
+        "col": "LTE.dBm",
         "out": 2,
         "ber": 1,
         "mod": 0,
-        "nf": -124,
-        "res": 2,
-        "rad": 2
+        "nf": -120,
+        "res": 10,
+        "rad": 5
     }
 }

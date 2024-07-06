@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.3.4 06/07/2024
+- Fix: Templates with floats for heights weren't working
+- Fix: Templates with multi azimuth values eg. "0,90,180" weren't working
+- Improvement: Pruned old templates, added a new TSM950 one
+- Improvement: API errors eg. "Plan expired" now show in dialog vs toast
+
 ## 1.3 27/04/2024
 - Improvement: Added login form for CloudRF/SOOTHSAYER user account
 - Improvement: Integrated templates API to fetch templates

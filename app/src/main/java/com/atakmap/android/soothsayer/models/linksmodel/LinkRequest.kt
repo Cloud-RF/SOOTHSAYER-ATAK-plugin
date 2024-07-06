@@ -36,7 +36,7 @@ data class LinkRequest(
 
 data class Point(
     val markerId: String,
-    val alt: Int?,
+    val alt: Double?,
     val lat: Double?,
     val lon: Double?
 )

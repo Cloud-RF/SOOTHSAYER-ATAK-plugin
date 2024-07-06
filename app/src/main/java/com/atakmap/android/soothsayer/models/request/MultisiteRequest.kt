@@ -13,7 +13,7 @@ data class MultisiteRequest(
 ): Serializable
 
 data class MultiSiteTransmitter(
-    val alt: Int,
+    val alt: Double,
     val bwi: Double,
     val frq: Double,
     var lat: Double,

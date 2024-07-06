@@ -114,7 +114,7 @@ data class TemplateDataModel(
 
 data class Antenna(
     val ant: Int,
-    val azi: Int,
+    val azi: String, // Can be 0 or "0,90,180,270"
     val fbr: Double,
     val hbw: Int,
     val mode: String,
@@ -156,7 +156,7 @@ data class Output(
 ): Serializable
 
 data class Receiver(
-    val alt: Int,
+    val alt: Double,
     var lat: Double,
     var lon: Double,
     val rxg: Double,
@@ -172,7 +172,7 @@ data class Template(
 ): Serializable
 
 data class Transmitter(
-    val alt: Int,
+    val alt: Double,
     val bwi: Double,
     val frq: Double,
     var lat: Double,

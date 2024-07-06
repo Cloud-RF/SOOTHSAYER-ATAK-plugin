@@ -55,7 +55,7 @@
     "environment": {
         "clm": 1,
         "cll": 2,
-        "clt": "LIGHT.clt"
+        "clt": "Minimal.clt"
     },
     "output": {
         "units": "m",

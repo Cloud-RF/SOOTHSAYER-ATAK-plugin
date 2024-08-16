@@ -38,6 +38,18 @@
                 android:padding="5dp"
                 android:src="@android:drawable/ic_input_add" />
 
+            <ImageButton
+                android:id="@+id/btnSpotBeam"
+                style="@style/darkButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_centerHorizontal="true"
+                android:padding="5dp"
+                android:src="@drawable/marker_icon"/>
 
         </RelativeLayout>
 
@@ -85,6 +97,11 @@
     <include
         android:id="@+id/ilLogin"
         layout="@layout/login_layout"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/sbmainll"
+        layout="@layout/spot_beam_layout"
         android:visibility="gone" />
 
 </LinearLayout>

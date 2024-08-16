@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sbmainll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="20dp">
+
+    <LinearLayout
+        android:id="@+id/sbtopbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/sbBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/app_name"
+            android:padding="@dimen/dp_4"
+            android:src="@drawable/back_arrow" />
+
+        <TextView
+            android:id="@+id/tvSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Spot Beam"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_18" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:layout_margin="3dp"
+        android:background="@android:color/white" />
+
+    <TextView
+        android:id="@+id/viewSatellites"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Satellite(s)" />
+
+    <AutoCompleteTextView
+        android:id="@+id/sbSatelliteSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Search Satellites" />
+
+    <TextView
+        android:id="@+id/viewDateTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Date/Time" />
+
+    <EditText
+        android:id="@+id/editDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="date"
+        android:text="2024-7-23" />
+
+    <EditText
+        android:id="@+id/editTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="time"
+        android:text="04:54:28" />
+
+    <TextView
+        android:id="@+id/viewResolution"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Resolution" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonResLow"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Low (30m)" />
+
+        <Button
+            android:id="@+id/buttonResMedium"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Med (10m)" />
+
+        <Button
+            android:id="@+id/buttonResHigh"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="High (5m)" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/viewAziLabel"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Azimuth (degrees)" />
+
+        <TextView
+            android:id="@+id/viewAltLAbel"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Altitude (km)" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/viewAzi"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/viewAlt"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -12,7 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.*
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
 import com.atakmap.android.drawing.mapItems.DrawingShape
@@ -23,6 +25,8 @@ import com.atakmap.android.hierarchy.HierarchyListReceiver
 import com.atakmap.android.importexport.ImportExportMapComponent
 import com.atakmap.android.importexport.ImportReceiver
 import com.atakmap.android.ipc.AtakBroadcast
+import com.atakmap.android.layers.kmz.KMZContentHandler
+import com.atakmap.android.layers.kmz.KMZPackageImporter
 import com.atakmap.android.maps.*
 import com.atakmap.android.maps.MapView.RenderStack
 import com.atakmap.android.menu.PluginMenuParser
@@ -46,19 +50,25 @@ import com.atakmap.android.soothsayer.network.repository.PluginRepository
 import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
 import com.atakmap.android.soothsayer.util.*
+import com.atakmap.android.toolbars.RangeAndBearingTool
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.coremap.maps.coords.GeoPoint
+import com.atakmap.map.layer.AbstractLayer
+import com.atakmap.map.layer.Layer
 import com.atakmap.map.layer.opengl.GLLayerFactory
+import com.ekito.simpleKML.model.Overlay
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.*
+import java.net.URL
 import java.util.*
+
 
 
 class PluginDropDownReceiver (
     mapView: MapView?,
-    private val pluginContext: Context, private val mapOverlay: PluginMapOverlay
+    val pluginContext: Context, private val mapOverlay: PluginMapOverlay
 ) : DropDownReceiver(mapView), OnStateListener {
     // Remember to use the PluginLayoutInflater if you are actually inflating a custom view.
     private val templateView: View = PluginLayoutInflater.inflate(
@@ -72,6 +82,7 @@ class PluginDropDownReceiver (
     private val cbCoverageLayer: CheckBox = settingView.findViewById(R.id.cbKmzLayer)
     private val cbLinkLines: CheckBox = settingView.findViewById(R.id.cbLinkLines)
     private val loginView = templateView.findViewById<LinearLayout>(R.id.ilLogin)
+
     private var etLoginServerUrl: EditText? = null
     private var etUsername: EditText? = null
     private var etPassword: EditText? = null
@@ -90,10 +101,11 @@ class PluginDropDownReceiver (
     private var itemPositionForEdit: Int = -1
     private val serverTypes: ArrayList<String> = ArrayList()
 
-
     init {
         initViews()
         initListeners()
+
+        initSpotBeam()
     }
 
     private fun initViews() {
@@ -113,6 +125,11 @@ class PluginDropDownReceiver (
             setDataFromPref()
             mainLayout.visibility = View.GONE
             settingView.visibility = View.VISIBLE
+        }
+
+        val btnSettingLogin = settingView.findViewById<ImageButton>(R.id.btnSettingLogin)
+        btnSettingLogin.setOnClickListener {
+            setLoginViewVisibility(false)
         }
 
         val btnsvMode = settingView.findViewById<Switch>(R.id.svMode);
@@ -172,10 +189,6 @@ class PluginDropDownReceiver (
             }
         }
 
-        val btnSettingLogin = settingView.findViewById<ImageButton>(R.id.btnSettingLogin)
-        btnSettingLogin.setOnClickListener {
-            setLoginViewVisibility(false)
-        }
     }
 
     private fun initRecyclerview() {
@@ -434,6 +447,7 @@ class PluginDropDownReceiver (
     private fun moveBackToMainLayout() {
         mainLayout.visibility = View.VISIBLE
         settingView.visibility = View.GONE
+        spotBeamView.visibility = View.GONE
     }
 
     private fun setEditViewVisibility(isEdit: Boolean) {
@@ -563,11 +577,11 @@ class PluginDropDownReceiver (
                         val latitude = marker.geoPointMetaData.get().latitude
                         val longitude = marker.geoPointMetaData.get().longitude
                         Log.d(
-                            TAG,
+                            "TAGG",
                             "DragDropped latitude: $latitude Longitude: $longitude Marker_id: ${mapItem.uid} actual uid = $uid"
                         )
                         Log.d(
-                            TAG,
+                            "TAGG",
                             "MapItem: ${mapItem.altitudeMode} radialMenuPath: ${mapItem.radialMenuPath} serialId: ${mapItem.serialId} zOrder: ${mapItem.zOrder} "
                         )
 
@@ -638,7 +652,6 @@ class PluginDropDownReceiver (
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -1010,13 +1023,36 @@ class PluginDropDownReceiver (
     }
 
     // Add a layer. Previously KMZ..
-    private fun addSingleKMZLayer(layerName: String, filePath: String, bounds: List<Double>) {
+    fun addSingleKMZLayer(layerName: String, filePath: String, bounds: List<Double>) {
         val file = File(filePath)
         synchronized(this@PluginDropDownReceiver) {
             if (singleSiteCloudRFLayer != null) { // remove previous layer if exists.
                 singleSiteCloudRFLayer = null
                 GLLayerFactory.unregister(GLCloudRFLayer.SPI)
             }
+
+            for (layer in mapView.getLayers(RenderStack.MAP_SURFACE_OVERLAYS)) {
+                if (layer.name == "SPOTBEAM") {
+                    try {
+                        if (layer != null) {
+                            mapView.removeLayer(
+                                RenderStack.MAP_SURFACE_OVERLAYS,
+                                layer
+                            )
+                        }
+                        if (layer != null) {
+                            mapView.removeLayer(
+                                RenderStack.MAP_SURFACE_OVERLAYS,
+                                layer
+                            )
+                            GLLayerFactory.unregister(GLCloudRFLayer.SPI)
+                        }
+                    } catch (e: java.lang.Exception) {
+                        Log.e("spotbeam", "error", e)
+                    }
+                }
+            }
+
             // create new layer.
             GLLayerFactory.register(GLCloudRFLayer.SPI)
             singleSiteCloudRFLayer = CloudRFLayer(
@@ -1031,6 +1067,7 @@ class PluginDropDownReceiver (
                 }
             )
         }
+
         // Add the layer to the map
         singleSiteCloudRFLayer?.let {
             mapView.addLayer(
@@ -1076,6 +1113,7 @@ class PluginDropDownReceiver (
                         }
                     })
         }
+
         // Add the layer to the map
         cloudRFLayer?.let {
             mapView.addLayer(
@@ -1471,6 +1509,146 @@ class PluginDropDownReceiver (
         const val RADIO_EDIT = "com.atakmap.android.maps.EDIT_DETAILS"
         const val RADIO_DELETE = "com.atakmap.android.soothsayer.RADIO_DELETE"
     }
+
+
+
+
+
+
+
+    var names = arrayOf("")
+    var satellite = Satellite()
+
+    var date: String = "2024-07-23"
+    var time: String = "04:54:28"
+
+    var spotBeamView = templateView.findViewById<LinearLayout>(R.id.sbmainll)
+
+    var resolution = 30;
+
+    private fun initSpotBeam() {
+
+        addSpotBeamAreaMarker()
+
+        spotBeamView = templateView.findViewById(R.id.sbmainll)
+        val sbtopbar = spotBeamView.findViewById<LinearLayout>(R.id.sbtopbar)
+
+        val sbBack = sbtopbar.findViewById<ImageView>(R.id.sbBack)
+        sbBack.setOnClickListener {
+            setDataFromPref()
+            moveBackToMainLayout()
+        }
+
+        val btnSpotBeam = templateView.findViewById<ImageButton>(R.id.btnSpotBeam)
+        btnSpotBeam.setOnClickListener {
+            settingView.visibility = View.GONE
+            radioSettingView.visibility = View.GONE
+            loginView.visibility = View.GONE
+            mainLayout.visibility = View.GONE
+            spotBeamView.visibility = View.VISIBLE
+        }
+
+        val btnResLow = spotBeamView.findViewById<Button>(R.id.buttonResLow)
+        btnResLow.setBackgroundColor(255000000)
+
+        val btnResMedium = spotBeamView.findViewById<Button>(R.id.buttonResMedium)
+        val btnResHigh = spotBeamView.findViewById<Button>(R.id.buttonResHigh)
+        btnResLow.setOnClickListener {
+            resolution = 30
+            btnResLow.setBackgroundColor(255000000);
+            btnResMedium.setBackgroundResource(android.R.drawable.btn_default)
+            btnResHigh.setBackgroundResource(android.R.drawable.btn_default)
+        }
+
+        btnResMedium.setOnClickListener {
+            resolution = 10
+            btnResLow.setBackgroundResource(android.R.drawable.btn_default)
+            btnResMedium.setBackgroundColor(255000000)
+            btnResHigh.setBackgroundResource(android.R.drawable.btn_default)
+        }
+
+        btnResHigh.setOnClickListener {
+            resolution = 2
+            btnResLow.setBackgroundResource(android.R.drawable.btn_default)
+            btnResMedium.setBackgroundResource(android.R.drawable.btn_default)
+            btnResHigh.setBackgroundColor(255000000)
+        }
+
+        val editDate = spotBeamView.findViewById<EditText>(R.id.editDate)
+        editDate.setOnFocusChangeListener { _, b ->
+            if (!b && editDate.text.length.toString() == "0") editDate.setText("2024-07-23")
+        }
+
+        editDate.addTextChangedListener {
+            date = editDate.text.toString()
+        }
+
+        val editTime = spotBeamView.findViewById<EditText>(R.id.editTime)
+        editTime.setOnFocusChangeListener { _, b ->
+            if (!b && editTime.text.length.toString() == "0") editTime.setText("04:54:28")
+        }
+
+        editTime.addTextChangedListener {
+            time = editTime.text.toString()
+        }
+        
+        val satelliteSearch = spotBeamView.findViewById<AutoCompleteTextView>(R.id.sbSatelliteSearch);
+
+        satelliteSearch.setOnFocusChangeListener { _, b ->
+            if (b) satelliteSearch.setText("")
+            else if (satelliteSearch.text.length.toString() == "0")
+                satelliteSearch.setText("Search Satellites")
+        }
+
+        satelliteSearch.addTextChangedListener {
+            Satellite.getSatelites(satelliteSearch.text.toString(), this);
+            if (names.isEmpty()) names = arrayOf("")
+            val adapter = ArrayAdapter(pluginContext,
+                android.R.layout.simple_list_item_1,
+                names)
+            satelliteSearch.setAdapter(adapter)
+            satelliteSearch.threshold = 2
+        }
+    }
+
+    private fun addSpotBeamAreaMarker() {
+        val uid = UUID.randomUUID().toString()
+        val location = mapView.centerPoint.get()
+        val marker = Marker(location, uid)
+        marker.title = "Spot Beam Area";
+
+        val icon: Bitmap? = if(selectedMarkerType?.customIcon == null) pluginContext.getBitmap(R.drawable.marker_icon_svg)
+        else selectedMarkerType?.customIcon?.base64StringToBitmap()?:pluginContext.getBitmap(R.drawable.marker_icon_svg)
+        val outputStream = ByteArrayOutputStream()
+        icon?.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        val b = outputStream.toByteArray()
+        val encoded = "base64://" + Base64.encodeToString(b, Base64.NO_WRAP or Base64.URL_SAFE)
+        val markerIconBuilder = Icon.Builder().setImageUri(0, encoded)
+        marker.icon = markerIconBuilder.build()
+
+        marker.setMetaBoolean("movable", true)
+        mapView.rootGroup.addItem(marker)
+
+        mapView.mapEventDispatcher.addMapItemEventListener(
+            marker
+        ) { _, mapEvent ->
+            when (mapEvent.type) {
+                MapEvent.ITEM_DRAG_DROPPED -> {
+                    pluginContext.toast("Calculating coverage...");
+                    val latitude = marker.geoPointMetaData.get().latitude
+                    val longitude = marker.geoPointMetaData.get().longitude
+                    SpotBeamCall.callAPI(satellite, latitude, longitude, this,
+                        sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "").toString());
+                }
+            }
+        }
+    }
+
+    fun toast(message: String) {
+        pluginContext.toast(message)
+    }
+
+    fun drawLine(p1: Array<Double>, p2: Array<Double>) {
+
+    }
 }
-
-

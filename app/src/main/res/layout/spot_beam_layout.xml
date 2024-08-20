@@ -41,7 +41,7 @@
         android:id="@+id/viewSatellites"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Satellite(s)" />
+        android:text="Satellite" />
 
     <AutoCompleteTextView
         android:id="@+id/sbSatelliteSearch"
@@ -49,60 +49,48 @@
         android:layout_height="wrap_content"
         android:text="Search Satellites" />
 
-    <TextView
-        android:id="@+id/viewDateTime"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Date/Time" />
+        android:orientation="horizontal">
 
-    <EditText
-        android:id="@+id/editDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="date"
-        android:text="2024-7-23" />
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Date" />
 
-    <EditText
-        android:id="@+id/editTime"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="time"
-        android:text="04:54:28" />
-
-    <TextView
-        android:id="@+id/viewResolution"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Resolution" />
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Time" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/buttonResLow"
-            android:layout_width="0dp"
+        <EditText
+            android:id="@+id/editDate"
+            android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Low (30m)" />
+            android:ems="10"
+            android:inputType="date"
+            android:text="2024-7-23" />
 
-        <Button
-            android:id="@+id/buttonResMedium"
-            android:layout_width="0dp"
+        <EditText
+            android:id="@+id/editTime"
+            android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Med (10m)" />
-
-        <Button
-            android:id="@+id/buttonResHigh"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="High (5m)" />
-
+            android:ems="10"
+            android:inputType="time"
+            android:text="04:54:28" />
     </LinearLayout>
 
     <LinearLayout
@@ -111,18 +99,42 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/viewAziLabel"
-            android:layout_width="0px"
+            android:id="@+id/viewResolution"
+            android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Azimuth (degrees)" />
+            android:text="Resolution" />
+
+        <Spinner
+            android:id="@+id/resolutionSpinner"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:drawable/screen_background_dark"
+            android:popupBackground="@android:drawable/screen_background_dark"
+            android:spinnerMode="dropdown" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/viewAltLAbel"
-            android:layout_width="0px"
+            android:id="@+id/azimutLabel"
+            android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Altitude (km)" />
+            android:text="Azimuth" />
+
+        <TextView
+            android:id="@+id/viewAzimuth"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="" />
     </LinearLayout>
 
     <LinearLayout
@@ -131,18 +143,53 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/viewAzi"
-            android:layout_width="0px"
+            android:id="@+id/elevationLabel"
+            android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="18sp" />
+            android:text="Elevation" />
 
         <TextView
-            android:id="@+id/viewAlt"
-            android:layout_width="0px"
+            android:id="@+id/viewElevation"
+            android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="18sp" />
+            android:text="" />
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/altitudeLabel"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Altitude" />
+
+        <TextView
+            android:id="@+id/viewAltitude"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"/>
 
 </LinearLayout>

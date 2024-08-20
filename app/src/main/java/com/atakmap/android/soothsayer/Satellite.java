@@ -110,8 +110,11 @@ public class Satellite {
 
                         reciever.setNames(names);
 
-                        if (names.length == 1)
+                        if (names.length == 1) {
                             reciever.setSatellite(satellites[0]);
+                            reciever.addSpotBeamAreaMarker();
+                        }
+
 
                     }
                 } catch (Exception e) {

@@ -1,6 +1,8 @@
 package com.atakmap.android.soothsayer;
 
+import android.annotation.SuppressLint;
 import android.os.Looper;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.atakmap.android.soothsayer.plugin.R;
@@ -63,7 +65,7 @@ public class SpotBeamCall {
                 "        \"obstacles\": 0\n" +
                 "    },\n" +
                 "    \"output\": {\n" +
-                "        \"col\": \"LTE.dBm\",\n" +
+                "        \"col\": \"GREEN.dBm\",\n" +
                 "        \"res\": \"" + receiver.getResolution() + "\",\n" +
                 "        \"rx_units\": \"m\",\n" +
                 "        \"bounds\": {\n" +
@@ -119,26 +121,45 @@ public class SpotBeamCall {
                     );
 
                     double satAzi = -Math.toDegrees(Math.atan2(satLat - areaLat, satLon - areaLon)) + 90;
+                    if (satAzi < 0) satAzi += 360;
+
+                    double satElev = calculateElevation(satLon, areaLat, areaLon);
 
                     Log.d("spotbeam", "in: " + (areaLat - satLat) + ", " + (areaLon - satLon));
 
                     Log.d("spotbeam", "SatAlt: " + satAlt);
                     Log.d("spotbeam", "SatAzi: " + satAzi);
 
-                    Double[] areaPoint = {areaLon, areaLat};
-                    double[] point = endpointFromPointBearingDistance(areaLat, areaLon, satAzi, 1000);
+                    double dist = receiver.getResolution() == 5 ?  2000 : (receiver.getResolution() == 10 ? 4000 : 8000);
+
+                    Double[] areaPoint = {areaLat, areaLon};
+                    double[] point = endpointFromPointBearingDistance(areaLat, areaLon, satAzi, 2 * dist);
+                    double[] point2 = endpointFromPointBearingDistance(areaLat, areaLon, satAzi + 2.5, 1.9 * dist);
+                    double[] point3 = endpointFromPointBearingDistance(areaLat, areaLon, satAzi - 2.5, 1.9 * dist);
                     Double[] secondPoint = { point[0], point[1] };
+                    Double[] thirdPoint = { point2[0], point2[1] };
+                    Double[] fourthPoint = { point3[0], point3[1] };
 
-                    receiver.drawLine(areaPoint, secondPoint);
+                    Log.d("spotbeam", "First Point: " + areaPoint[0] + ", " + areaPoint[1]);
+                    Log.d("spotbeam", "Second Point: " + secondPoint[0] + ", " + secondPoint[1]);
 
+                    receiver.removeLines();
+                    receiver.drawLine(areaPoint, secondPoint, true, satAzi, satElev);
+                    receiver.drawLine(secondPoint, thirdPoint, false, satAzi, satElev);
+                    receiver.drawLine(secondPoint, fourthPoint, false, satAzi, satElev);
+
+                    double finalSatAzi = satAzi;
                     Thread updateUIThread = new Thread() {
+                        @SuppressLint("SetTextI18n")
                         @Override
                         public void run() {
-                            TextView viewAlt = receiver.getSpotBeamView().findViewById(R.id.viewAlt);
-                            TextView viewAzi = receiver.getSpotBeamView().findViewById(R.id.viewAzi);
+                            TextView viewAzimuth = receiver.getSpotBeamView().findViewById(R.id.viewAzimuth);
+                            TextView viewElevation = receiver.getSpotBeamView().findViewById(R.id.viewElevation);
+                            TextView viewAltitude = receiver.getSpotBeamView().findViewById(R.id.viewAltitude);
 
-                            viewAlt.setText(Math.round(satAlt * 100) / 100.0 + "");
-                            viewAzi.setText(Math.round(satAzi * 100) / 100.0  + "");
+                            viewAzimuth.setText((Math.round(finalSatAzi * 10) / 10.0) + "°");
+                            viewElevation.setText((Math.round(satElev * 10) / 10.0) + "°");
+                            viewAltitude.setText(Math.round(satHeight) + "km");
                         }
                     };
 
@@ -217,6 +238,7 @@ public class SpotBeamCall {
 
             HttpsURLConnection.setDefaultHostnameVerifier((s, sslSession) -> true);
 
+
             String responseString = "";
             URL url = new URL("https://api.cloudrf.com/satellite/area");
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
@@ -278,6 +300,18 @@ public class SpotBeamCall {
                 rad * Math.sin(lon) * Math.sin(lat),
                 rad * Math.cos(lon)
         };
+    }
+
+    private static double calculateElevation(double satLon, double areaLat, double areaLon) {
+        double S = Math.toRadians(satLon);
+        double N = Math.toRadians(areaLon);
+        double L = Math.toRadians(areaLat);
+        double G = S - N;
+
+        return Math.toDegrees(Math.atan(
+                  (Math.cos(G) * Math.cos(L) - 0.1512)
+                / Math.sqrt(1 - (Math.cos(G) * Math.cos(G)) * (Math.cos(L) * Math.cos(L)))
+        ));
     }
 
 }

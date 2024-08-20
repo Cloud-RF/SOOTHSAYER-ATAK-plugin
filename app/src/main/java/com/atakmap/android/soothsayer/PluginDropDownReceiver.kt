@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Typeface
 import android.text.InputType
 import android.util.Base64
 import android.util.Log
@@ -14,7 +15,6 @@ import android.webkit.URLUtil
 import android.widget.*
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
 import com.atakmap.android.drawing.mapItems.DrawingShape
@@ -25,8 +25,6 @@ import com.atakmap.android.hierarchy.HierarchyListReceiver
 import com.atakmap.android.importexport.ImportExportMapComponent
 import com.atakmap.android.importexport.ImportReceiver
 import com.atakmap.android.ipc.AtakBroadcast
-import com.atakmap.android.layers.kmz.KMZContentHandler
-import com.atakmap.android.layers.kmz.KMZPackageImporter
 import com.atakmap.android.maps.*
 import com.atakmap.android.maps.MapView.RenderStack
 import com.atakmap.android.menu.PluginMenuParser
@@ -50,18 +48,13 @@ import com.atakmap.android.soothsayer.network.repository.PluginRepository
 import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
 import com.atakmap.android.soothsayer.util.*
-import com.atakmap.android.toolbars.RangeAndBearingTool
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.coremap.maps.coords.GeoPoint
-import com.atakmap.map.layer.AbstractLayer
-import com.atakmap.map.layer.Layer
 import com.atakmap.map.layer.opengl.GLLayerFactory
-import com.ekito.simpleKML.model.Overlay
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.*
-import java.net.URL
 import java.util.*
 
 
@@ -529,6 +522,7 @@ class PluginDropDownReceiver (
         marker.setMetaBoolean("movable", true)
         marker.setMetaBoolean("removable", true)
         marker.setMetaString("entry", "user")
+        marker.setMetaBoolean("CLOUDRF", true)
         marker.setMetaString("callsign", selectedMarkerType?.template?.name ?: "Test Marker")
         marker.setMetaString(
             "menu",
@@ -1524,11 +1518,10 @@ class PluginDropDownReceiver (
 
     var spotBeamView = templateView.findViewById<LinearLayout>(R.id.sbmainll)
 
-    var resolution = 30;
+    var resolution = 20;
 
     private fun initSpotBeam() {
 
-        addSpotBeamAreaMarker()
 
         spotBeamView = templateView.findViewById(R.id.sbmainll)
         val sbtopbar = spotBeamView.findViewById<LinearLayout>(R.id.sbtopbar)
@@ -1546,32 +1539,6 @@ class PluginDropDownReceiver (
             loginView.visibility = View.GONE
             mainLayout.visibility = View.GONE
             spotBeamView.visibility = View.VISIBLE
-        }
-
-        val btnResLow = spotBeamView.findViewById<Button>(R.id.buttonResLow)
-        btnResLow.setBackgroundColor(255000000)
-
-        val btnResMedium = spotBeamView.findViewById<Button>(R.id.buttonResMedium)
-        val btnResHigh = spotBeamView.findViewById<Button>(R.id.buttonResHigh)
-        btnResLow.setOnClickListener {
-            resolution = 30
-            btnResLow.setBackgroundColor(255000000);
-            btnResMedium.setBackgroundResource(android.R.drawable.btn_default)
-            btnResHigh.setBackgroundResource(android.R.drawable.btn_default)
-        }
-
-        btnResMedium.setOnClickListener {
-            resolution = 10
-            btnResLow.setBackgroundResource(android.R.drawable.btn_default)
-            btnResMedium.setBackgroundColor(255000000)
-            btnResHigh.setBackgroundResource(android.R.drawable.btn_default)
-        }
-
-        btnResHigh.setOnClickListener {
-            resolution = 2
-            btnResLow.setBackgroundResource(android.R.drawable.btn_default)
-            btnResMedium.setBackgroundResource(android.R.drawable.btn_default)
-            btnResHigh.setBackgroundColor(255000000)
         }
 
         val editDate = spotBeamView.findViewById<EditText>(R.id.editDate)
@@ -1609,21 +1576,50 @@ class PluginDropDownReceiver (
             satelliteSearch.setAdapter(adapter)
             satelliteSearch.threshold = 2
         }
+
+        val resolutionSpinner = spotBeamView.findViewById<Spinner>(R.id.resolutionSpinner);
+        val items = arrayOf("Low (20m)", "Medium (10m)", "High (5m)")
+        val adapter = ArrayAdapter(pluginContext,
+            android.R.layout.simple_spinner_dropdown_item, items)
+        resolutionSpinner.adapter = adapter
+
+
+        resolutionSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                resolution = if (position == 0) 20
+                else if (position == 1) 10
+                else 5
+            }
+        }
+
     }
 
-    private fun addSpotBeamAreaMarker() {
+    fun addSpotBeamAreaMarker() {
+
+        Log.d("spotbeamicon", "start ----------------------------------------------------------------------------------------------------------------------------------------------------------------")
+
+        for (marker in mapView.rootGroup.items)
+            if (marker.title == "Spot Beam Area")
+                mapView.rootGroup.removeItem(marker)
+
         val uid = UUID.randomUUID().toString()
         val location = mapView.centerPoint.get()
         val marker = Marker(location, uid)
         marker.title = "Spot Beam Area";
 
-        val icon: Bitmap? = if(selectedMarkerType?.customIcon == null) pluginContext.getBitmap(R.drawable.marker_icon_svg)
-        else selectedMarkerType?.customIcon?.base64StringToBitmap()?:pluginContext.getBitmap(R.drawable.marker_icon_svg)
+        val icon: Bitmap? = if(selectedMarkerType?.customIcon == null) pluginContext.getBitmap(R.drawable.spotbeam_marker_icon)
+        else selectedMarkerType?.customIcon?.base64StringToBitmap()?:pluginContext.getBitmap(R.drawable.spotbeam_marker_icon)
         val outputStream = ByteArrayOutputStream()
         icon?.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
         val b = outputStream.toByteArray()
         val encoded = "base64://" + Base64.encodeToString(b, Base64.NO_WRAP or Base64.URL_SAFE)
         val markerIconBuilder = Icon.Builder().setImageUri(0, encoded)
+
+        marker.setMetaBoolean("CLOUDRF", true)
+
         marker.icon = markerIconBuilder.build()
 
         marker.setMetaBoolean("movable", true)
@@ -1642,13 +1638,29 @@ class PluginDropDownReceiver (
                 }
             }
         }
+
+        Log.d("spotbeamicon", "finish ----------------------------------------------------------------------------------------------------------------------------------------------------------------");
     }
 
     fun toast(message: String) {
         pluginContext.toast(message)
     }
 
-    fun drawLine(p1: Array<Double>, p2: Array<Double>) {
+    fun drawLine(p1: Array<Double>, p2: Array<Double>, label: Boolean, azi: Double, elev: Double) {
+        val line = Polyline(UUID.randomUUID().toString());
+        line.toggleMetaData("labels_on", label)
 
+        line.setPoints(arrayOf(GeoPoint(p1[0], p1[1]), GeoPoint(p2[0], p2[1])));
+        line.title = "AZIMUTH"
+        line.lineLabel = "AZ: " + Math.round(azi) + "° EL: " + Math.round(elev) + "°"
+        line.setLabelTextSize(72, Typeface.DEFAULT)
+
+        mapView.rootGroup.addItem(line)
+    }
+
+    fun removeLines() {
+        for (it in mapView.rootGroup.items)
+            if (it.title == "AZIMUTH")
+                mapView.rootGroup.removeItem(it)
     }
 }

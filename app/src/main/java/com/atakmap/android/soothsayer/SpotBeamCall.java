@@ -31,11 +31,16 @@ import javax.net.ssl.X509TrustManager;
 
 public class SpotBeamCall {
 
-    public static void callAPI(Satellite satellite, double areaLat, double areaLon, PluginDropDownReceiver receiver, String apiKey) {
+    public static void callAPI(Satellite satellite, double areaLat, double areaLon, PluginDropDownReceiver receiver, String apiKey, String API_URL) {
 
         String dateTime = receiver.getDate() + "T" + receiver.getTime() + "Z";
 
-        double dist = receiver.getResolution() == 5 ?  2000 : (receiver.getResolution() == 10 ? 4000 : 8000);
+        // Compute study area relative to resolution with a 1MP target size
+        // 2m res @ 1000m radius = 1MP
+        // 10m res @ 5000m = 1MP
+        // 20m res @ 10km = 1MP
+
+        double dist = receiver.getResolution() == 2 ?  1000 : (receiver.getResolution() == 10 ? 5000 : 10000);
 
         double dLat = Math.abs(areaLat - endpointFromPointBearingDistance(areaLat, areaLon, 0, dist)[0]);
         double dLon = Math.abs(areaLon - endpointFromPointBearingDistance(areaLat, areaLon, 90, dist)[1]);
@@ -79,14 +84,14 @@ public class SpotBeamCall {
 
         Log.d("spotbeam", "Body: " + body);
 
-        makeCall(body, receiver, satellite.name, apiKey, areaLat, areaLon);
+        makeCall(body, receiver, satellite.name, apiKey, areaLat, areaLon, API_URL);
 
     }
 
-    private static void makeCall(String body, PluginDropDownReceiver receiver, String satName, String apiKey, double areaLat, double areaLon) {
+    private static void makeCall(String body, PluginDropDownReceiver receiver, String satName, String apiKey, double areaLat, double areaLon, String API_URL) {
         Thread thread = new Thread(() -> {
             try {
-                String str = getJsonString(body, apiKey, receiver, satName);
+                String str = getJsonString(body, apiKey, receiver, satName, API_URL);
 
                 Log.d("spotbeam", "Response String: " + str);
 
@@ -219,7 +224,7 @@ public class SpotBeamCall {
         return new double[] {Math.toDegrees(latitudePoint), Math.toDegrees(longitudePoint)};
     }
 
-    private static String getJsonString(String body, String apiKey, PluginDropDownReceiver receiver, String satName) {
+    private static String getJsonString(String body, String apiKey, PluginDropDownReceiver receiver, String satName, String API_URL) {
         try {
 
             SSLContext ctx;
@@ -240,7 +245,7 @@ public class SpotBeamCall {
 
 
             String responseString = "";
-            URL url = new URL("https://api.cloudrf.com/satellite/area");
+            URL url = new URL(API_URL + "/satellite/area");
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("key", apiKey);

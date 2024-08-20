@@ -1,5 +1,9 @@
 package com.atakmap.android.soothsayer;
 
+import android.view.View;
+
+import com.atakmap.android.gui.EditText;
+import com.atakmap.android.preference.AtakPreferences;
 import com.atakmap.coremap.log.Log;
 
 import com.google.gson.JsonArray;
@@ -17,7 +21,6 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
-
 
 public class Satellite {
 
@@ -39,8 +42,7 @@ public class Satellite {
         this.name = "EMPTY";
     }
 
-    public static void getSatelites(String query, PluginDropDownReceiver reciever) {
-
+    public static void getSats(String query, PluginDropDownReceiver receiver, String API_URL) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -62,7 +64,7 @@ public class Satellite {
                     HttpsURLConnection.setDefaultHostnameVerifier((s, sslSession) -> true);
 
                     String responseString = "";
-                    URL url = new URL("https://api.cloudrf.com/satellite/query?NAME=" + query);
+                    URL url = new URL(API_URL + "/satellite/query?NAME=" + query);
                     HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
                     con.setRequestMethod("GET");
 
@@ -108,11 +110,11 @@ public class Satellite {
                             names[i] = name;
                         }
 
-                        reciever.setNames(names);
+                        receiver.setNames(names);
 
                         if (names.length == 1) {
-                            reciever.setSatellite(satellites[0]);
-                            reciever.addSpotBeamAreaMarker();
+                            receiver.setSatellite(satellites[0]);
+                            receiver.addSpotBeamAreaMarker();
                         }
 
 

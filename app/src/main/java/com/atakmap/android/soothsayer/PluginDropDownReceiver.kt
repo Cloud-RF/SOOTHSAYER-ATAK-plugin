@@ -58,7 +58,6 @@ import java.io.*
 import java.util.*
 
 
-
 class PluginDropDownReceiver (
     mapView: MapView?,
     val pluginContext: Context, private val mapOverlay: PluginMapOverlay
@@ -93,6 +92,8 @@ class PluginDropDownReceiver (
     private var lineGroup: MapGroup? = null
     private var itemPositionForEdit: Int = -1
     private val serverTypes: ArrayList<String> = ArrayList()
+
+    @JvmField val KOTLIN_API_URL = ""
 
     init {
         initViews()
@@ -151,6 +152,8 @@ class PluginDropDownReceiver (
                 sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
                 sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbCoverageLayer.isChecked)
                 sharedPrefs?.set(Constant.PreferenceKey.sLinkLinesVisibility, cbLinkLines.isChecked)
+
+
                 moveBackToMainLayout()
                 handleLinkLineVisibility()
                 handleKmzLayerVisibility()
@@ -1568,7 +1571,7 @@ class PluginDropDownReceiver (
         }
 
         satelliteSearch.addTextChangedListener {
-            Satellite.getSatelites(satelliteSearch.text.toString(), this);
+            Satellite.getSats(satelliteSearch.text.toString(), this, RetrofitClient.BASE_URL);
             if (names.isEmpty()) names = arrayOf("")
             val adapter = ArrayAdapter(pluginContext,
                 android.R.layout.simple_list_item_1,
@@ -1578,7 +1581,7 @@ class PluginDropDownReceiver (
         }
 
         val resolutionSpinner = spotBeamView.findViewById<Spinner>(R.id.resolutionSpinner);
-        val items = arrayOf("Low (20m)", "Medium (10m)", "High (5m)")
+        val items = arrayOf("Low (20m)", "Medium (10m)", "High (2m)")
         val adapter = ArrayAdapter(pluginContext,
             android.R.layout.simple_spinner_dropdown_item, items)
         resolutionSpinner.adapter = adapter
@@ -1591,7 +1594,7 @@ class PluginDropDownReceiver (
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 resolution = if (position == 0) 20
                 else if (position == 1) 10
-                else 5
+                else 2
             }
         }
 
@@ -1599,19 +1602,16 @@ class PluginDropDownReceiver (
 
     fun addSpotBeamAreaMarker() {
 
-        Log.d("spotbeamicon", "start ----------------------------------------------------------------------------------------------------------------------------------------------------------------")
-
         for (marker in mapView.rootGroup.items)
-            if (marker.title == "Spot Beam Area")
+            if (marker.title == "Satellite coverage")
                 mapView.rootGroup.removeItem(marker)
 
         val uid = UUID.randomUUID().toString()
         val location = mapView.centerPoint.get()
         val marker = Marker(location, uid)
-        marker.title = "Spot Beam Area";
+        marker.title = "Satellite coverage";
 
-        val icon: Bitmap? = if(selectedMarkerType?.customIcon == null) pluginContext.getBitmap(R.drawable.spotbeam_marker_icon)
-        else selectedMarkerType?.customIcon?.base64StringToBitmap()?:pluginContext.getBitmap(R.drawable.spotbeam_marker_icon)
+        val icon = pluginContext.getBitmap(R.drawable.spotbeam_marker_icon)
         val outputStream = ByteArrayOutputStream()
         icon?.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
         val b = outputStream.toByteArray()
@@ -1634,7 +1634,7 @@ class PluginDropDownReceiver (
                     val latitude = marker.geoPointMetaData.get().latitude
                     val longitude = marker.geoPointMetaData.get().longitude
                     SpotBeamCall.callAPI(satellite, latitude, longitude, this,
-                        sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "").toString());
+                        sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "").toString(), RetrofitClient.BASE_URL);
                 }
             }
         }

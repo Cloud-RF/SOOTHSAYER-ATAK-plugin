@@ -4,6 +4,7 @@ package com.atakmap.android.soothsayer;
 import android.content.Context;
 import android.content.Intent;
 
+import com.atakmap.android.maps.MapItem;
 import com.atakmap.android.soothsayer.layers.PluginMapOverlay;
 import com.atakmap.android.soothsayer.plugin.R;
 import com.atakmap.android.dropdown.DropDownMapComponent;
@@ -51,5 +52,10 @@ public class PluginMapComponent extends DropDownMapComponent {
     protected void onDestroyImpl(Context context, MapView view) {
         super.onDestroyImpl(context, view);
         view.getMapOverlayManager().removeOverlay(mapOverlay);
+
+        for (MapItem item : view.getRootGroup().getItems())
+            if (item.getMetaBoolean("CLOUDRF", true))
+                view.getRootGroup().removeItem(item);
+
     }
 }

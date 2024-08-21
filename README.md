@@ -2,7 +2,7 @@
 
 This plugin is a tactical client to the CloudRF / SOOTHSAYER [radio planning API](https://cloudrf.com/documentation/developer/). 
 
-Presently, users can task the `Area`, `Multisite` and `Points` APIs to make heatmaps and links for RF systems using templates from a user's account.
+Presently, users can task the `Area`, `Multisite`, `Points` and `Satellite` APIs to make heatmaps and links for RF systems using templates from a user's account.
 
 ![SOOTHSAYER ATAK plugin](help/soothsayer_atak.jpg "SOOTHSAYER ATAK plugin")
 
@@ -11,15 +11,19 @@ Presently, users can task the `Area`, `Multisite` and `Points` APIs to make heat
 - Issue board: https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin
 - Developer email: [support@cloudrf.com](mailto:support@cloudrf.com)
 
+*This is a fully supported, genuine, privately funded, open source application by a UK SME!*
+
 ## Ports Required
 
 Outgoing: TCP 443
 
 ## Equipment Required
 
-An Android phone running ATAK-CIV [available in Play store](https://play.google.com/store/apps/details?id=com.atakmap.app.civ) and a [CloudRF account](https://cloudrf.com/my-account)
+- An Android phone running ATAK-CIV [available in Play store](https://play.google.com/store/apps/details?id=com.atakmap.app.civ)
 
-For operation on a private LAN you will require a [SOOTHSAYER server](https://cloudrf.com/soothsayer) which can be hosted as a VM or a container. 
+- Either a [CloudRF account](https://cloudrf.com/my-account) or a SOOTHSAYER server
+
+*For operation on a private LAN you require a [SOOTHSAYER server](https://cloudrf.com/soothsayer) which can be deployed as a VM or as containers.*
 
 ## Equipment Supported
 
@@ -30,11 +34,11 @@ ATAK 5.1.x
 https://cloudrf.com/documentation/06_atak_plugin.html
 
 ## Quickstart
-If you don't fancy building it from source, you can find a ready made APK release under the releases section. Copy the .apk file to your phone and install it.
+If you don't fancy building it from source, you can find a ready made APK release under the releases section. Copy the .apk file to your phone.
 
 In ATAK, add and activate the plugin if it isn't already listed via the plugins menu.
 
-To use the plugin, login to your account first. For CloudRF the service should be `https://cloudrf.com` and for a SOOTHSAYER server it should be your server's IP/FQDN with https://
+To use the plugin, login to your account first. For CloudRF the service should be `https://cloudrf.com` and for a SOOTHSAYER server it should be your server's IP/FQDN and protocol eg. https://192.168.1.3
 
 Your templates from your account will download at this point. You may also side load templates as JSON files to your atak/SOOTHSAYER/templates folder on the SD card.
 
@@ -42,10 +46,21 @@ To simulate coverage and layers click + and then drag the marker. For more infor
 
 ![SOOTHSAYER ATAK plugin](help/soothsayer_atak_settings.jpg "SOOTHSAYER ATAK plugin settings")
 
+### Satellite coverage
+
+Added in 1.4, this feature uses the new [Satellite API](https://cloudrf.com/documentation/developer/#/Satellite/satellite%2Farea) to test a wide area for satellite visibility. 
+
+To use it, **ensure you have coverage enabled** in the plugin options and then enter the name of a satellite eg. OPTUS C1. Select a date/time and then drag the satellite marker to place it upon the earth. 
+
+An area of 1 million points will be tested against the API. The radius is relative to the resolution so at 2m = 1km, 10m = 5km, 20m = 10km.
+
+
+![SOOTHSAYER satellite coverage NYC](help/satellite_coverage_nyc.jpg "SOOTHSAYER satellite coverage NYC")
+
 ### Premium API features
 
-Some CloudRF API features require a Silver account such as Multisite which uses a GPU. If you want to evaluate the plugin with a free or Bronze account you can slide the coverage layer slider to `single` which will perform a slower single-site CPU calculation.
-A private server has no restrictions.
+Some CloudRF API features require a Silver account such as Multisite and Satellite coverage which uses a GPU. If you want to evaluate the plugin with a free or Bronze account you can slide the coverage layer slider to `single` which will perform a slower single-site CPU calculation.
+*A private server has no restrictions.*
 
 ## Compilation
 

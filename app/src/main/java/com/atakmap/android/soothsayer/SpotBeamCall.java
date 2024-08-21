@@ -2,7 +2,6 @@ package com.atakmap.android.soothsayer;
 
 import android.annotation.SuppressLint;
 import android.os.Looper;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.atakmap.android.soothsayer.plugin.R;
@@ -31,9 +30,7 @@ import javax.net.ssl.X509TrustManager;
 
 public class SpotBeamCall {
 
-    public static void callAPI(Satellite satellite, double areaLat, double areaLon, PluginDropDownReceiver receiver, String apiKey, String API_URL) {
-
-        String dateTime = receiver.getDate() + "T" + receiver.getTime() + "Z";
+    public static void callAPI(Satellite satellite, double areaLat, double areaLon, PluginDropDownReceiver receiver, String apiKey, String API_URL, String dateTime) {
 
         // Compute study area relative to resolution with a 1MP target size
         // 2m res @ 1000m radius = 1MP
@@ -41,7 +38,6 @@ public class SpotBeamCall {
         // 20m res @ 10km = 1MP
 
         double dist = receiver.getResolution() == 2 ?  1000 : (receiver.getResolution() == 10 ? 5000 : 10000);
-
         double dLat = Math.abs(areaLat - endpointFromPointBearingDistance(areaLat, areaLon, 0, dist)[0]);
         double dLon = Math.abs(areaLon - endpointFromPointBearingDistance(areaLat, areaLon, 90, dist)[1]);
 
@@ -53,6 +49,7 @@ public class SpotBeamCall {
         Log.d("spotbeam", "dLat: " + dLat + ", dLon: " + dLon);
         Log.d("spotbeam", "NSEW: \n" + north + ", \n" + south + ", \n" + east + ", \n" + west);
 
+        // https://cloudrf.com/documentation/developer/#/Satellite/satellite%2Farea
         String body =
                 "{\n" +
                 "    \"satellites\": [\n" +
@@ -114,46 +111,18 @@ public class SpotBeamCall {
 
                     double satLat = object.get("satellites").getAsJsonObject().get(satName).getAsJsonObject().get("lat").getAsDouble();
                     double satLon = object.get("satellites").getAsJsonObject().get(satName).getAsJsonObject().get("lon").getAsDouble();
-                    double satHeight = object.get("satellites").getAsJsonObject().get(satName).getAsJsonObject().get("height_km").getAsDouble();
-
-                    double[] areaXYZ = sphericalToCartesianCoords(areaLat, areaLon, 6371);
-                    double[] satXYZ = sphericalToCartesianCoords(satLat, satLon, satHeight);
-
-                    double satAlt = Math.sqrt(
-                            (areaXYZ[0] - satXYZ[0]) * (areaXYZ[0] - satXYZ[0])
-                            + (areaXYZ[1] - satXYZ[1]) * (areaXYZ[1] - satXYZ[1])
-                            + (areaXYZ[2] - satXYZ[2]) * (areaXYZ[2] - satXYZ[2])
-                    );
-
-                    double satAzi = -Math.toDegrees(Math.atan2(satLat - areaLat, satLon - areaLon)) + 90;
-                    if (satAzi < 0) satAzi += 360;
-
-                    double satElev = calculateElevation(satLon, areaLat, areaLon);
-
-                    Log.d("spotbeam", "in: " + (areaLat - satLat) + ", " + (areaLon - satLon));
-
-                    Log.d("spotbeam", "SatAlt: " + satAlt);
-                    Log.d("spotbeam", "SatAzi: " + satAzi);
-
+                    double satAlt = object.get("satellites").getAsJsonObject().get(satName).getAsJsonObject().get("height_km").getAsDouble();
+                    double satAzi = calculateAzimuth(areaLat, areaLon, satLat, satLon);
+                    double satElev = calculateElevation(areaLat, areaLon, 1.0, satLat, satLon, satAlt);
                     double dist = receiver.getResolution() == 5 ?  2000 : (receiver.getResolution() == 10 ? 4000 : 8000);
 
                     Double[] areaPoint = {areaLat, areaLon};
-                    double[] point = endpointFromPointBearingDistance(areaLat, areaLon, satAzi, 2 * dist);
-                    double[] point2 = endpointFromPointBearingDistance(areaLat, areaLon, satAzi + 2.5, 1.9 * dist);
-                    double[] point3 = endpointFromPointBearingDistance(areaLat, areaLon, satAzi - 2.5, 1.9 * dist);
+                    double[] point = endpointFromPointBearingDistance(areaLat, areaLon, satAzi, 4 * dist);
                     Double[] secondPoint = { point[0], point[1] };
-                    Double[] thirdPoint = { point2[0], point2[1] };
-                    Double[] fourthPoint = { point3[0], point3[1] };
-
-                    Log.d("spotbeam", "First Point: " + areaPoint[0] + ", " + areaPoint[1]);
-                    Log.d("spotbeam", "Second Point: " + secondPoint[0] + ", " + secondPoint[1]);
 
                     receiver.removeLines();
                     receiver.drawLine(areaPoint, secondPoint, true, satAzi, satElev);
-                    receiver.drawLine(secondPoint, thirdPoint, false, satAzi, satElev);
-                    receiver.drawLine(secondPoint, fourthPoint, false, satAzi, satElev);
 
-                    double finalSatAzi = satAzi;
                     Thread updateUIThread = new Thread() {
                         @SuppressLint("SetTextI18n")
                         @Override
@@ -162,9 +131,9 @@ public class SpotBeamCall {
                             TextView viewElevation = receiver.getSpotBeamView().findViewById(R.id.viewElevation);
                             TextView viewAltitude = receiver.getSpotBeamView().findViewById(R.id.viewAltitude);
 
-                            viewAzimuth.setText((Math.round(finalSatAzi * 10) / 10.0) + "°");
+                            viewAzimuth.setText((Math.round(satAzi * 10) / 10.0) + "°");
                             viewElevation.setText((Math.round(satElev * 10) / 10.0) + "°");
-                            viewAltitude.setText(Math.round(satHeight) + "km");
+                            viewAltitude.setText(Math.round(satAlt) + "km");
                         }
                     };
 
@@ -307,16 +276,89 @@ public class SpotBeamCall {
         };
     }
 
-    private static double calculateElevation(double satLon, double areaLat, double areaLon) {
-        double S = Math.toRadians(satLon);
-        double N = Math.toRadians(areaLon);
-        double L = Math.toRadians(areaLat);
-        double G = S - N;
+    private static double calculateAzimuth(double latA, double lonA, double latB, double lonB) {
+        double latARad = Math.toRadians(latA);
+        double lonARad = Math.toRadians(lonA);
+        double latBRad = Math.toRadians(latB);
+        double lonBRad = Math.toRadians(lonB);
 
-        return Math.toDegrees(Math.atan(
-                  (Math.cos(G) * Math.cos(L) - 0.1512)
-                / Math.sqrt(1 - (Math.cos(G) * Math.cos(G)) * (Math.cos(L) * Math.cos(L)))
-        ));
+        double deltaLon = lonBRad - lonARad;
+
+        double x = Math.cos(latBRad) * Math.sin(deltaLon);
+        double y = Math.cos(latARad) * Math.sin(latBRad) - Math.sin(latARad) * Math.cos(latBRad) * Math.cos(deltaLon);
+
+        double r = Math.atan2(x, y);
+
+        double d = Math.toDegrees(r);
+    
+        while (d < 0) d += 360;
+
+        return d;
+    }
+
+    private static double calculateElevation(double latA, double lonA, double altA, double latB, double lonB, double altB) {
+        double latARad = Math.toRadians(latA);
+        double lonARad = Math.toRadians(lonA);
+        double latBRad = Math.toRadians(latB);
+        double lonBRad = Math.toRadians(lonB);
+
+        double aGroundX = 6371.0 * Math.sin(lonARad) * Math.cos(latARad);
+        double aGroundY = 6371.0 * Math.sin(lonARad) * Math.sin(latARad);
+        double aGroundZ = 6371.0 * Math.cos(lonARad);
+
+        double aX = (6371.0 + altA) * Math.sin(lonARad) * Math.cos(latARad);
+        double aY = (6371.0 + altA) * Math.sin(lonARad) * Math.sin(latARad);
+        double aZ = (6371.0 + altA) * Math.cos(lonARad);
+
+        double bGroundX = 6371.0 * Math.sin(lonBRad) * Math.cos(latBRad);
+        double bGroundY = 6371.0 * Math.sin(lonBRad) * Math.sin(latBRad);
+        double bGroundZ = 6371.0 * Math.cos(lonBRad);
+
+        double bX = (6371.0 + altB) * Math.sin(lonBRad) * Math.cos(latBRad);
+        double bY = (6371.0 + altB) * Math.sin(lonBRad) * Math.sin(latBRad);
+        double bZ = (6371.0 + altB) * Math.cos(lonBRad);
+
+
+        double aNormalX = aX - aGroundX;
+        double aNormalY = aY - aGroundY;
+        double aNormalZ = aZ - aGroundZ;
+        double aNormalLen = Math.sqrt(aNormalX * aNormalX + aNormalY * aNormalY + aNormalZ * aNormalZ);
+        aNormalX /= aNormalLen;
+        aNormalY /= aNormalLen;
+        aNormalZ /= aNormalLen;
+
+        double bDirX = bX - bGroundX;
+        double bDirY = bY - bGroundY;
+        double bDirZ = bZ - bGroundZ;
+        double bDirLen = Math.sqrt(bDirX * bDirX + bDirY * bDirY + bDirZ * bDirZ);
+        bDirX /= bDirLen;
+        bDirY /= bDirLen;
+        bDirZ /= bDirLen;
+
+        double d = ((aX - bGroundX) * aNormalX + (aY - bGroundY) * aNormalY + (aZ - bGroundZ) * aNormalZ) / (bDirX * aNormalX + bDirY * aNormalY + bDirZ * aNormalZ);
+
+        double iX = bGroundX + bDirX * d;
+        double iY = bGroundY + bDirY * d;
+        double iZ = bGroundZ + bDirZ * d;
+
+        double v1X = iX - aX;
+        double v1Y = iY - aY;
+        double v1Z = iZ - aZ;
+        double v1Len = Math.sqrt(v1X * v1X + v1Y * v1Y + v1Z * v1Z);
+        v1X /= v1Len;
+        v1Y /= v1Len;
+        v1Z /= v1Len;
+
+        double v2X = bX - aX;
+        double v2Y = bY - aY;
+        double v2Z = bZ - aZ;
+        double v2Len = Math.sqrt(v2X * v2X + v2Y * v2Y + v2Z * v2Z);
+        v2X /= v2Len;
+        v2Y /= v2Len;
+        v2Z /= v2Len;
+
+
+        return Math.toDegrees(Math.acos(v1X * v2X + v1Y * v2Y + v1Z * v2Z));
     }
 
 }

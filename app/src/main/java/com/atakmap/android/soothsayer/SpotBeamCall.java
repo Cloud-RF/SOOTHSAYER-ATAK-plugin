@@ -1,6 +1,7 @@
 package com.atakmap.android.soothsayer;
 
 import android.annotation.SuppressLint;
+import android.os.Environment;
 import android.os.Looper;
 import android.widget.TextView;
 
@@ -50,6 +51,13 @@ public class SpotBeamCall {
         Log.d("spotbeam", "NSEW: \n" + north + ", \n" + south + ", \n" + east + ", \n" + west);
 
         // https://cloudrf.com/documentation/developer/#/Satellite/satellite%2Farea
+
+        /*
+        By default the environment uses DSM/LiDAR data with clutter etc off.
+        If your region does not have LiDAR, the next best thing is elevation=2, buildings=1 to use ML generated buildings
+        To add trees for shadows, set landcover=1 and ensure your clutter profile heights match your region eg. FOREST.clt
+        To check LiDAR coverage: https://api.cloudrf.com/API/terrain/
+         */
         String body =
                 "{\n" +
                 "    \"satellites\": [\n" +
@@ -57,14 +65,14 @@ public class SpotBeamCall {
                 "    ],\n" +
                 "    \"date_time\": \"" + dateTime + "\",\n" +
                 "    \"receiver\": {\n" +
-                "        \"alt\": 1.0\n" +
+                "        \"alt\": 1.0\n" + // Height AGL
                 "    },\n" +
                 "    \"environment\": {\n" +
-                "        \"clt\": \"Minimal.clt\",\n" +
-                "        \"elevation\": 1,\n" +
-                "        \"landcover\": 0,\n" +
-                "        \"buildings\": 0,\n" +
-                "        \"obstacles\": 0\n" +
+                "        \"clt\": \"Minimal.clt\",\n" + // Sets height for trees
+                "        \"elevation\": 1,\n" + // 1 = DSM/LiDAR, 2 = DTM
+                "        \"landcover\": 0,\n" + // 1 = Trees etc ON
+                "        \"buildings\": 0,\n" + // 1 = Buildings ON
+                "        \"obstacles\": 0\n" + // 1 = Custom clutter ON
                 "    },\n" +
                 "    \"output\": {\n" +
                 "        \"col\": \"GREEN.dBm\",\n" +
@@ -148,9 +156,13 @@ public class SpotBeamCall {
         thread.start();
     }
 
+    /*
+    Warning: Assumes storage path starts /sdcard/
+     */
     private static void downloadKMZ(String urlString, String satName) throws IOException {
         URL url = new URL(urlString);
         BufferedInputStream bis = new BufferedInputStream(url.openStream());
+
         FileOutputStream fis = new FileOutputStream("/sdcard/atak/SOOTHSAYER/KMZ/" + satName + ".kmz");
         byte[] buffer = new byte[1024];
         int count;
@@ -197,7 +209,6 @@ public class SpotBeamCall {
         try {
 
             SSLContext ctx;
-
             ctx = SSLContext.getInstance("SSL");
 
             ctx.init(null, new X509TrustManager[]{new X509TrustManager(){
@@ -209,9 +220,7 @@ public class SpotBeamCall {
             }}, new SecureRandom());
 
             HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
-
             HttpsURLConnection.setDefaultHostnameVerifier((s, sslSession) -> true);
-
 
             String responseString = "";
             URL url = new URL(API_URL + "/satellite/area");
@@ -283,19 +292,17 @@ public class SpotBeamCall {
         double lonBRad = Math.toRadians(lonB);
 
         double deltaLon = lonBRad - lonARad;
-
         double x = Math.cos(latBRad) * Math.sin(deltaLon);
         double y = Math.cos(latARad) * Math.sin(latBRad) - Math.sin(latARad) * Math.cos(latBRad) * Math.cos(deltaLon);
-
         double r = Math.atan2(x, y);
-
         double d = Math.toDegrees(r);
     
         while (d < 0) d += 360;
-
         return d;
     }
 
+    // Verbose but it works.
+    // altA is the terminal, altB is the satellite
     private static double calculateElevation(double latA, double lonA, double altA, double latB, double lonB, double altB) {
         double latARad = Math.toRadians(latA);
         double lonARad = Math.toRadians(lonA);

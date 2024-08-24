@@ -96,7 +96,6 @@ class PluginDropDownReceiver (
     init {
         initViews()
         initListeners()
-
         initSpotBeam()
     }
 
@@ -142,21 +141,19 @@ class PluginDropDownReceiver (
 
         val btnSave = settingView.findViewById<ImageButton>(R.id.btnSave)
         btnSave.setOnClickListener {
-            //if (isValidSettings()) {
-                Constant.sServerUrl = etLoginServerUrl?.text.toString()
-                sharedPrefs?.set(Constant.PreferenceKey.sServerUrl, Constant.sServerUrl)
-                sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
+            Constant.sServerUrl = etLoginServerUrl?.text.toString()
+            sharedPrefs?.set(Constant.PreferenceKey.sServerUrl, Constant.sServerUrl)
+            sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
 
-                sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
-                sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbCoverageLayer.isChecked)
-                sharedPrefs?.set(Constant.PreferenceKey.sLinkLinesVisibility, cbLinkLines.isChecked)
+            sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
+            sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbCoverageLayer.isChecked)
+            sharedPrefs?.set(Constant.PreferenceKey.sLinkLinesVisibility, cbLinkLines.isChecked)
 
 
-                moveBackToMainLayout()
-                handleLinkLineVisibility()
-                handleKmzLayerVisibility()
-                refreshView()
-           // }
+            moveBackToMainLayout()
+            handleLinkLineVisibility()
+            handleKmzLayerVisibility()
+            refreshView()
         }
 
         // open help dialog
@@ -171,7 +168,6 @@ class PluginDropDownReceiver (
             moveBackToMainLayout()
         }
 
-        //sAccessToken
         // add a marker on the map
         val btnAddMarker = templateView.findViewById<ImageButton>(R.id.btnAddMarker)
         btnAddMarker.setOnClickListener {
@@ -375,9 +371,6 @@ class PluginDropDownReceiver (
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
 
-                        //itemPositionForEdit = -1
-
-
                         if(cbLinkLines.isChecked) {
                             // UPDATE MARKER
                             markersList[itemPositionForEdit].markerDetails = marker
@@ -386,7 +379,7 @@ class PluginDropDownReceiver (
 
                         itemPositionForEdit = -1
 
-                        // trigger calc
+                        // Trigger a multisite API call
                          if (svMode.isChecked) {
                              marker.let { template ->
                                  val list: List<MultiSiteTransmitter> =
@@ -468,22 +461,6 @@ class PluginDropDownReceiver (
             findViewById<EditText>(R.id.etBandWidth).setText("${transmitter?.bwi ?: ""}")
             findViewById<EditText>(R.id.etOutputNoiseFloor).setText("${item.markerDetails.output.nf}")
         }
-    }
-
-    private fun isValidSettings(): Boolean {
-        var isValid = true
-        val apiKey: String? = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "").toString()
-        val message = when {
-            !URLUtil.isValidUrl(etServerUrl?.text.toString()) -> pluginContext.getString(R.string.invalid_url_error)
-            (apiKey?.isEmpty()) == true -> pluginContext.getString(R.string.empty_api_key)
-            (apiKey?.trim()?.length ?: 0) < 12 -> pluginContext.getString(R.string.unauthorized_error)
-            else -> null
-        }
-        message?.let {
-            isValid = false
-            pluginContext.toast(message)
-        }
-        return isValid
     }
 
     private fun isValidLogin(): Boolean {
@@ -834,7 +811,7 @@ class PluginDropDownReceiver (
         return Receiver(pReceiver.alt, 0.0, 0.0, pReceiver.rxg, pReceiver.rxs)
     }
 
-    // Area API
+    // Area API request
     private fun sendSingleSiteDataToServer(marker: TemplateDataModel?) {
         // For an area call, the receiver lat and lon should be zero.
         if (pluginContext.isConnected()) {
@@ -904,7 +881,7 @@ class PluginDropDownReceiver (
         }
     }
 
-    // Multisite API (GPU!)
+    // Multisite API
     private fun sendMultiSiteDataToServer(markerData: MultisiteRequest?) {
         if (pluginContext.isConnected()) {
             markerData?.let {

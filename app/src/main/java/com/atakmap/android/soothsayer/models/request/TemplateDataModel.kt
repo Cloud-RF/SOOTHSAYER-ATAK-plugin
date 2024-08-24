@@ -3,6 +3,8 @@ package com.atakmap.android.soothsayer.models.request
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
+// API reference https://cloudrf.com/documentation/developer
+
 data class TemplateDataModel(
     val antenna: Antenna,
     val coordinates: Int,

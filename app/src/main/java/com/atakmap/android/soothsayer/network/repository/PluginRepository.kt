@@ -84,7 +84,9 @@ class PluginRepository {
 
     }
 
-    // DANGER!
+    /*
+    Support self signed SSL certificates for private SOOTHSAYER servers.
+     */
     fun OkHttpClient.Builder.ignoreAllSSLErrors(): OkHttpClient.Builder {
         val naiveTrustManager = object : X509TrustManager {
             override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
@@ -266,8 +268,6 @@ class PluginRepository {
                                 e.printStackTrace()
                                 callback?.onFailed(response.message(), response.code())
                             }
-
-//                            callback?.onFailed(response.message(), response.code())
                         }
                     }
 

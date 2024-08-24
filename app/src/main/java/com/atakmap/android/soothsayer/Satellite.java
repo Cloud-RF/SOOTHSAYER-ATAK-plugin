@@ -42,6 +42,11 @@ public class Satellite {
         this.name = "EMPTY";
     }
 
+    /*
+    Query the satellite API to find satellite(s).
+    String can be partial eg. skyn.. but presently only first satellite is used.
+    Results are paged and rate limited :p
+     */
     public static void getSats(String query, PluginDropDownReceiver receiver, String API_URL) {
         Thread thread = new Thread(new Runnable() {
             @Override

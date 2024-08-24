@@ -83,8 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:inputType="date"
-            android:text="2024-7-23" />
+            android:inputType="date" />
 
         <EditText
             android:id="@+id/editTime"
@@ -92,8 +91,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:inputType="time"
-            android:text="04:54:28" />
+            android:inputType="time" />
     </LinearLayout>
 
     <LinearLayout

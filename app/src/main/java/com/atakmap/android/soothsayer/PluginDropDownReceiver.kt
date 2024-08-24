@@ -55,8 +55,8 @@ import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.*
+import java.text.SimpleDateFormat
 import java.util.*
-
 
 class PluginDropDownReceiver (
     mapView: MapView?,
@@ -93,12 +93,9 @@ class PluginDropDownReceiver (
     private var itemPositionForEdit: Int = -1
     private val serverTypes: ArrayList<String> = ArrayList()
 
-    @JvmField val KOTLIN_API_URL = ""
-
     init {
         initViews()
         initListeners()
-
         initSpotBeam()
     }
 
@@ -126,17 +123,17 @@ class PluginDropDownReceiver (
             setLoginViewVisibility(false)
         }
 
-        val btnsvMode = settingView.findViewById<Switch>(R.id.svMode);
+        val btnsvMode = settingView.findViewById<Switch>(R.id.svMode)
         btnsvMode.setOnClickListener{
             sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
         }
 
-        val coverageCB = settingView.findViewById<CheckBox>(R.id.cbKmzLayer);
+        val coverageCB = settingView.findViewById<CheckBox>(R.id.cbKmzLayer)
         coverageCB.setOnClickListener{
             sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbCoverageLayer.isChecked)
         }
 
-        val linksCB = settingView.findViewById<CheckBox>(R.id.cbLinkLines);
+        val linksCB = settingView.findViewById<CheckBox>(R.id.cbLinkLines)
         linksCB.setOnClickListener{
             sharedPrefs?.set(Constant.PreferenceKey.sLinkLinesVisibility, cbLinkLines.isChecked)
         }
@@ -144,21 +141,19 @@ class PluginDropDownReceiver (
 
         val btnSave = settingView.findViewById<ImageButton>(R.id.btnSave)
         btnSave.setOnClickListener {
-            //if (isValidSettings()) {
-                Constant.sServerUrl = etLoginServerUrl?.text.toString()
-                sharedPrefs?.set(Constant.PreferenceKey.sServerUrl, Constant.sServerUrl)
-                sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
+            Constant.sServerUrl = etLoginServerUrl?.text.toString()
+            sharedPrefs?.set(Constant.PreferenceKey.sServerUrl, Constant.sServerUrl)
+            sharedPrefs?.set(Constant.PreferenceKey.sApiKey, Constant.sAccessToken)
 
-                sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
-                sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbCoverageLayer.isChecked)
-                sharedPrefs?.set(Constant.PreferenceKey.sLinkLinesVisibility, cbLinkLines.isChecked)
+            sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
+            sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbCoverageLayer.isChecked)
+            sharedPrefs?.set(Constant.PreferenceKey.sLinkLinesVisibility, cbLinkLines.isChecked)
 
 
-                moveBackToMainLayout()
-                handleLinkLineVisibility()
-                handleKmzLayerVisibility()
-                refreshView()
-           // }
+            moveBackToMainLayout()
+            handleLinkLineVisibility()
+            handleKmzLayerVisibility()
+            refreshView()
         }
 
         // open help dialog
@@ -173,7 +168,6 @@ class PluginDropDownReceiver (
             moveBackToMainLayout()
         }
 
-        //sAccessToken
         // add a marker on the map
         val btnAddMarker = templateView.findViewById<ImageButton>(R.id.btnAddMarker)
         btnAddMarker.setOnClickListener {
@@ -377,9 +371,6 @@ class PluginDropDownReceiver (
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
 
-                        //itemPositionForEdit = -1
-
-
                         if(cbLinkLines.isChecked) {
                             // UPDATE MARKER
                             markersList[itemPositionForEdit].markerDetails = marker
@@ -388,7 +379,7 @@ class PluginDropDownReceiver (
 
                         itemPositionForEdit = -1
 
-                        // trigger calc
+                        // Trigger a multisite API call
                          if (svMode.isChecked) {
                              marker.let { template ->
                                  val list: List<MultiSiteTransmitter> =
@@ -470,22 +461,6 @@ class PluginDropDownReceiver (
             findViewById<EditText>(R.id.etBandWidth).setText("${transmitter?.bwi ?: ""}")
             findViewById<EditText>(R.id.etOutputNoiseFloor).setText("${item.markerDetails.output.nf}")
         }
-    }
-
-    private fun isValidSettings(): Boolean {
-        var isValid = true
-        val apiKey: String? = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "").toString()
-        val message = when {
-            !URLUtil.isValidUrl(etServerUrl?.text.toString()) -> pluginContext.getString(R.string.invalid_url_error)
-            (apiKey?.isEmpty()) == true -> pluginContext.getString(R.string.empty_api_key)
-            (apiKey?.trim()?.length ?: 0) < 12 -> pluginContext.getString(R.string.unauthorized_error)
-            else -> null
-        }
-        message?.let {
-            isValid = false
-            pluginContext.toast(message)
-        }
-        return isValid
     }
 
     private fun isValidLogin(): Boolean {
@@ -774,7 +749,6 @@ class PluginDropDownReceiver (
         lineColor: Int,
         snr: Int
     ) {
-        val uid = snr
         val mapView = mapView
         if(lineGroup == null) {
             lineGroup = mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
@@ -837,7 +811,7 @@ class PluginDropDownReceiver (
         return Receiver(pReceiver.alt, 0.0, 0.0, pReceiver.rxg, pReceiver.rxs)
     }
 
-    // Area API
+    // Area API request
     private fun sendSingleSiteDataToServer(marker: TemplateDataModel?) {
         // For an area call, the receiver lat and lon should be zero.
         if (pluginContext.isConnected()) {
@@ -907,7 +881,7 @@ class PluginDropDownReceiver (
         }
     }
 
-    // Multisite API (GPU!)
+    // Multisite API
     private fun sendMultiSiteDataToServer(markerData: MultisiteRequest?) {
         if (pluginContext.isConnected()) {
             markerData?.let {
@@ -959,7 +933,7 @@ class PluginDropDownReceiver (
                                         pluginContext.getString(R.string.ok_txt)
                                 ) { dialog, _ -> dialog.dismiss() }
                                 builderSingle.show()
-                            };
+                            }
                         }
                     })
             }
@@ -1135,7 +1109,7 @@ class PluginDropDownReceiver (
         if(isValidLogin()) {
             if (pluginContext.isConnected()) {
 
-                RetrofitClient.BASE_URL = etLoginServerUrl?.text.toString();
+                RetrofitClient.BASE_URL = etLoginServerUrl?.text.toString()
 
                 repository.loginUser(
                     etUsername?.text.toString(),
@@ -1158,7 +1132,7 @@ class PluginDropDownReceiver (
                                     SOOTHSAYER has both UI & API on same server
                                      */
                                     if(etLoginServerUrl?.text.toString() == "https://cloudrf.com"){
-                                        RetrofitClient.BASE_URL = "https://api.cloudrf.com";
+                                        RetrofitClient.BASE_URL = "https://api.cloudrf.com"
                                     }
                                     Log.d(TAG, "SOOTHSAYER API key: "+response.apiKey)
                                     Constant.sAccessToken = it
@@ -1228,7 +1202,7 @@ class PluginDropDownReceiver (
         }
 
         val item: TemplatesResponseItem = items.removeAt(0)
-        Log.d(TAG, item.name);
+        Log.d(TAG, item.name)
         downloadTemplateDetail(item.id, item.name, items)
     }
 
@@ -1508,20 +1482,12 @@ class PluginDropDownReceiver (
     }
 
 
-
-
-
-
-
     var names = arrayOf("")
     var satellite = Satellite()
 
-    var date: String = "2024-07-23"
-    var time: String = "04:54:28"
-
     var spotBeamView = templateView.findViewById<LinearLayout>(R.id.sbmainll)
 
-    var resolution = 20;
+    var resolution = 20
 
     private fun initSpotBeam() {
 
@@ -1544,25 +1510,21 @@ class PluginDropDownReceiver (
             spotBeamView.visibility = View.VISIBLE
         }
 
-        val editDate = spotBeamView.findViewById<EditText>(R.id.editDate)
-        editDate.setOnFocusChangeListener { _, b ->
-            if (!b && editDate.text.length.toString() == "0") editDate.setText("2024-07-23")
-        }
 
-        editDate.addTextChangedListener {
-            date = editDate.text.toString()
-        }
+
+        val currentDate = Date()
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+        val timeFormat = SimpleDateFormat("HH:mm:ss")
+
+        val editDate = spotBeamView.findViewById<EditText>(R.id.editDate)
+        editDate.setText(dateFormat.format(currentDate))
+
 
         val editTime = spotBeamView.findViewById<EditText>(R.id.editTime)
-        editTime.setOnFocusChangeListener { _, b ->
-            if (!b && editTime.text.length.toString() == "0") editTime.setText("04:54:28")
-        }
+        editTime.setText("12:00:00"); // GS was moving :/ timeFormat.format(currentDate))
 
-        editTime.addTextChangedListener {
-            time = editTime.text.toString()
-        }
         
-        val satelliteSearch = spotBeamView.findViewById<AutoCompleteTextView>(R.id.sbSatelliteSearch);
+        val satelliteSearch = spotBeamView.findViewById<AutoCompleteTextView>(R.id.sbSatelliteSearch)
 
         satelliteSearch.setOnFocusChangeListener { _, b ->
             if (b) satelliteSearch.setText("")
@@ -1633,14 +1595,18 @@ class PluginDropDownReceiver (
                     pluginContext.toast("Calculating coverage...");
                     val latitude = marker.geoPointMetaData.get().latitude
                     val longitude = marker.geoPointMetaData.get().longitude
+
+                    val editDate = spotBeamView.findViewById<EditText>(R.id.editDate).text
+                    val editTime = spotBeamView.findViewById<EditText>(R.id.editTime).text
+                    val dateTime: String = (editDate.toString() + "T" + editTime.toString() + "Z")
+
                     SpotBeamCall.callAPI(satellite, latitude, longitude, this,
-                        sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "").toString(), RetrofitClient.BASE_URL);
+                        sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "").toString(), RetrofitClient.BASE_URL, dateTime);
                 }
             }
         }
 
-        Log.d("spotbeamicon", "finish ----------------------------------------------------------------------------------------------------------------------------------------------------------------");
-    }
+     }
 
     fun toast(message: String) {
         pluginContext.toast(message)
@@ -1652,7 +1618,7 @@ class PluginDropDownReceiver (
 
         line.setPoints(arrayOf(GeoPoint(p1[0], p1[1]), GeoPoint(p2[0], p2[1])));
         line.title = "AZIMUTH"
-        line.lineLabel = "AZ: " + Math.round(azi) + "° EL: " + Math.round(elev) + "°"
+        line.lineLabel = "AZ: " + Math.round(azi*10)/10 + "° EL: " + Math.round(elev*10)/10 + "°"
         line.setLabelTextSize(72, Typeface.DEFAULT)
 
         mapView.rootGroup.addItem(line)

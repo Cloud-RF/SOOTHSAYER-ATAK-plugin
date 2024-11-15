@@ -1,9 +1,7 @@
 package com.atakmap.android.soothsayer.network.remote
 
-import android.util.Log
 import com.atakmap.android.soothsayer.network.ApiService
 import com.atakmap.android.soothsayer.util.Constant
-import com.google.gson.Gson
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -47,10 +45,14 @@ object RetrofitClient {
     private class AuthorizationInterceptor : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
             val originalRequest = chain.request()
+            var apiKey = Constant.sAccessToken
+            if(apiKey === ""){
+                apiKey = "0-0"
+            }
             val authRequest = originalRequest.newBuilder()
                 .header(mContentType, mContentTypeJson)
                 .header(
-                    mAuthorizationKey, Constant.sAccessToken
+                    mAuthorizationKey, apiKey
                 ) // This should be from user input.
                 .build()
             return chain.proceed(authRequest)

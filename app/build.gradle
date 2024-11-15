@@ -8,8 +8,8 @@
 
 buildscript {
 
-    ext.PLUGIN_VERSION = "1.4.1"
-    ext.ATAK_VERSION = "5.1.0"
+    ext.PLUGIN_VERSION = "1.4.2"
+    ext.ATAK_VERSION = "5.2.0"
 
     def takdevVersion = '2.+'
 
@@ -64,7 +64,7 @@ buildscript {
             exclude group: "net.sf.proguard", module:
                     "proguard-gradle"
         }
-        classpath 'com.guardsquare:proguard-gradle:7.2.2'
+        classpath 'com.guardsquare:proguard-gradle:7.4.2'
         if(isDevKitEnabled()) {
             classpath "com.atakmap.gradle:atak-gradle-takdev:${takdevVersion}"
         } else {
@@ -90,7 +90,7 @@ apply plugin: 'atak-takdev-plugin'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
     buildToolsVersion "30.0.3"
 
     dexOptions {
@@ -197,7 +197,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 34
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86"
         }

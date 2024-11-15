@@ -10,7 +10,6 @@ import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.atakmap.android.soothsayer.models.response.LoginResponse
 import com.atakmap.android.soothsayer.models.response.ResponseModel
 import com.atakmap.android.soothsayer.models.response.TemplatesResponse
-import com.atakmap.android.soothsayer.models.response.TemplatesResponseItem
 import com.atakmap.android.soothsayer.network.remote.RetrofitClient
 import com.atakmap.android.soothsayer.util.Constant
 import com.google.gson.Gson

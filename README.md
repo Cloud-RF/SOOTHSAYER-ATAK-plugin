@@ -6,6 +6,15 @@ Presently, users can task the `Area`, `Multisite`, `Points` and `Satellite` APIs
 
 ![SOOTHSAYER ATAK plugin](help/soothsayer_atak.jpg "SOOTHSAYER ATAK plugin")
 
+# Signed APK
+
+The latest release (15th Nov 24) supports ATAK 5.2 on Android 14 and is signed by TPC.
+
+[![SOOTHSAYER ATAK plugin](help/download_apk.png "Download APK")](https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin/releases/download/1.4.2/ATAK-Plugin-SOOTHSAYER-ATAK-plugin-1.4.2-d1d8ebf1-5.2.0-civ-release.apk)
+
+Older releases are [here](https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin/releases).
+
+
 ## Points of Contact
 
 - Issue board: https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin

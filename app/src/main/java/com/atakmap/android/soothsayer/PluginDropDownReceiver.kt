@@ -1380,7 +1380,7 @@ class PluginDropDownReceiver (
         builder.setTitle(pluginContext.getString(R.string.civ_delete_layer))
         builder.setIcon(com.atakmap.app.R.drawable.ic_menu_delete)
         builder.setMessage(
-            "${pluginContext.getString(R.string.delete)}${layer.description}${
+            "${pluginContext.getString(R.string.delete)} ${layer.description}${
                 pluginContext.getString(
                     R.string.question_mark_symbol
                 )

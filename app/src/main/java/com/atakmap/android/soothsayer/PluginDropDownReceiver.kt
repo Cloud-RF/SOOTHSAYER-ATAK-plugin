@@ -389,39 +389,6 @@ class PluginDropDownReceiver (
 
                         itemPositionForEdit = -1
 
-                        // Trigger a multisite API call
-                         if (svMode.isChecked) {
-                             marker.let { template ->
-                                 val txList: List<MultiSiteTransmitter> =
-                                     markersList.mapNotNull { marker ->
-                                         marker.markerDetails.transmitter?.run {
-                                             MultiSiteTransmitter(
-                                                 alt,
-                                                 bwi,
-                                                 frq,
-                                                 lat,
-                                                 lon,
-                                                 powerUnit,
-                                                 txw,
-                                                 marker.markerDetails.antenna
-                                             )
-                                         }
-                                     }
-
-                                 val request = MultisiteRequest(
-                                     template.site,
-                                     template.network,
-                                     txList,
-                                     template.receiver,
-                                     template.model,
-                                     template.environment,
-                                     template.output
-                                 )
-                                 if (cbCoverageLayer.isChecked) {
-                                     sendMultiSiteDataToServer(request)
-                                 }
-                             }
-                        }
                     }
                 }
                 setEditViewVisibility(false)
@@ -1412,7 +1379,7 @@ class PluginDropDownReceiver (
         builder.setTitle(pluginContext.getString(R.string.civ_delete_layer))
         builder.setIcon(com.atakmap.app.R.drawable.ic_menu_delete)
         builder.setMessage(
-            "${pluginContext.getString(R.string.delete)}${layer.description}${
+            "${pluginContext.getString(R.string.delete)} ${layer.description}${
                 pluginContext.getString(
                     R.string.question_mark_symbol
                 )

@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.os.Looper;
 import android.widget.TextView;
 
+import com.atakmap.android.drawing.mapItems.DrawingShape;
 import com.atakmap.android.soothsayer.plugin.R;
 import com.atakmap.coremap.log.Log;
 
@@ -46,6 +47,15 @@ public class SpotBeamCall {
         double south = areaLat - dLat;
         double east = areaLon + dLon;
         double west = areaLon - dLon;
+
+        DrawingShape polygon = CustomPolygonTool.getMaskingPolygon();
+        if(polygon != null) {
+            north = GeoImageMasker.getBounds(polygon.getPoints()).getNorth();
+            east = GeoImageMasker.getBounds(polygon.getPoints()).getEast();
+            south = GeoImageMasker.getBounds(polygon.getPoints()).getSouth();
+            west = GeoImageMasker.getBounds(polygon.getPoints()).getWest();
+        }
+
 
         Log.d("spotbeam", "dLat: " + dLat + ", dLon: " + dLon);
         Log.d("spotbeam", "NSEW: \n" + north + ", \n" + south + ", \n" + east + ", \n" + west);

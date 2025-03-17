@@ -20,5 +20,6 @@ data class MultiSiteTransmitter(
     var lon: Double,
     val powerUnit: String,
     val txw: Double,
-    val antenna: Antenna
+    val antenna: Antenna,
+    var remote: Boolean = false
 ): Serializable

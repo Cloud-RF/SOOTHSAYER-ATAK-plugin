@@ -35,6 +35,7 @@ import com.atakmap.android.soothsayer.layers.GLCloudRFLayer
 import com.atakmap.android.soothsayer.layers.PluginMapOverlay
 import com.atakmap.android.soothsayer.models.common.MarkerDataModel
 import com.atakmap.android.soothsayer.models.linksmodel.*
+import com.atakmap.android.soothsayer.models.request.Bounds
 import com.atakmap.android.soothsayer.models.request.MultiSiteTransmitter
 import com.atakmap.android.soothsayer.models.request.MultisiteRequest
 import com.atakmap.android.soothsayer.models.request.Receiver
@@ -176,6 +177,15 @@ class PluginDropDownReceiver (
                 addCustomMarker()
             } else {
                 pluginContext.toast(pluginContext.getString(R.string.marker_error))
+            }
+        }
+
+        // add a polygon on the map
+        val btnAddPolygon = templateView.findViewById<ImageButton>(R.id.btnAddPolygon)
+        btnAddPolygon.setOnClickListener {
+            if (Constant.sAccessToken != "") {
+                pluginContext.shortToast("Draw a polygon for the study area")
+                CustomPolygonTool.createPolygon()
             }
         }
 
@@ -382,7 +392,7 @@ class PluginDropDownReceiver (
                         // Trigger a multisite API call
                          if (svMode.isChecked) {
                              marker.let { template ->
-                                 val list: List<MultiSiteTransmitter> =
+                                 val txList: List<MultiSiteTransmitter> =
                                      markersList.mapNotNull { marker ->
                                          marker.markerDetails.transmitter?.run {
                                              MultiSiteTransmitter(
@@ -401,7 +411,7 @@ class PluginDropDownReceiver (
                                  val request = MultisiteRequest(
                                      template.site,
                                      template.network,
-                                     list,
+                                     txList,
                                      template.receiver,
                                      template.model,
                                      template.environment,
@@ -549,13 +559,14 @@ class PluginDropDownReceiver (
                         val latitude = marker.geoPointMetaData.get().latitude
                         val longitude = marker.geoPointMetaData.get().longitude
                         Log.d(
-                            "TAGG",
+                            "SOOTHSAYER",
                             "DragDropped latitude: $latitude Longitude: $longitude Marker_id: ${mapItem.uid} actual uid = $uid"
                         )
                         Log.d(
-                            "TAGG",
+                            "SOOTHSAYER",
                             "MapItem: ${mapItem.altitudeMode} radialMenuPath: ${mapItem.radialMenuPath} serialId: ${mapItem.serialId} zOrder: ${mapItem.zOrder} "
                         )
+
 
                         // update the lat and lon of that marker.
                         val item = markersList.find { it.markerID == mapItem.uid }
@@ -567,6 +578,7 @@ class PluginDropDownReceiver (
                             )
                             item.markerDetails.transmitter?.lat = latitude.roundValue()
                             item.markerDetails.transmitter?.lon = longitude.roundValue()
+
                             saveMarkerListToPref()
                             Log.d(
                                 TAG,
@@ -575,6 +587,8 @@ class PluginDropDownReceiver (
                             markerAdapter?.notifyItemChanged(markersList.indexOf(item))
                         }
 
+
+
                         // Links first. I'm not a slag..
                         item?.let {
                             if(cbLinkLines.isChecked) {
@@ -582,11 +596,25 @@ class PluginDropDownReceiver (
                             }
                         }
 
+
+
+
+
                         // Multisite API (GPU)
                         if (svMode.isChecked) {
                             // For multisite api
                             item?.markerDetails?.let { template ->
-                                val list: List<MultiSiteTransmitter> =
+                                // fetch shape
+                                val polygon = CustomPolygonTool.getMaskingPolygon()
+                                var remote = false;
+
+                                if(polygon != null) {
+                                    var newbounds = Bounds(GeoImageMasker.getBounds(polygon.points).north,GeoImageMasker.getBounds(polygon.points).east,GeoImageMasker.getBounds(polygon.points).south,GeoImageMasker.getBounds(polygon.points).west)
+                                    template.output.bounds = newbounds
+                                    remote = true;
+                                }
+
+                                val txlist: List<MultiSiteTransmitter> =
                                     markersList.mapNotNull { marker ->
                                         marker.markerDetails.transmitter?.run {
                                             MultiSiteTransmitter(
@@ -597,7 +625,8 @@ class PluginDropDownReceiver (
                                                 lon,
                                                 powerUnit,
                                                 txw,
-                                                marker.markerDetails.antenna
+                                                marker.markerDetails.antenna,
+                                                remote
                                             )
                                         }
                                     }
@@ -605,11 +634,11 @@ class PluginDropDownReceiver (
                                 val request = MultisiteRequest(
                                     template.site,
                                     template.network,
-                                    list,
+                                    txlist,
                                     template.receiver,
                                     template.model,
                                     template.environment,
-                                    template.output
+                                    template.output // because we updated it with bounds :)
                                 )
                                 if(cbCoverageLayer.isChecked){
                                     sendMultiSiteDataToServer(request)
@@ -803,7 +832,8 @@ class PluginDropDownReceiver (
             marker.site,
             marker.template,
             marker.transmitter,
-            marker.version
+            marker.version,
+            marker.bounds
         )
     }
 
@@ -819,6 +849,8 @@ class PluginDropDownReceiver (
                 // creating deep copy so that it would not modify the actual object.
                 Log.d(TAG, "sendSingleSiteDataToServer: old:$marker")
                 val markerData = getModifiedMarker(marker)
+
+
                 markerData.receiver = getModifiedReceiver(marker.receiver)
                 Log.d(TAG, "sendSingleSiteDataToServer: old:$marker \n request: ${Gson().toJson(markerData)}")
                 repository.sendSingleSiteMarkerData(
@@ -1593,6 +1625,7 @@ class PluginDropDownReceiver (
             when (mapEvent.type) {
                 MapEvent.ITEM_DRAG_DROPPED -> {
                     pluginContext.toast("Calculating coverage...");
+
                     val latitude = marker.geoPointMetaData.get().latitude
                     val longitude = marker.geoPointMetaData.get().longitude
 

@@ -64,6 +64,7 @@
         "mod": 0,
         "nf": -120,
         "res": 20,
-        "rad": 15
+        "rad": 14,
+        "bounds": {"north":  null, "east":  null, "south":  null, "west":  null}
     }
 }

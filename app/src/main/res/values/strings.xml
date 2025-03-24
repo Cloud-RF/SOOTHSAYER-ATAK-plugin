@@ -77,12 +77,12 @@
     <string name="link_lines">Show links</string>
 
     <string name="radio_settings">Edit (%1$s)</string>
-    <string name="radio_height">Height (alt)</string>
-    <string name="radio_power">Power (txw)</string>
-    <string name="radio_frequency">Frequency (frq)</string>
-    <string name="radio_bandwidth">Bandwidth (bwi)</string>
-    <string name="radio_noise">Noise Floor (nf)</string>
-    <string name="antenna_azimuth">Antenna Azimuth (azi)</string>
+    <string name="radio_height">Height (m)</string>
+    <string name="radio_power">Power (w)</string>
+    <string name="radio_frequency">Frequency (MHz)</string>
+    <string name="radio_bandwidth">Bandwidth (MHz)</string>
+    <string name="radio_noise">Noise Floor (dBm)</string>
+    <string name="antenna_azimuth">Azimuth (deg)</string>
     <string name="radio_recalculate">Recalculate</string>
     <string name="alert_title">Are you sure?</string>
     <string name="yes">Yes</string>

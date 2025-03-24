@@ -64,14 +64,14 @@ data class Model(
 ): Serializable
 
 data class Output(
-    val col: String,
-    val mod: Int,
-    var nf: Int, // noise floor
-    val `out`: Int,
-    val rad: Double,
-    val res: Double,
-    val units: String,
-    var bounds: Bounds?
+        val col: String,
+        val mod: Int,
+        var nf: Int, // noise floor
+        val `out`: Int,
+        var rad: Double,
+        var res: Double,
+        val units: String,
+        var bounds: Bounds?
 ): Serializable
 
 data class Bounds (

@@ -96,17 +96,6 @@
 
 
         <ImageButton
-            android:id="@+id/btnSave"
-            style="@style/darkButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerInParent="true"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:src="@android:drawable/stat_notify_sync" />
-
-        <ImageButton
             android:id="@+id/btnSettingLogin"
             style="@style/darkButton"
             android:layout_width="60dp"

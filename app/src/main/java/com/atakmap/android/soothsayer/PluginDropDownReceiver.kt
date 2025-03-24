@@ -527,6 +527,10 @@ class PluginDropDownReceiver (
                         if(haversineDistance > item.markerDetails.output.rad){
                             item.markerDetails.output.rad = haversineDistance*1.1; // +10%
                         }
+
+                        if(haversineDistance > 500) {
+                            remote = true; // will use AMSL heights for SAT LOS. Use with care!
+                        }
                     }
 
 
@@ -534,7 +538,6 @@ class PluginDropDownReceiver (
 
                     var newbounds = Bounds(GeoImageMasker.getBounds(polygon.points).north,GeoImageMasker.getBounds(polygon.points).east,GeoImageMasker.getBounds(polygon.points).south,GeoImageMasker.getBounds(polygon.points).west)
                     template.output.bounds = newbounds
-                    remote = true;
 
                 }
 

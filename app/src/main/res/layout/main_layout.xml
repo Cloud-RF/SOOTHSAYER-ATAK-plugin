@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -16,40 +18,72 @@
             android:layout_height="wrap_content">
 
 
-            <ImageView
-                android:id="@+id/ivSettings"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:contentDescription="@string/app_name"
-                android:padding="5dp"
-                android:src="@drawable/ic_settings" />
-
             <ImageButton
                 android:id="@+id/btnAddMarker"
                 style="@style/darkButton"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_marginStart="5dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="5dp"
                 android:layout_marginBottom="5dp"
+                android:background="@drawable/btn_gray"
                 android:padding="5dp"
-                android:src="@android:drawable/ic_input_add" />
+                android:src="@drawable/marker_icon_svg" />
+
+            <ImageButton
+                android:id="@+id/btnAddPolygon"
+                style="@style/darkButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_toRightOf="@id/btnAddMarker"
+                android:padding="5dp"
+                android:src="@drawable/polygon" />
 
             <ImageButton
                 android:id="@+id/btnSpotBeam"
                 style="@style/darkButton"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_centerHorizontal="true"
                 android:layout_marginStart="5dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="5dp"
                 android:layout_marginBottom="5dp"
+                android:layout_toRightOf="@id/btnAddPolygon"
                 android:padding="5dp"
                 android:src="@drawable/spotbeam_marker_icon" />
+
+            <ImageView
+                android:id="@+id/ivSettings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
+                android:contentDescription="@string/app_name"
+                android:padding="5dp"
+                android:src="@drawable/ic_settings" />
+
+            <ImageButton
+                android:id="@+id/btnPlayBtn"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="5dp"
+                android:layout_toLeftOf="@id/ivSettings"
+                android:background="@drawable/btn_gray"
+                android:padding="5dp"
+                android:src="@drawable/play" />
 
         </RelativeLayout>
 

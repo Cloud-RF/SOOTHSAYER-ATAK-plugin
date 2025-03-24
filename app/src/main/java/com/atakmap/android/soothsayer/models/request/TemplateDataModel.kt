@@ -13,7 +13,7 @@ data class TemplateDataModel(
     val feeder: Feeder,
     val model: Model,
     val network: String,
-    val output: Output,
+    var output: Output,
     var `receiver`: Receiver,
     val reference: String,
     val site: String,
@@ -21,6 +21,7 @@ data class TemplateDataModel(
     var transmitter: Transmitter?,
     val version: String,
     @SerializedName("custom_icon")
+    var bounds: Bounds?,
     val customIcon: String?=null,
 ): Serializable
 
@@ -63,13 +64,21 @@ data class Model(
 ): Serializable
 
 data class Output(
-    val col: String,
-    val mod: Int,
-    var nf: Int, // noise floor
-    val `out`: Int,
-    val rad: Double,
-    val res: Double,
-    val units: String
+        val col: String,
+        val mod: Int,
+        var nf: Int, // noise floor
+        val `out`: Int,
+        var rad: Double,
+        var res: Double,
+        val units: String,
+        var bounds: Bounds?
+): Serializable
+
+data class Bounds (
+        @SerializedName("north") var north : Double,
+        @SerializedName("east") var east : Double,
+        @SerializedName("south") var south : Double,
+        @SerializedName("west") var west : Double
 ): Serializable
 
 data class Receiver(

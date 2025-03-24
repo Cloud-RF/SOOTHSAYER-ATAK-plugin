@@ -5,7 +5,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.atakmap.android.drawing.mapItems.DrawingShape;
 import com.atakmap.android.menu.PluginMenuParser;
+import com.atakmap.android.soothsayer.CustomPolygonTool;
+import com.atakmap.android.soothsayer.GeoImageMasker;
 import com.atakmap.android.soothsayer.interfaces.CloudRFLayerListener;
 import com.atakmap.android.soothsayer.plugin.R;
 import com.atakmap.android.maps.MetaShape;
@@ -52,8 +55,16 @@ public class CloudRFLayer extends AbstractLayer {
         this.lowerRight = GeoPoint.createMutable();
         this.lowerLeft = GeoPoint.createMutable();
 
-        bitmap = BitmapFactory.decodeFile(uri);
+        DrawingShape polygon = CustomPolygonTool.getMaskingPolygon();
 
+        if(polygon != null) {
+            GeoImageMasker.Bounds newbounds = GeoImageMasker.getBounds(polygon.getPoints());
+            bitmap = GeoImageMasker.cropImage(BitmapFactory.decodeFile(uri),newbounds,polygon);
+        }else{
+            bitmap = BitmapFactory.decodeFile(uri);
+        }
+
+                
 //        north, east, south, west
         if(bounds.size() == 4) {
             upperLeft.set(bounds.get(0), bounds.get(3));  // north, west

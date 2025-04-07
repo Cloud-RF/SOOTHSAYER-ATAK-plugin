@@ -506,7 +506,10 @@ class PluginDropDownReceiver (
                 val polygon = CustomPolygonTool.getMaskingPolygon()
                 var remote = false;
 
+
+
                 if(polygon != null) {
+                    Log.d(TAG,polygon.toString());
 
                     // area is in m
                     var area = polygon.area
@@ -529,13 +532,11 @@ class PluginDropDownReceiver (
                         }
                     }
 
-
-
-
                     var newbounds = Bounds(GeoImageMasker.getBounds(polygon.points).north,GeoImageMasker.getBounds(polygon.points).east,GeoImageMasker.getBounds(polygon.points).south,GeoImageMasker.getBounds(polygon.points).west)
                     template.output.bounds = newbounds
                     remote = true;
-
+                }else{
+                    template.output.bounds = null;
                 }
 
                 val txlist: List<MultiSiteTransmitter> =

@@ -39,13 +39,11 @@ data class Antenna(
 ): Serializable
 
 data class Environment(
-    val cll: Int,
-    val clm: Int,
     val clt: String,
-    val buildings: Int?,
-    val elevation: Int?,
-    val landcover: Int?,
-    val obstacles: Int?
+    val buildings: Int,
+    val elevation: Int,
+    val landcover: Int,
+    val obstacles: Int
 ): Serializable
 
 data class Feeder(
@@ -58,9 +56,7 @@ data class Model(
     val ked: Int,
     val pe: Int,
     val pm: Int, // can be 1,2...or "auto"
-    val rel: Int,
-    val cli: Int?,
-    val ter: Int?
+    val rel: Int
 ): Serializable
 
 data class Output(

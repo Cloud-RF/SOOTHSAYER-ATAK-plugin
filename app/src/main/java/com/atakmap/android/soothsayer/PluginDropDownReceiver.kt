@@ -485,7 +485,7 @@ class PluginDropDownReceiver (
         // even if disabled
         removeLinkLinesFromMap(item);
 
-        if(!cbLinkLines.isChecked && !svMode.isChecked) {
+        if(!cbLinkLines.isChecked && !cbCoverageLayer.isChecked) {
             toast("You need either links or coverage enabled")
             return
         }

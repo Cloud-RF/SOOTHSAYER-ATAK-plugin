@@ -16,9 +16,9 @@
         "lat": 51.23854,
         "lon": -2.979421,
         "alt": 4,
-        "frq": 1000,
+        "frq": 2450,
         "txw": 0.1,
-        "bwi": 1.2,
+        "bwi": 20,
         "powerUnit": "W"
     },
     "receiver": {
@@ -46,11 +46,10 @@
         "pol": "v"
     },
     "model": {
-        "pm": 11,
+        "pm": 10,
         "pe": 2,
         "ked": 0,
-        "rel": 90,
-        "rcs": 1
+        "rel": 80
     },
     "environment": {
         "elevation": 2,

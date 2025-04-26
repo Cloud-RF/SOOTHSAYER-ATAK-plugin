@@ -64,7 +64,7 @@
                 android:layout_marginTop="4dp"
                 android:background="@drawable/et_background"
                 android:imeOptions="actionNext"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:labelFor="@id/etRadioHeight"
                 android:padding="8dp"
                 android:textColor="@color/darker_gray"

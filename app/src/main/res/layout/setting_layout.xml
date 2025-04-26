@@ -85,7 +85,7 @@
             android:layout_height="wrap_content"/>
 
         <ImageButton
-            android:id="@+id/tvHelp"
+            android:id="@+id/tvDocs"
             style="@style/darkButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
@@ -94,6 +94,16 @@
             android:paddingVertical="8dp"
             android:src="@android:drawable/ic_dialog_info" />
 
+
+        <ImageButton
+            android:id="@+id/tvHelp"
+            style="@style/darkButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:src="@android:drawable/ic_dialog_info" />
 
         <ImageButton
             android:id="@+id/btnSettingLogin"

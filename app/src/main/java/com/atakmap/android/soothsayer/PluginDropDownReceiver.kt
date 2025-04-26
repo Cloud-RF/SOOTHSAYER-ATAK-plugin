@@ -901,7 +901,7 @@ class PluginDropDownReceiver (
                                     })
 
                                 //Download kmz file also to SD card
-                                repository.downloadFile(response.kmz,
+                                /*repository.downloadFile(response.kmz,
                                     KMZ_FOLDER,
                                     KMZ_FILE.getFileName(),
                                     listener = { isDownloaded, filePath ->
@@ -909,7 +909,7 @@ class PluginDropDownReceiver (
                                             TAG,
                                             "sendSingleSiteMarkerData: kmz downloaded isDownloaded:$isDownloaded to path: $filePath "
                                         )
-                                    })
+                                    })*/
                             }
                         }
 
@@ -961,7 +961,7 @@ class PluginDropDownReceiver (
                                     })
 
                                 // Download kmz file also to SD card
-                                repository.downloadFile(response.kmz,
+                                /*repository.downloadFile(response.kmz,
                                     KMZ_FOLDER,
                                     KMZ_FILE.getFileName(),
                                     listener = { isDownloaded, filePath ->
@@ -969,7 +969,7 @@ class PluginDropDownReceiver (
                                             TAG,
                                             "sendMultiSiteMarkerData: kmz downloaded isDownloaded:$isDownloaded to path: $filePath "
                                         )
-                                    })
+                                    })*/
                             }
                         }
 

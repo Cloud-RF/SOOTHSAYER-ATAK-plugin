@@ -1,8 +1,8 @@
-
 package com.atakmap.android.soothsayer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 
 import com.atakmap.android.maps.MapItem;
 import com.atakmap.android.soothsayer.layers.PluginMapOverlay;
@@ -11,6 +11,7 @@ import com.atakmap.android.dropdown.DropDownMapComponent;
 import com.atakmap.android.ipc.AtakBroadcast.DocumentedIntentFilter;
 import com.atakmap.android.maps.MapView;
 import com.atakmap.coremap.log.Log;
+// CoT service imports removed - using direct map marker collection instead
 
 public class PluginMapComponent extends DropDownMapComponent {
 
@@ -46,6 +47,7 @@ public class PluginMapComponent extends DropDownMapComponent {
         ddFilter.addAction(PluginDropDownReceiver.RADIO_DELETE,
                 "Delete marker");
         registerDropDownReceiver(ddr, ddFilter);
+        // CoT service connection removed - using direct map marker collection instead
     }
 
     @Override

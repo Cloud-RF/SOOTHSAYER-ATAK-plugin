@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    This layout defines a single, re-designed row in the Co-Opt callsign list.
+    It displays all settings inline for a cleaner, more efficient user experience.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="2dp">
+
+    <CheckBox
+        android:id="@+id/co_opt_item_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="2dp" />
+
+    <ImageView
+        android:id="@+id/co_opt_item_marker_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="2dp"
+        android:adjustViewBounds="true"
+        android:background="@drawable/contact_color_circle"
+        android:scaleType="fitCenter" />
+
+    <TextView
+        android:id="@+id/co_opt_item_callsign"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="CALLSIGN"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="11sp"
+        android:typeface="normal" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:orientation="vertical">
+
+        <com.atakmap.android.gui.PluginSpinner
+            android:id="@+id/co_opt_item_template_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/et_background"
+            android:dropDownWidth="match_parent"
+            android:prompt="@string/template_option_prompt" />
+
+    </LinearLayout>
+
+</LinearLayout> 

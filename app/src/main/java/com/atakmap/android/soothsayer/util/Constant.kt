@@ -24,5 +24,9 @@ object Constant {
         const val sCalculationMode = "Calculation Mode"
         const val sKmzVisibility = "KMZ Visibility"
         const val sLinkLinesVisibility = "Link Lines Visibility"
+        const val sCoOptTimeRefreshEnabled = "Co-Opt Time Refresh Enabled"
+        const val sCoOptTimeRefreshInterval = "Co-Opt Time Refresh Interval"
+        const val sCoOptDistanceRefreshEnabled = "Co-Opt Distance Refresh Enabled"
+        const val sCoOptDistanceRefreshThreshold = "Co-Opt Distance Refresh Threshold"
     }
 }

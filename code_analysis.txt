@@ -1,0 +1,82 @@
+# SOOTHSAYER ATAK Plugin: Code Analysis
+
+## 1. Project Overview
+
+This is an Android Tactical Assault Kit (ATAK) plugin that acts as a client for the CloudRF / SOOTHSAYER radio planning API. It allows ATAK users to perform sophisticated RF (Radio Frequency) analysis directly within the ATAK environment.
+
+**Core Functionalities:**
+
+*   **RF Coverage Visualization**: Users can place virtual radio transmitters (as markers) on the map to generate and display coverage heatmaps. This is useful for planning communication infrastructure.
+*   **Point-to-Point Links**: The plugin can calculate and display the quality of RF links between multiple points on the map, showing the Signal-to-Noise Ratio (SNR).
+*   **Multi-site Analysis**: It supports combining multiple transmitters into a single coverage analysis.
+*   **Satellite Coverage**: A dedicated feature allows users to analyze the visibility of satellites (e.g., OPTUS C1) for a given area.
+*   **Template-Based Configuration**: Radio systems are defined using JSON template files. The plugin comes with several pre-packaged templates, and users can download more from their CloudRF account or sideload their own.
+
+The plugin is written in a mix of **Kotlin** and **Java** and uses **Gradle** for building. It integrates deeply with ATAK, using its map view, dropdown framework, and inter-component communication (Intents).
+
+## 2. Codebase Structure & Key Files
+
+The project follows a standard Android application structure.
+
+*   `app/build.gradle`: The Gradle build file. It defines project dependencies, SDK versions, and build configurations.
+    *   **Dependencies**:
+        *   `com.squareup.retrofit2:retrofit:2.9.0`: For making HTTP requests to the CloudRF API.
+        *   `com.squareup.okhttp3:okhttp:4.9.1`: The underlying HTTP client for Retrofit.
+        *   `com.google.code.gson:gson`: For serializing and deserializing JSON data (used by Retrofit).
+        *   `androidx.recyclerview:recyclerview:1.1.0`: For displaying lists of markers/radios.
+*   `app/src/main/assets/plugin.xml`: The ATAK plugin descriptor. It registers the main lifecycle and tool components with the ATAK framework.
+*   `app/src/main/java/com/atakmap/android/soothsayer/plugin/PluginLifecycle.java`: The main entry point for the plugin. It initializes the `PluginMapComponent`.
+*   `app/src/main/java/com/atakmap/android/soothsayer/PluginMapComponent.java`: The primary component that integrates with the ATAK map view. It sets up the main UI receiver (`PluginDropDownReceiver`) and map overlays.
+*   `app/src/main/java/com/atakmap/android/soothsayer/PluginDropDownReceiver.kt`: **This is the most critical file in the project.** This ~1700 line Kotlin file contains the vast majority of the plugin's UI logic, state management, and business logic. It handles user interactions, API calls, marker management, and layer drawing.
+*   `app/src/main/java/com/atakmap/android/soothsayer/network/ApiService.kt`: A Retrofit interface that defines all the CloudRF API endpoints used by the application.
+*   `app/src/main/java/com/atakmap/android/soothsayer/models/`: This package contains all the Kotlin data classes that model the API requests and responses (e.g., `TemplateDataModel`, `MultisiteRequest`, `LinkResponse`).
+*   `app/src/main/assets/json templates/`: This directory contains default JSON files that serve as templates for different radio systems.
+
+## 3. Architectural Analysis
+
+### 3.1. Overall Architecture
+
+The plugin's architecture is event-driven and tightly coupled with the ATAK framework.
+
+1.  **Initialization**: ATAK loads the plugin via `plugin.xml`, which instantiates `PluginLifecycle`. This, in turn, creates the `PluginMapComponent`.
+2.  **UI and Main Logic**: The `PluginMapComponent` creates the `PluginDropDownReceiver`. This class acts as a monolithic controller for the plugin's UI. It's a "DropDown" that can be shown or hidden from the side of the screen. It manages multiple view states (main, login, settings, radio edit, spot beam) within a single layout by toggling their visibility.
+3.  **User Interaction**:
+    *   The user interacts with the UI in the dropdown (e.g., selects a radio template, clicks "add marker").
+    *   `PluginDropDownReceiver` handles these events and adds a custom `Marker` to the ATAK map.
+    *   The receiver listens for map events on these markers (e.g., `ITEM_DRAG_DROPPED`).
+4.  **API Communication**:
+    *   When a calculation is needed (e.g., after a marker is moved), the `PluginDropDownReceiver` builds the appropriate request object (e.g., `MultisiteRequest`) using data from the JSON template and the marker's current state.
+    *   It uses a `PluginRepository` (a singleton repository pattern) to execute the API call defined in `ApiService.kt`.
+    *   The repository handles the asynchronous call and returns the result via a callback.
+5.  **Displaying Results**:
+    *   On a successful API call, the plugin receives a URL for a PNG or KMZ file.
+    *   It downloads this file and uses it to create a `CloudRFLayer`, a custom map overlay that displays the heatmap.
+    *   For point-to-point links, it draws `Polyline` objects directly on the map.
+
+### 3.2. State Management
+
+State is managed in two primary ways:
+*   **In-Memory**: The `PluginDropDownReceiver` holds the current state of the UI, the list of active markers (`markersList`), and loaded templates in memory.
+*   **Persistence**: `AtakPreferences` (a `SharedPreferences` wrapper) is used to save user credentials, the server URL, plugin settings, and the list of markers between sessions. This allows the plugin to restore its state when ATAK restarts.
+
+### 3.3. Noteworthy Features & Implementation Details
+
+*   **Monolithic Controller**: The `PluginDropDownReceiver` is a very large class that handles almost everything. While this makes it easy to find code, it could be difficult to maintain or extend. Refactoring it into smaller, more focused components could be beneficial.
+*   **Dynamic Templates**: The system for loading templates from assets, the API, and a local folder is powerful and flexible.
+*   **Deep ATAK Integration**: The plugin makes good use of ATAK features like custom markers, menus (`radio_menu.xml`), intents for cross-component communication, and map overlays.
+*   **Spot Beam Feature**: This is a distinct and complex piece of functionality with its own UI and API calls, demonstrating the plugin's capability to handle different types of geospatial analysis.
+
+## 4. Summary & Potential Improvements
+
+The SOOTHSAYER ATAK plugin is a powerful and feature-rich tool for RF analysis. It is well-integrated into the ATAK ecosystem and provides a significant amount of functionality.
+
+**Strengths:**
+*   Comprehensive feature set covering area, multisite, point-to-point, and satellite analysis.
+*   Flexible template system.
+*   Good use of persistent storage for user convenience.
+
+**Potential Areas for Improvement:**
+*   **Code Modularity**: The `PluginDropDownReceiver.kt` file is extremely large. Breaking it down into smaller, more specialized classes (e.g., a `SettingsManager`, a `MarkerManager`, a `SpotBeamController`) would improve readability and maintainability.
+*   **UI/UX**: The UI is functional but relies on showing/hiding multiple layouts within one container. Using Fragments or a more modern UI paradigm could lead to a cleaner implementation.
+*   **Error Handling**: The error handling is basic. More specific feedback to the user about what went wrong with an API call (e.g., distinguishing between a network error and an invalid parameter) would be helpful.
+*   **Testing**: There are no visible unit or integration tests. Given the complexity of the API interactions and calculations, adding a test suite would greatly improve the robustness of the plugin. 

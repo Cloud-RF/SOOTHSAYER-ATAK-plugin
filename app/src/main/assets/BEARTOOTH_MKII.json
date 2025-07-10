@@ -1,0 +1,72 @@
+{
+    "version": "CloudRF-API-v3.8.10",
+    "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
+    "customIcon": "data:image/png;base64,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",
+    "template": {
+        "name": "Beartooth_MKII",
+        "service": "CloudRF https://api.cloudrf.com",
+        "created_at": "2025-07-04T00:00:00+02:00",
+        "owner": 1,
+        "bom_value": 0
+    },
+    "site": "Beartooth_MKII-915",
+    "network": "Beartooth",
+    "engine": 1,
+    "coordinates": 1,
+    "transmitter": {
+        "lat": 38.916,
+        "lon": -77.222,
+        "alt": 2,
+        "frq": 915,
+        "txw": 1,
+        "bwi": 1,
+        "powerUnit": "W"
+    },
+    "receiver": {
+        "lat": 38.917,
+        "lon": -77.223,
+        "alt": 2,
+        "rxg": 2,
+        "rxs": -113
+    },
+    "feeder": {
+        "flt": 1,
+        "fll": 0,
+        "fcc": 0
+    },
+    "antenna": {
+        "mode": "custom",
+        "txg": 2,
+        "txl": 1,
+        "ant": 0,
+        "azi": 0,
+        "tlt": 0,
+        "hbw": 360,
+        "vbw": 360,
+        "fbr": 0,
+        "pol": "v"
+    },
+    "model": {
+        "pm": 10,
+        "pe": 2,
+        "ked": 4,
+        "rel": 90
+    },
+    "environment": {
+        "elevation": 2,
+        "landcover": 1,
+        "buildings": 1,
+        "obstacles": 1,
+        "clt": "Mean.clt"
+    },
+    "output": {
+        "units": "m",
+        "col": "RAINBOW.dBm",
+        "out": 2,
+        "ber": 2,
+        "mod": 3,
+        "nf": -114,
+        "res": 5,
+        "rad": 5
+    }
+}

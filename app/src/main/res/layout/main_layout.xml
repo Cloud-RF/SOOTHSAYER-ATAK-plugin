@@ -31,32 +31,54 @@
                 android:padding="5dp"
                 android:src="@drawable/marker_icon_svg" />
 
+            <!--
+                This is the new button to launch the Co-Opt feature.
+                It uses the Sheriff's badge icon and is positioned to the left of the settings icon.
+            -->
+
             <ImageButton
                 android:id="@+id/btnAddPolygon"
                 style="@style/darkButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginStart="10dp"
+                android:layout_marginLeft="5dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
-                android:layout_toRightOf="@id/btnAddMarker"
+                android:layout_toRightOf="@id/coOptButton"
                 android:padding="5dp"
                 android:src="@drawable/polygon" />
 
             <ImageButton
-                android:id="@+id/btnSpotBeam"
+                android:id="@+id/coOptButton"
                 style="@style/darkButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_centerHorizontal="true"
+                android:layout_centerHorizontal="false"
                 android:layout_marginStart="10dp"
+                android:layout_marginLeft="45dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
-                android:layout_toRightOf="@id/btnAddPolygon"
+
+                android:contentDescription="Co-Opt a callsign"
                 android:padding="5dp"
-                android:src="@drawable/spotbeam_marker_icon" />
+                android:src="@drawable/ic_sheriff_badge" />
+
+            <ImageButton
+                android:id="@+id/stopCoOptButton"
+                style="@style/darkButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="0dp"
+                android:layout_toRightOf="@id/btnPlayBtn"
+                android:contentDescription="Stop Co-Opt"
+                android:padding="5dp"
+                android:src="@drawable/ic_red_square"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/ivSettings"
@@ -77,10 +99,10 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginStart="10dp"
+                android:layout_marginLeft="200dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
-                android:layout_toRightOf="@id/btnSpotBeam"
                 android:background="@drawable/btn_gray"
                 android:padding="5dp"
                 android:src="@drawable/play" />
@@ -91,12 +113,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tvTemplate"
-                style="@style/TextStyle"
-                android:text="@string/template"
-                android:textSize="@dimen/sp_14" />
 
             <!-- For all usages of Spinners in plugins one must make
                    use of the PluginSpinner class supplied with the SDK -->
@@ -137,5 +153,20 @@
         android:id="@+id/sbmainll"
         layout="@layout/spot_beam_layout"
         android:visibility="gone" />
+
+    <!-- This comment describes the included Co-Opt list layout. -->
+    <include
+        android:id="@+id/ilCoOpt"
+        layout="@layout/co_opt_layout"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/co_opt_next_update_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:padding="8dp"
+        android:text=""
+        android:visibility="gone"/>
 
 </LinearLayout>

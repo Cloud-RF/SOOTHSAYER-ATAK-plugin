@@ -1,0 +1,448 @@
+## Java Function-by-Function Analysis
+
+This document provides a detailed, function-by-function analysis of every `.java` file in the SOOTHSAYER ATAK Plugin project.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/SpotBeamCall.java`
+
+This class is responsible for handling the "Spot Beam" or satellite coverage analysis feature of the plugin. It constructs and sends a specific request to the CloudRF `/satellite/area` API endpoint and processes the results.
+
+**1. `public static void callAPI(Satellite satellite, double areaLat, double areaLon, PluginDropDownReceiver receiver, String apiKey, String API_URL, String dateTime)`**
+*   **Purpose**: This is the main public method that initiates the satellite coverage API call. It gathers all necessary parameters, constructs the JSON request body, and triggers the network call.
+*   **Parameters**:
+    *   `satellite`: A `Satellite` object containing the name of the satellite to be analyzed.
+    *   `areaLat`, `areaLon`: The latitude and longitude for the center of the analysis area.
+    *   `receiver`: A reference to the main `PluginDropDownReceiver` to access UI elements, settings (like resolution), and callback methods.
+    *   `apiKey`: The user's CloudRF API key for authentication.
+    *   `API_URL`: The base URL of the CloudRF API.
+    *   `dateTime`: The specific date and time for the satellite visibility calculation.
+*   **Functionality**:
+    1.  Calculates the geographic bounds (North, South, East, West) for the API request. The size of this area is determined by the `resolution` set in the plugin's settings.
+    2.  If a polygon has been drawn on the map (`CustomPolygonTool.getMaskingPolygon()`), it uses the bounds of that polygon instead.
+    3.  Constructs a detailed JSON string for the request body. This JSON includes the satellite name, date/time, receiver/environment parameters, and the output format specifications.
+    4.  Calls the private `makeCall` method to execute the request.
+
+**2. `private static void makeCall(String body, PluginDropDownReceiver receiver, String satName, String apiKey, double areaLat, double areaLon, String API_URL)`**
+*   **Purpose**: Executes the actual network request on a background thread and processes the JSON response.
+*   **Parameters**:
+    *   `body`: The JSON request body created by `callAPI`.
+    *   `receiver`: The `PluginDropDownReceiver` for UI updates and callbacks.
+    *   `satName`: The name of the satellite.
+    *   `apiKey`, `areaLat`, `areaLon`, `API_URL`: Passed through for use in response processing.
+*   **Functionality**:
+    1.  Spawns a new `Thread` to avoid blocking the main UI thread.
+    2.  Calls `getJsonString` to perform the HTTP POST request.
+    3.  If the request is successful, it parses the JSON response using `JsonParser`.
+    4.  Extracts key information from the response: the URL for the KMZ and PNG files, the geographic bounds, and the satellite's position (`lat`, `lon`, `height_km`).
+    5.  Calls `downloadKMZ` and `downloadPNG` to fetch the result files.
+    6.  Calculates the azimuth and elevation from the user's location to the satellite's position using `calculateAzimuth` and `calculateElevation`.
+    7.  Updates the UI on the main thread to display the calculated azimuth, elevation, and altitude.
+    8.  Draws a line on the map to visualize the direction to the satellite.
+
+**3. `private static void downloadKMZ(String urlString, String satName)` & `private static void downloadPNG(String urlString, String satName, PluginDropDownReceiver receiver, List<Double> bounds)`**
+*   **Purpose**: These methods download the result files (KMZ and PNG image) from the URLs provided in the API response.
+*   **Functionality**: They open a connection to the given URL, read the data stream, and write it to a file in the `atak/SOOTHSAYER/KMZ/` directory on the device's SD card. The `downloadPNG` method additionally calls `receiver.addSingleKMZLayer` to display the downloaded image as a map overlay.
+
+**4. `private static double[] endpointFromPointBearingDistance(double latitude, double longitude, double bearingDegrees, double distanceMeters)`**
+*   **Purpose**: A geospatial utility function to calculate a new coordinate point given a starting point, a bearing (direction), and a distance.
+*   **Returns**: A `double[]` array containing the resulting latitude and longitude.
+
+**5. `private static String getJsonString(String body, String apiKey, PluginDropDownReceiver receiver, String satName, String API_URL)`**
+*   **Purpose**: Handles the low-level details of making the `HttpsURLConnection` POST request.
+*   **Functionality**:
+    1.  Sets up an `SSLContext` that trusts all certificates. This is often done to simplify development but can be a security risk in production if not handled carefully.
+    2.  Opens an `HttpsURLConnection` to the `/satellite/area` endpoint.
+    3.  Sets the request method to POST and adds the API key to the request properties.
+    4.  Writes the JSON `body` to the connection's output stream.
+    5.  Reads the response. If the response code is `HTTP_OK`, it returns the response body as a string.
+    6.  If the response code indicates an error, it reads the error stream, parses the error message from the JSON, and displays it to the user as a `Toast` message.
+
+**6. `private static double calculateAzimuth(...)` & `private static double calculateElevation(...)`**
+*   **Purpose**: These are mathematical utility functions for performing geospatial calculations.
+*   **`calculateAzimuth`**: Calculates the directional bearing (in degrees) from point A to point B.
+*   **`calculateElevation`**: A more complex method that calculates the elevation angle (in degrees) from a ground terminal (A) to a satellite (B), accounting for the curvature of the Earth.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/layers/CloudRFLayer.java`
+
+This class defines a custom map layer for ATAK. Its primary purpose is to represent a georeferenced image (the RF coverage heatmap downloaded from the CloudRF API) as an overlay on the map. It extends `AbstractLayer`, which is the standard way to create custom layers in ATAK.
+
+**1. `public CloudRFLayer(Context plugin, final String name, final String description, final String uri, final List<Double> bounds, final CloudRFLayerListener listener)`**
+*   **Purpose**: This is the constructor for the layer. It initializes all the necessary properties to define the image overlay.
+*   **Parameters**:
+    *   `plugin`: The plugin's `Context`.
+    *   `name`: The internal name for the layer.
+    *   `description`: A user-facing description of the layer.
+    *   `uri`: The file path (URI) to the downloaded PNG image that will be displayed.
+    *   `bounds`: A `List<Double>` containing the four geographic coordinates (North, East, South, West) that define the rectangular area where the image should be placed on the map.
+    *   `listener`: A `CloudRFLayerListener` instance, used for callbacks (like when the user wants to delete the layer).
+*   **Functionality**:
+    1.  Calls the superclass constructor with the layer `name`.
+    2.  Stores the `description`, `fileUri`, and `listener`.
+    3.  **Image Masking**: It checks if a masking polygon has been drawn using `CustomPolygonTool.getMaskingPolygon()`.
+        *   If a polygon exists, it uses the `GeoImageMasker` utility to crop the source bitmap to the shape of that polygon. This allows for non-rectangular coverage areas.
+        *   If no polygon exists, it decodes the entire bitmap from the `uri`.
+    4.  **Geo-referencing**: It sets the four corner points (`upperLeft`, `upperRight`, `lowerRight`, `lowerLeft`) of the layer based on the `bounds` list. This maps the corners of the bitmap image to specific latitude/longitude coordinates.
+    5.  Stores the `width` and `height` of the final bitmap.
+    6.  **MetaShape Creation**: It creates a `MetaShape`. This is an important ATAK concept that makes the layer selectable and interactable within the map UI and Overlay Manager.
+        *   The `MetaShape` is configured with a `callsign`, a `type` (`SOOTHSAYER Layer`), and is made `removable`.
+        *   Crucially, it attaches a custom menu (`menus/layer_menu.xml`) to the layer, allowing users to perform actions like toggling visibility or deleting it.
+
+**2. `public GeoBounds getBounds()`**
+*   **Purpose**: Returns the geographic bounds of the entire layer.
+*   **Functionality**: It calculates and returns a `GeoBounds` object based on the four corner points of the layer. ATAK uses this for various purposes, such as zooming to the layer.
+
+**3. `public GeoPoint[] getPoints()`**
+*   **Purpose**: Returns the four corner points of the layer.
+*   **Functionality**: It returns a `GeoPoint[]` array containing the `upperLeft`, `upperRight`, `lowerRight`, and `lowerLeft` coordinates. This is used by the associated `MetaShape` and the GL renderer.
+
+**4. `public MetaShape getMetaShape()`**
+*   **Purpose**: A simple getter method to expose the `MetaShape` associated with this layer.
+*   **Functionality**: Returns the `metaShape` object created in the constructor.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/layers/GLCloudRFLayer.java`
+
+This class is the OpenGL renderer for the `CloudRFLayer`. In ATAK's graphics architecture, for every `Layer` object that needs to be drawn on the map, there is a corresponding `GLLayer` object responsible for handling the OpenGL drawing commands. This class takes the `Bitmap` and geographic coordinates from a `CloudRFLayer` and renders it as a textured quadrilateral on the map surface.
+
+**1. `public final static GLLayerSpi2 SPI`**
+*   **Purpose**: This is a Service Provider Interface (SPI). It's a static factory object that ATAK's map renderer uses to create an instance of this `GLCloudRFLayer` whenever a `CloudRFLayer` is added to the map.
+*   **Functionality**:
+    *   `getPriority()`: Returns a priority value that helps ATAK decide which SPI to use if multiple renderers could handle the same layer type.
+    *   `create()`: This method is called by the renderer. It checks if the layer to be rendered is an instance of `CloudRFLayer`. If it is, it creates and returns a new `GLCloudRFLayer`; otherwise, it returns `null`.
+
+**2. `public GLCloudRFLayer(MapRenderer surface, CloudRFLayer subject)`**
+*   **Purpose**: The constructor for the renderer.
+*   **Parameters**:
+    *   `surface`: A reference to the ATAK `MapRenderer`.
+    *   `subject`: The `CloudRFLayer` instance that this OpenGL renderer will be responsible for drawing.
+*   **Functionality**: It calls the superclass constructor and stores a reference to the `subject` layer to access its data (bitmap, bounds, etc.).
+
+**3. `protected void init()`**
+*   **Purpose**: Called once by the rendering engine to initialize the OpenGL components.
+*   **Functionality**: It creates a new `Data` object (the private inner class that holds GL buffers) and then calls the `setData` method to pass the bitmap and coordinates from the `subject` layer to the renderer for the first time.
+
+**4. `protected void drawImpl(GLMapView view)`**
+*   **Purpose**: This is the core drawing method, called for every frame that the map renders.
+*   **Parameters**:
+    *   `view`: The current `GLMapView` state, which provides projection information.
+*   **Functionality**:
+    1.  It uses `view.forward()` to project the geographic corner points (`frame.points`) of the layer into the map's 2D screen coordinates (`frame.vertexCoordinates`).
+    2.  It then calls `frame.texture.draw()`, passing the vertex and texture coordinates. This tells OpenGL to draw the texture (the coverage image) onto the quadrilateral defined by the projected vertex coordinates.
+
+**5. `public void release()`**
+*   **Purpose**: Called when the layer is removed from the map or the application is shutting down.
+*   **Functionality**: It releases the OpenGL texture resource (`frame.texture.release()`) to prevent memory leaks in the GPU.
+
+**6. `public void setData(...)` (two overloaded versions)**
+*   **Purpose**: These methods are used to update the layer's data (the image and its bounds). One is a legacy method taking an `int[]` array, but the one used in the plugin takes a `Bitmap`.
+*   **Functionality**:
+    1.  It receives the new bitmap and corner points.
+    2.  It uses `renderContext.queueEvent()` to ensure that the actual update logic runs on the dedicated OpenGL thread, which is a requirement for modifying GL resources like textures.
+    3.  The `Runnable` passed to the queue calls the private `frame.update()` method.
+    4.  It recycles the bitmap after it has been used to free up memory.
+
+**7. `private static class Data`**
+*   **Purpose**: A private inner class that encapsulates all the raw data and buffers needed for OpenGL rendering.
+*   **Fields**:
+    *   `texture`: A `GLTexture` object, which is ATAK's wrapper around an OpenGL texture.
+    *   `points`: A `DoubleBuffer` holding the four corner geographic coordinates (lat/lon).
+    *   `vertexCoordinates`: A `FloatBuffer` holding the projected 2D screen coordinates.
+    *   `textureCoordinates`: A `ByteBuffer` that maps the corners of the texture image to the corners of the quadrilateral.
+*   **`void update(...)` method**:
+    *   This is where the bitmap data is actually loaded into the `GLTexture`.
+    *   If the new bitmap is larger than the existing texture, it releases the old texture and allocates a new, larger one.
+    *   It updates the `textureCoordinates` and `points` buffers with the new data.
+    *   Finally, it calls `this.texture.load(frame)` to upload the pixel data from the `Bitmap` to the GPU.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/layers/PluginMapOverlay.java`
+
+This class acts as the bridge between the plugin's custom `CloudRFLayer`s and ATAK's Overlay Manager. The Overlay Manager is the list (usually on the left side of the screen) that allows users to see and control all the different map layers and objects. This class defines how the SOOTHSAYER layers appear and behave in that list. It extends `AbstractMapOverlay2`, the standard base class for this purpose.
+
+**1. `public PluginMapOverlay(MapView mapView, Context plugin)`**
+*   **Purpose**: The constructor for the overlay manager.
+*   **Parameters**:
+    *   `mapView`: The main ATAK `MapView`.
+    *   `plugin`: The plugin's `Context`.
+*   **Functionality**: It initializes a `DefaultMapGroup` which will contain the `MetaShape`s associated with each `CloudRFLayer`. It also instantiates `PluginDeepMapItemQuery` for handling map queries.
+
+**2. `public String getIdentifier()` and `public String getName()`**
+*   **Purpose**: Basic getters required by the ATAK framework.
+*   **Functionality**: `getIdentifier()` returns a unique string for the overlay, and `getName()` returns the user-visible name that appears at the top of the list in Overlay Manager (i.e., "SOOTHSAYER").
+
+**3. `public MapGroup getRootGroup()`**
+*   **Purpose**: Returns the `MapGroup` that holds all the map items associated with this overlay.
+
+**4. `public DeepMapItemQuery getQueryFunction()`**
+*   **Purpose**: Returns the custom query handler (`PluginDeepMapItemQuery`) that allows ATAK to find and interact with the overlay's items (e.g., when the user taps on the map).
+
+**5. `public HierarchyListItem getListModel(...)`**
+*   **Purpose**: This is a factory method that provides the root item for this overlay in the Overlay Manager list.
+*   **Functionality**: It creates (if needed) and returns a `PluginListModel` instance, which defines the appearance and behavior of the main "SOOTHSAYER" entry in the list.
+
+**6. `private List<CloudRFLayer> getLayers()`**
+*   **Purpose**: A helper method to find all active `CloudRFLayer` instances currently on the map.
+*   **Functionality**: It iterates through all layers on the map's surface overlay stack and returns a `List` of those that are instances of `CloudRFLayer`.
+
+**7. `public CloudRFLayer findLayer(String uid)`**
+*   **Purpose**: Finds a specific `CloudRFLayer` by its unique ID.
+*   **Functionality**: Iterates through the active layers and returns the one whose `MetaShape` UID matches the one provided.
+
+**8. `public Boolean hideAllKmzLayer(String layerType, Boolean isVisible)`**
+*   **Purpose**: Sets the visibility for all layers of a specific type.
+*   **Functionality**: Iterates through all `CloudRFLayer`s and calls `setVisible()` on each one that matches the given `layerType`.
+
+---
+#### Inner Class: `public class PluginListModel`
+This class defines the main "SOOTHSAYER" entry in the Overlay Manager list.
+
+*   **`getTitle()`, `getIconUri()`**: Provide the title and icon for the list entry.
+*   **`getFooterView()`**: Inflates and manages a custom footer view (`overlay_footer.xml`) that contains buttons to toggle visibility for all layers managed by this overlay.
+*   **`refreshImpl()`**: The core logic for populating the list. It gets all the current `CloudRFLayer`s and creates a `LayerHierarchyListItem` for each one, then updates its children in the list.
+*   **`setVisible(boolean visible)`**: Implements the `Visibility2` interface, allowing the "show/hide all" functionality from the footer.
+*   **`find(String searchTerms)`**: Implements the `Search` interface, allowing the layers to be found via the Overlay Manager's search bar.
+
+---
+#### Inner Class: `private class LayerHierarchyListItem`
+This class defines how each individual `CloudRFLayer` (e.g., "Multisite Coverage," "SPOTBEAM") appears as a sub-item in the Overlay Manager list.
+
+*   **`getExtraView(...)`**: Inflates a custom view (`overlay_list_item_extra.xml`) for each item, which contains a "delete" button.
+*   **`getTitle()`, `getDescription()`, `getIconUri()`**: Provide the title, description, and icon for the individual layer item.
+*   **`setVisible(boolean visible)`, `isVisible()`**: Implements the `Visibility` interface, allowing the visibility of a single layer to be toggled.
+*   **`goTo(boolean select)`**: Implements the `GoTo` interface. When a user taps the item in the list, this function is called to pan/zoom the map to that layer's extent. If `select` is true, it also opens the context menu for that layer.
+*   **`onClick(View v)`**: Handles the click event for the "delete" button, calling back to the `CloudRFLayerListener` to initiate the deletion process.
+
+---
+#### Inner Class: `private class PluginDeepMapItemQuery`
+This class handles "deep" map queries, which are essential for making the non-standard `CloudRFLayer` objects selectable on the map.
+
+*   **`deepHitTest(int xpos, int ypos, GeoPoint point, MapView view)`**: This is the most important method here. When the user taps the screen, ATAK calls this method. It checks if the tap location (`point`) is within the geographic bounds of any visible `CloudRFLayer`. If it is, it returns the layer's `MetaShape`, making the layer "selectable" and allowing its context menu to be opened.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/GeoImageMasker.java`
+
+This is a helper class dedicated to performing a single, complex task: cropping a rectangular `Bitmap` image into a non-rectangular shape defined by a user-drawn polygon. It contains no state and all its methods are `static`. This is used to ensure that the final coverage heatmap displayed on the map perfectly matches the arbitrary boundaries a user might have drawn.
+
+**1. `public static class Bounds`**
+*   **Purpose**: A simple, static inner class that acts as a data container for geographic bounds.
+*   **Functionality**: It holds four `double` values: `north`, `south`, `east`, and `west`. It provides basic getter methods and a `toString()` method for easy debugging. This makes passing around boundary coordinates cleaner and less error-prone than using a raw `List` or array.
+
+**2. `public static Bounds getBounds(GeoPoint[] points)`**
+*   **Purpose**: This utility method calculates the minimum bounding box for an array of geographic points.
+*   **Parameters**:
+    *   `points`: An array of `GeoPoint` objects.
+*   **Returns**: A `Bounds` object.
+*   **Functionality**: It iterates through all the points in the input array, finding the maximum latitude (`north`), minimum latitude (`south`), maximum longitude (`east`), and minimum longitude (`west`) to define the rectangle that fully encloses all the points.
+
+**3. `public static Bitmap cropImage(Bitmap bm, Bounds imageBounds, DrawingShape ds)`**
+*   **Purpose**: An overloaded convenience method that extracts the `GeoPoint[]` from a `DrawingShape` object before calling the main `cropImage` method.
+*   **Parameters**:
+    *   `bm`: The source `Bitmap` image to be cropped.
+    *   `imageBounds`: The geographic bounds of the source `Bitmap`.
+    *   `ds`: The `DrawingShape` (polygon) that will define the crop mask.
+*   **Returns**: The newly cropped `Bitmap`.
+
+**4. `public static Bitmap cropImage(Bitmap bm, Bounds imageBounds, GeoPoint[] points)`**
+*   **Purpose**: This is the core method of the class. It performs the graphical masking operation.
+*   **Parameters**:
+    *   `bm`: The source `Bitmap` image.
+    *   `imageBounds`: The geographic `Bounds` of the source `Bitmap`.
+    *   `points`: An array of `GeoPoint`s defining the polygon mask.
+*   **Returns**: A new, cropped `Bitmap`.
+*   **Functionality**: The process involves several steps:
+    1.  **Coordinate Conversion**: It iterates through each `GeoPoint` of the polygon and converts its latitude/longitude into pixel coordinates (x, y) relative to the source `Bitmap`. This is done by linear interpolation based on the `imageBounds`.
+    2.  **Mask Creation**: It creates a new, blank `Bitmap` (`mask`) of the same dimensions as the original image.
+    3.  **Path Drawing**: It creates a `Path` object from the converted pixel coordinates and draws this filled polygon onto the `mask` bitmap using a solid color (white). The rest of the mask remains transparent.
+    4.  **Applying the Mask**:
+        *   It creates a final `result` bitmap and draws the original source bitmap (`bm`) onto it.
+        *   It then sets the `Paint`'s transfer mode to `PorterDuff.Mode.DST_IN`. This is a critical step. `DST_IN` mode means "keep the destination pixels (`result` bitmap) only where they overlap with the source pixels (`mask` bitmap)."
+        *   It draws the `mask` bitmap onto the `result` canvas. Because of the `DST_IN` mode, this effectively erases everything in the `result` bitmap that is outside the white polygon shape of the mask.
+    5.  The final `result` bitmap, which now appears to be shaped like the polygon, is returned.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/plugin/PluginNativeLoader.java`
+
+This is a boilerplate utility class provided as part of the ATAK plugin development kit. Its purpose is to provide a secure and reliable way to load native C/C++ libraries (`.so` files) that a plugin might depend on.
+
+*Note: While this file exists in the project, the SOOTHSAYER plugin does not appear to actually use it or load any native libraries based on the current codebase. It's likely included as part of the standard plugin template.*
+
+**1. `synchronized static public void init(final Context context)`**
+*   **Purpose**: Initializes the loader by determining the absolute path to the directory where the application's native libraries are stored.
+*   **Parameters**:
+    *   `context`: The application or plugin `Context`.
+*   **Functionality**:
+    1.  It's `synchronized` to ensure it's thread-safe, as it modifies a static variable (`ndl`).
+    2.  It checks if the native directory path (`ndl`) has already been fetched. If not, it proceeds.
+    3.  It uses the `PackageManager` to get the `ApplicationInfo` for the current package.
+    4.  From the `ApplicationInfo`, it retrieves the `nativeLibraryDir` property. This is a system-provided, absolute path to the location where Android has installed the `.so` files for this specific application.
+    5.  It stores this path in the static `ndl` variable for later use.
+
+**2. `public static void loadLibrary(final String name)`**
+*   **Purpose**: Loads a specific native library using its full, absolute path.
+*   **Parameters**:
+    *   `name`: The name of the library to load (e.g., "my-native-lib").
+*   **Functionality**:
+    1.  It first checks if `init()` has been called by verifying that `ndl` is not null.
+    2.  It constructs the full, absolute path to the library file. It does this by combining the `nativeLibraryDir` path (`ndl`), a file separator, and the platform-specific library name (e.g., `libmy-native-lib.so`), which it gets from `System.mapLibraryName(name)`.
+    3.  It checks if the file at that absolute path actually exists.
+    4.  If it exists, it calls `System.load(lib)`. The key here is using `System.load()` with an absolute path, which is considered more secure than `System.loadLibrary()`, as the latter can be subject to manipulation through environmental variables.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/plugin/PluginToolDescriptor.java`
+
+This class describes the plugin's tool to the ATAK framework. It defines what the plugin looks like in the ATAK toolbar and what happens when the user presses its button. It extends `AbstractPluginTool`, which is the standard base class for this purpose.
+
+**1. `public PluginToolDescriptor(Context context)`**
+*   **Purpose**: The constructor for the tool descriptor.
+*   **Parameters**:
+    *   `context`: The plugin's `Context`.
+*   **Functionality**: It simply calls the `super` constructor of `AbstractPluginTool` with five important pieces of information:
+    1.  `context`: The plugin context.
+    2.  `context.getString(R.string.app_name)`: The short name or title of the tool (e.g., "SOOTHSAYER"). This is what might appear as a label.
+    3.  `context.getString(R.string.app_name)`: The description or tooltip for the tool.
+    4.  `context.getResources().getDrawable(R.drawable.ic_launcher)`: The icon for the tool button that will be displayed in the ATAK toolbar.
+    5.  `PluginDropDownReceiver.SHOW_PLUGIN`: **This is the most critical parameter.** This is the `Intent` action that ATAK will broadcast when the user taps the tool's icon in the toolbar. The `PluginDropDownReceiver` is listening for this specific action, and this is what triggers the dropdown to appear.
+
+**2. `public void dispose()`**
+*   **Purpose**: Implements the `Disposable` interface. This method is called when the plugin is being unloaded.
+*   **Functionality**: In this case, the method is empty as there are no specific resources within this class that need to be cleaned up.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/plugin/PluginLifecycle.java`
+
+This class serves as the primary entry point for the entire plugin. When ATAK loads the plugin, this is the class that gets instantiated, as defined in the `plugin.xml` file. It extends `AbstractPlugin`, the base class for ATAK plugin lifecycle management.
+
+**1. `public PluginLifecycle(IServiceController serviceController)`**
+*   **Purpose**: This is the constructor and the only method in the class. It's responsible for creating and registering the plugin's main components with the ATAK framework.
+*   **Parameters**:
+    *   `serviceController`: An object provided by the ATAK framework that allows the plugin to get services and context.
+*   **Functionality**: Its sole job is to call the `super` constructor of `AbstractPlugin`, passing it three new objects:
+    1.  `serviceController`: It passes along the service controller provided by ATAK.
+    2.  `new PluginToolDescriptor(...)`: It creates an instance of the `PluginToolDescriptor`. This registers the plugin's button in the ATAK toolbar. To get the `Context` needed by the descriptor, it first gets the `PluginContextProvider` service and then calls `getPluginContext()`.
+    3.  `new PluginMapComponent()`: It creates an instance of the `PluginMapComponent`. This is the core component that will handle all map-related interactions and logic for the plugin. Registering it here ensures it will be loaded into the map view.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/Satellite.java`
+
+This class serves two purposes: it acts as a data model to hold information about a single satellite, and it contains the static method responsible for querying the CloudRF API to find satellites based on a search term.
+
+**1. `public Satellite(String name, double period, double inclination, int apogee, int perigee)` and `public Satellite()`**
+*   **Purpose**: These are the constructors for the class.
+*   **Functionality**:
+    *   The main constructor takes five parameters (`name`, `period`, `inclination`, `apogee`, `perigee`) and assigns them to the corresponding public fields of the object. This creates a populated `Satellite` data object.
+    *   The empty (default) constructor creates a placeholder object with the name "EMPTY". This is likely used for initialization before a real satellite is selected.
+
+**2. `public static void getSats(String query, PluginDropDownReceiver receiver, String API_URL)`**
+*   **Purpose**: This is the main functional method of the class. It performs an asynchronous API call to search for satellites.
+*   **Parameters**:
+    *   `query`: The search string provided by the user (e.g., "SKYNET").
+    *   `receiver`: A reference to the `PluginDropDownReceiver` to act as a callback target for the results.
+    *   `API_URL`: The base URL for the CloudRF API.
+*   **Functionality**:
+    1.  **Background Thread**: It creates and starts a new `Thread` to ensure the network operation does not block the UI.
+    2.  **HTTPS Setup**:
+        *   It sets up an `SSLContext` that trusts all certificates, disabling standard SSL verification. This is common for development but should be handled carefully in a production environment.
+        *   It opens an `HttpsURLConnection` to the `/satellite/query` endpoint, appending the user's `query` as a URL parameter.
+    3.  **API Call**: It executes the GET request and reads the response.
+    4.  **JSON Parsing**: If the request is successful and the response is not empty, it uses `JsonParser` to parse the JSON response, which is expected to be a `JsonArray`.
+    5.  **Object Creation**: It iterates through the `JsonArray`. For each `JsonObject` in the array, it:
+        *   Extracts the satellite's properties (NAME, PERIOD, INCLINATION, etc.).
+        *   Creates a new `Satellite` object with this data.
+        *   Stores the new `Satellite` object in a `satellites` array and its name in a `names` array.
+    6.  **Callback and UI Update**:
+        *   It calls `receiver.setNames(names)`. This updates the `AutoCompleteTextView` in the UI, showing the search results to the user.
+        *   **Auto-selection**: If exactly one satellite is returned by the search, it assumes this is the one the user wants. It calls `receiver.setSatellite(satellites[0])` to set it as the active satellite and then immediately calls `receiver.addSpotBeamAreaMarker()` to place the calculation marker on the map, streamlining the user workflow.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/recyclerview/RecyclerView.java`
+
+This class is a custom extension of the standard Android `androidx.recyclerview.widget.RecyclerView`. Its purpose is to work around a specific crash that occurs on certain devices, particularly Samsung devices.
+
+**1. `public RecyclerView(Context context)` and overloads**
+*   **Purpose**: These are the standard constructors required for an Android `View`.
+*   **Functionality**: They simply pass the arguments directly to the `super` constructor of the `androidx.recyclerview.widget.RecyclerView` class.
+
+**2. `@Override public void scrollTo(int x, int y)`**
+*   **Purpose**: This is the key method of the entire class. It overrides the default `scrollTo` behavior of the `RecyclerView`.
+*   **Functionality**:
+    *   The method body is **empty**. This creates a "no-op" (no operation).
+    *   As the comments explain, some device manufacturers (specifically mentioning Samsung) can call the `scrollTo` method under certain conditions that the ATAK framework does not support, leading to a crash.
+    *   By overriding the method and doing nothing, the plugin effectively intercepts and ignores these problematic calls, preventing the crash and improving the plugin's stability on a wider range of hardware.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/CustomPolygonTool.java`
+
+This is a utility class for managing a user-drawn polygon on the map. This polygon is used as a custom boundary or mask for RF coverage calculations. All methods in this class are `static`, indicating it's a stateless helper.
+
+**1. `private static ShapeToolUtils.Callback<? extends Shape, Object> shapeHandler()`**
+*   **Purpose**: This method defines a success callback for the polygon drawing tool. It's executed after the user has successfully finished drawing a polygon on the map.
+*   **Returns**: A `Callback` object.
+*   **Functionality**:
+    1.  It receives the newly created `Shape` (the polygon) as an argument.
+    2.  It customizes the appearance of the polygon by setting its stroke color to black, fill color to yellow, and fill alpha to 0 (making the fill transparent).
+    3.  It sets the title of the shape to "RF box".
+    4.  **Crucially**, it sets a piece of metadata on the shape: `polygon.setMetaString("RF box", "1")`. This key-value pair acts as a unique identifier, allowing the plugin to easily find this specific polygon later using `deepFindItem`.
+
+**2. `private static <A> ShapeToolUtils.Callback<Error, A> errorHandler()`**
+*   **Purpose**: This method defines an error callback for the polygon drawing tool.
+*   **Returns**: A `Callback` object.
+*   **Functionality**: If an error occurs during the shape creation process, this callback is executed. It simply re-throws the `Error` it receives, which will likely cause the application to crash, indicating a serious problem with the drawing tool itself.
+
+**3. `public static DrawingShape getMaskingPolygon()`**
+*   **Purpose**: This method retrieves the specific "RF box" polygon from the map.
+*   **Returns**: The `DrawingShape` object if found, otherwise `null`.
+*   **Functionality**:
+    1.  It gets the root `MapGroup` from the main `MapView`.
+    2.  It calls `deepFindItem` on the root group, searching for any map item that has the metadata key `"RF box"` with the value `"1"`.
+    3.  This provides a reliable way to get a handle on the specific polygon created by this tool, distinguishing it from any other polygons on the map.
+
+**4. `public static void createPolygon()`**
+*   **Purpose**: This is the main public method that a user would trigger to start drawing the polygon.
+*   **Functionality**:
+    1.  It creates an instance of ATAK's `ShapeToolUtils`, passing it the current `MapView`.
+    2.  It calls `runPolygonCreationTool`, passing the `shapeHandler` for the success case and the `errorHandler` for the failure case.
+    3.  Calling this method activates ATAK's built-in polygon drawing interface, allowing the user to place points on the map. Once the user completes the shape, the `shapeHandler` callback is invoked.
+
+---
+
+### File: `app/src/main/java/com/atakmap/android/soothsayer/PluginMapComponent.java`
+
+This class is the central hub for the plugin's map-related components. As seen in `PluginLifecycle`, this component is instantiated and registered when the plugin starts. It extends `DropDownMapComponent`, which is a standard ATAK class for plugins that use the dropdown panel UI. Its primary role is to create, register, and wire together the main UI (`PluginDropDownReceiver`) and the map layer management (`PluginMapOverlay`).
+
+**1. `public void onCreate(final Context context, Intent intent, final MapView view)`**
+*   **Purpose**: This is the initialization method for the map component, called by the ATAK framework when the component is loaded.
+*   **Parameters**:
+    *   `context`: The plugin's `Context`.
+    *   `intent`: The `Intent` that started the component.
+    *   `view`: The main ATAK `MapView`.
+*   **Functionality**:
+    1.  Sets the theme for the plugin's UI elements.
+    2.  Calls the `super.onCreate` method.
+    3.  **Initializes the Overlay Manager**: It creates a new `PluginMapOverlay` and registers it with the `MapView`'s `getMapOverlayManager()`. This is what makes the "SOOTHSAYER" entry appear in the Overlay Manager list.
+    4.  **Initializes the DropDown Receiver**: It creates a new `PluginDropDownReceiver` (`ddr`), passing it the `MapView`, `Context`, and the newly created `mapOverlay`. The `PluginDropDownReceiver` is the core UI controller for the plugin.
+    5.  **Registers Intent Filters**: It creates a `DocumentedIntentFilter` and adds several actions that the `ddr` will listen for. This is how other parts of the ATAK system (or the plugin itself) can communicate with the dropdown. The actions include:
+        *   `SHOW_PLUGIN`: The main action to make the dropdown visible.
+        *   `GRG_TOGGLE_VISIBILITY`, `GRG_DELETE`: Actions for controlling layer visibility and deletion (often triggered from context menus).
+        *   `RADIO_EDIT`, `RADIO_DELETE`: Actions for editing and deleting the custom radio markers.
+    6.  Finally, it calls `registerDropDownReceiver(ddr, ddFilter)` to officially register the `PluginDropDownReceiver` with the ATAK framework so it can receive the specified intents.
+
+**2. `@Override protected void onDestroyImpl(Context context, MapView view)`**
+*   **Purpose**: This is the cleanup method, called when the plugin is being unloaded or shut down.
+*   **Functionality**:
+    1.  Calls `super.onDestroyImpl`.
+    2.  **Removes the Overlay**: It properly unregisters the `PluginMapOverlay` from the `MapOverlayManager` to prevent resource leaks and lingering UI elements.
+    3.  **Removes All Plugin Markers**: It iterates through all items in the root map group. For every item that has the metadata flag `"CLOUDRF"` set to `true`, it removes that item from the map. This is a robust cleanup mechanism to ensure no plugin-specific markers are left behind when the plugin is disabled or uninstalled.
+
+</code_block_to_apply_changes_from> 

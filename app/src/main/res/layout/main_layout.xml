@@ -98,14 +98,28 @@
                 android:id="@+id/btnPlayBtn"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_centerHorizontal="true"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="200dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
-                android:background="@drawable/btn_gray"
+                android:background="@drawable/new_dark_button_selected"
                 android:padding="5dp"
-                android:src="@drawable/play" />
+                android:src="@android:drawable/ic_media_play" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:maxWidth="40dp"
+                android:maxHeight="40dp"
+                android:minWidth="40dp"
+                android:minHeight="40dp"
+                android:padding="2dp"
+                android:visibility="gone" />
 
         </RelativeLayout>
 

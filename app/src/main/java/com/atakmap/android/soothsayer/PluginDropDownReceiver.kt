@@ -518,7 +518,9 @@ class PluginDropDownReceiver(
             }
         }
 
+
         if (useGpu) {
+
             item?.markerDetails?.let { template ->
                 val polygon = CustomPolygonTool.getMaskingPolygon()
                 var remote = false
@@ -577,12 +579,14 @@ class PluginDropDownReceiver(
                         template.output
                 )
                 if(showCoverage){
+                    showHidePlayBtn();
                     sendMultiSiteDataToServer(request)
                 }
             }
         } else {
             item?.let {
                 if(showCoverage) {
+                    showHidePlayBtn();
                     sendSingleSiteDataToServer(item.markerDetails)
                 }
             }
@@ -846,6 +850,16 @@ class PluginDropDownReceiver(
         return Receiver(pReceiver.alt, 0.0, 0.0, pReceiver.rxg, pReceiver.rxs)
     }
 
+    private fun showHidePlayBtn(){
+        if(templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility == View.VISIBLE){
+            templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility = View.GONE;
+            templateView.findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE;
+        }else{
+            templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility = View.VISIBLE;
+            templateView.findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE;
+        }
+
+    }
     private fun sendSingleSiteDataToServer(marker: TemplateDataModel?) {
         if (pluginContext.isConnected()) {
             marker?.let {
@@ -858,10 +872,11 @@ class PluginDropDownReceiver(
                     markerData,
                     object : PluginRepository.ApiCallBacks {
                         override fun onLoading() {
-                            pluginContext.toast(pluginContext.getString(R.string.loading_msg))
+                            //pluginContext.toast(pluginContext.getString(R.string.loading_msg))
                         }
 
                         override fun onSuccess(response: Any?) {
+                            showHidePlayBtn();
                             Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
                             if (response is ResponseModel) {
                                 repository.downloadFile(response.PNG_WGS84,
@@ -880,6 +895,7 @@ class PluginDropDownReceiver(
                         }
 
                         override fun onFailed(error: String?, responseCode: Int?) {
+                            showHidePlayBtn();
                             Log.e(
                                 TAG,
                                 "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
@@ -907,10 +923,11 @@ class PluginDropDownReceiver(
                     markerData,
                     object : PluginRepository.ApiCallBacks {
                         override fun onLoading() {
-                            pluginContext.toast(pluginContext.getString(R.string.loading_msg))
+                            //pluginContext.toast(pluginContext.getString(R.string.loading_msg))
                         }
 
                         override fun onSuccess(response: Any?) {
+                            showHidePlayBtn();
                             Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
                             if (response is ResponseModel) {
                                 repository.downloadFile(response.PNG_WGS84,
@@ -925,6 +942,7 @@ class PluginDropDownReceiver(
                         }
 
                         override fun onFailed(error: String?, responseCode: Int?) {
+                            showHidePlayBtn();
                             Log.e(
                                 TAG,
                                 "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
@@ -1546,7 +1564,12 @@ class PluginDropDownReceiver(
                 toast("Add a radio marker to the map first")
             }
 
-            calculate(item)
+            // Handle pause
+            if(trackingRunnable != null){
+                stopTrackingLoop();
+            }else {
+                calculate(item)
+            }
         }
         
         val currentDate = Date()
@@ -1692,7 +1715,7 @@ class PluginDropDownReceiver(
             for (item in group.items) {
                 if (item is Marker && !item.getMetaBoolean("CLOUDRF", false)) {
                     // Skip markers that are already in our list and skip our plugin's markers
-                    if (!callsignMarkers.any { it.uid == item.uid }) {
+                    if (!callsignMarkers.any { it.uid == item.uid } && item.height > 0) {
                         markers.add(item)
                     }
                 }
@@ -1896,8 +1919,8 @@ class PluginDropDownReceiver(
 
         runCoOptUpdate()
 
-        val timeEnabled = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshEnabled, true) ?: true
-        val distanceEnabled = sharedPrefs?.get(Constant.PreferenceKey.sCoOptDistanceRefreshEnabled, false) ?: false
+        var timeEnabled = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshEnabled, true) ?: true
+        var distanceEnabled = sharedPrefs?.get(Constant.PreferenceKey.sCoOptDistanceRefreshEnabled, false) ?: false
 
         if (!timeEnabled && !distanceEnabled) {
             return
@@ -1914,17 +1937,24 @@ class PluginDropDownReceiver(
             }
         }
 
-        templateView.findViewById<ImageButton>(R.id.stopCoOptButton).visibility = View.VISIBLE
+        templateView.findViewById<ImageButton>(R.id.btnPlayBtn).setImageResource(android.R.drawable.ic_media_pause)
+       // templateView.findViewById<ImageButton>(R.id.stopCoOptButton).visibility = View.VISIBLE
 
         val nextUpdateTextView = templateView.findViewById<TextView>(R.id.co_opt_next_update_textview)
-        val refreshIntervalSeconds = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshInterval, 300L) ?: 300L
+        var refreshIntervalSeconds = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshInterval, 30L) ?: 30L
 
         trackingRunnable = object : Runnable {
             var countdown = if (timeEnabled) refreshIntervalSeconds else Long.MAX_VALUE
 
             override fun run() {
+                // keep checking for changes to preferences..
+                timeEnabled = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshEnabled, true) ?: true
+                distanceEnabled = sharedPrefs?.get(Constant.PreferenceKey.sCoOptDistanceRefreshEnabled, false) ?: false
+                refreshIntervalSeconds = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshInterval, 30L) ?: 30L
+
+
                 var periodicUpdateJustHappened = false
-                if (timeEnabled) {
+                if (timeEnabled && refreshIntervalSeconds > 1) {
                     nextUpdateTextView.visibility = View.VISIBLE
                     nextUpdateTextView.text = "Refresh in ${countdown}s"
                     if (countdown <= 0) {
@@ -1955,8 +1985,8 @@ class PluginDropDownReceiver(
             val markerInList = markersList.find { it.coopted_uid == uid }
             val currentMarker = mapView.rootGroup.deepFindItem("uid", uid) as? PointMapItem
             if (markerInList != null && currentMarker != null) {
-                markerInList.markerDetails.transmitter?.lat = currentMarker.point.latitude
-                markerInList.markerDetails.transmitter?.lon = currentMarker.point.longitude
+                markerInList.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5
+                markerInList.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5
                 // Keep altitude fixed at 2m for ground operations
                 val index = markersList.indexOf(markerInList)
                 if (index != -1) {
@@ -2009,7 +2039,7 @@ class PluginDropDownReceiver(
             }
         }
 
-        if (needsRecalculation && lastUpdatedMarkerForRecalc != null) {
+        if (needsRecalculation && templateView.findViewById<ImageButton>(R.id.progressBar).visibility == View.GONE) {
             calculate(lastUpdatedMarkerForRecalc)
         }
     }
@@ -2020,6 +2050,7 @@ class PluginDropDownReceiver(
             trackingRunnable = null
         }
         templateView.findViewById<TextView>(R.id.co_opt_next_update_textview).visibility = View.GONE
-        templateView.findViewById<ImageButton>(R.id.stopCoOptButton).visibility = View.GONE
+        templateView.findViewById<ImageButton>(R.id.btnPlayBtn).setImageResource(android.R.drawable.ic_media_play)
+        //templateView.findViewById<ImageButton>(R.id.stopCoOptButton).visibility = View.GONE
     }
 }

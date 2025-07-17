@@ -62,7 +62,7 @@ data class Model(
 data class Output(
         val col: String,
         val mod: Int,
-        var nf: Int, // noise floor
+        var nf: String, // noise floor
         val `out`: Int,
         var rad: Double,
         var res: Double,

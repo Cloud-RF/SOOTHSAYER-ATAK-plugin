@@ -34,9 +34,9 @@
     <string name="internal_server_error">Calc failed likely due to size. Check FAQ at https://cloudrf.com/atak</string>
     <string name="marker_error">Please login to the server first.</string>
     <string name="empty_api_key">Please enter your API key.</string>
-    <string name="api_mode">Coverage layer</string>
+    <string name="api_mode">Mode</string>
     <string name="single">Single</string>
-    <string name="multiple">Multisite (GPU)</string>
+    <string name="multiple">Multisite</string>
     <string name="help">Help</string>
     <string name="ok_txt">OK</string>
     <string name="help_msg">This plugin simulates radio coverage for any radio system or platform.

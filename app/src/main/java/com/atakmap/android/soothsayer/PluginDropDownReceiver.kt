@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Typeface
-import android.os.Bundle
 import android.text.InputType
 import android.util.Base64
 import android.util.Log
@@ -56,9 +55,6 @@ import com.atakmap.android.soothsayer.recyclerview.CoOptAdapter
 import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
 import com.atakmap.android.soothsayer.util.*
 import com.atakmap.android.util.SimpleItemSelectedListener
-import com.atakmap.comms.CommsMapComponent
-import com.atakmap.comms.CotServiceRemote
-import com.atakmap.coremap.cot.event.CotEvent
 import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.map.layer.opengl.GLLayerFactory
@@ -407,7 +403,8 @@ class PluginDropDownReceiver(
                             etFrequency.text.toString().toDoubleOrNull()?.let { transmitter.frq = it }
                             etBandWidth.text.toString().toDoubleOrNull()?.let { transmitter.bwi = it }
                         }
-                        etOutputNoiseFloor.text.toString().toIntOrNull()?.let { marker.output.nf = it }
+                        etOutputNoiseFloor.text.toString().let { marker.output.nf = it }
+
                         etAntennaAzimuth.text.toString().let { marker.antenna.azi = it }
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
@@ -459,10 +456,10 @@ class PluginDropDownReceiver(
             findViewById<TextView>(R.id.tvRadioTitle).text = title
             findViewById<EditText>(R.id.etRadioHeight).setText("${transmitter?.alt ?: ""}")
             findViewById<EditText>(R.id.etRadioPower).setText("${transmitter?.txw ?: ""}")
-            findViewById<EditText>(R.id.etAntennaAzimuth).setText("${antenna.azi}")
+            findViewById<EditText>(R.id.etAntennaAzimuth).setText(antenna.azi) // string: 0 OR 0,90,180,270
             findViewById<EditText>(R.id.etFrequency).setText("${transmitter?.frq ?: ""}")
             findViewById<EditText>(R.id.etBandWidth).setText("${transmitter?.bwi ?: ""}")
-            findViewById<EditText>(R.id.etOutputNoiseFloor).setText("${item.markerDetails.output.nf}")
+            findViewById<EditText>(R.id.etOutputNoiseFloor).setText(item.markerDetails.output.nf) // string: database OR -100
         }
     }
 
@@ -547,7 +544,7 @@ class PluginDropDownReceiver(
 
                     val newbounds = Bounds(GeoImageMasker.getBounds(polygon.points).north,GeoImageMasker.getBounds(polygon.points).east,GeoImageMasker.getBounds(polygon.points).south,GeoImageMasker.getBounds(polygon.points).west)
                     template.output.bounds = newbounds
-                    remote = true
+                    //remote = true // setting remote = true is for satellite mode where altitude is AMSL
                 }else{
                     template.output.bounds = null
                 }
@@ -757,14 +754,14 @@ class PluginDropDownReceiver(
                             linkDataModel.linkRequest.transmitter?.let { transmitter ->
                                 linkDataModel.linkResponse?.let { linkResponse ->
                                     for (data in linkResponse.transmitters) {
-                                        Log.d(TAG, "link SNR = "+data.signalToNoiseRatioDB)
+                                        //Log.d(TAG, "link SNR = "+data.signalToNoiseRatioDB)
                                         pluginContext.getLineColor(data.signalToNoiseRatioDB)
                                             ?.let { color ->
                                                 drawLine(
                                                     data.markerId,
                                                     linkDataModel.links,
-                                                    GeoPoint(transmitter.lat, transmitter.lon),
-                                                    GeoPoint(data.latitude, data.longitude),
+                                                    GeoPoint(transmitter.lat, transmitter.lon,transmitter.alt),
+                                                    GeoPoint(data.latitude, data.longitude,data.antennaHeight),
                                                     color,
                                                     data.signalToNoiseRatioDB.toInt()
                                                 )
@@ -798,6 +795,7 @@ class PluginDropDownReceiver(
         val dslist: MutableList<DrawingShape> = ArrayList()
         val dsUid = UUID.randomUUID().toString()
         val ds = DrawingShape(mapView,dsUid)
+
         ds.strokeColor = lineColor
         ds.points = arrayOf(startPoint, endPoint)
         ds.hideLabels(false)
@@ -806,11 +804,17 @@ class PluginDropDownReceiver(
 
         val lineUid = UUID.randomUUID().toString()
         val mp = MultiPolyline(mapView, lineGroup, dslist, lineUid)
+
         lineGroup?.addItem(mp)
         mp.movable = true
         mp.title = "${snr} dB"
         mp.lineLabel = "${snr} dB"
         mp.hideLabels(false)
+
+        // TODO: Figure out how to adjust HAE. May have to start over with polygons..
+        mp.heightExtrudeMode = 1
+        //mp.height = 123.0 // raises all vertices meh
+
         mp.toggleMetaData("labels_on", true)
         links.add(Link(lineUid, startPoint, endPoint))
         for (item in markerLinkList) {
@@ -1717,6 +1721,8 @@ class PluginDropDownReceiver(
                     // Skip markers that are already in our list and skip our plugin's markers
                     if (!callsignMarkers.any { it.uid == item.uid } && item.height > 0) {
                         markers.add(item)
+                    }else{
+                        Log.d(TAG, item.toString());
                     }
                 }
             }
@@ -1830,9 +1836,9 @@ class PluginDropDownReceiver(
                                 name = "$callsign - ${config.template!!.template.name}"
                             ),
                             transmitter = config.template!!.transmitter?.copy(
-                                lat = originalMarker.point.latitude,
-                                lon = originalMarker.point.longitude,
-                                alt = 2.0  // Fixed 2m height for ground operations
+                                lat = Math.round(originalMarker.point.latitude * 1e5).toDouble() / 1e5,
+                                lon = Math.round(originalMarker.point.longitude * 1e5).toDouble() / 1e5,
+                                alt = Math.round(originalMarker.point.altitude * 10).toDouble() / 10,
                             )
                         ),
                         coopted_uid = uid
@@ -1987,7 +1993,8 @@ class PluginDropDownReceiver(
             if (markerInList != null && currentMarker != null) {
                 markerInList.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5
                 markerInList.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5
-                // Keep altitude fixed at 2m for ground operations
+                markerInList.markerDetails.transmitter?.alt = Math.round(currentMarker.point.altitude * 10).toDouble() / 10
+
                 val index = markersList.indexOf(markerInList)
                 if (index != -1) {
                     markerAdapter?.notifyItemChanged(index)
@@ -2022,9 +2029,10 @@ class PluginDropDownReceiver(
                 if (distanceMoved >= refreshDistance) {
                     val markerInList = markersList.find { it.coopted_uid == uid }
                     if (markerInList != null) {
-                        markerInList.markerDetails.transmitter?.lat = currentMarker.point.latitude
-                        markerInList.markerDetails.transmitter?.lon = currentMarker.point.longitude
-                        // Keep altitude fixed at 2m for ground operations
+                        markerInList.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5;
+                        markerInList.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5;
+                        markerInList.markerDetails.transmitter?.alt = Math.round(currentMarker.point.altitude * 10).toDouble() / 10
+
                         val index = markersList.indexOf(markerInList)
                         if (index != -1) {
                             markerAdapter?.notifyItemChanged(index)
@@ -2039,7 +2047,7 @@ class PluginDropDownReceiver(
             }
         }
 
-        if (needsRecalculation && templateView.findViewById<ImageButton>(R.id.progressBar).visibility == View.GONE) {
+        if (needsRecalculation && templateView.findViewById<ProgressBar>(R.id.progressBar).visibility == View.GONE) {
             calculate(lastUpdatedMarkerForRecalc)
         }
     }

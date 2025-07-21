@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER</string>
+    <string name="help_title">SOOTHSAYER help</string>
     <!-- description -->
     <string name="app_desc">Interface to the CloudRF/SOOTHSAYER API</string>
     <string name="example_layer_description">This is an example layer.</string>
@@ -43,11 +43,13 @@
         \nIt requires a server with an account to function.
         \nYou can use the public system at https://cloudrf.com or a private SOOTHSAYER server eg. https://192.168.0.123
         \n\nTo use: Choose a template from the list then click the marker button to add a radio to the map. From there, either drag it or click the play button to calculate coverage. You can test a single radio or many with multisite mode (GPU required).
-        \n\nLinks:\nTo model SNR links, check the show links box in the settings and add multiple radios. Drag the markers to move them around or click the play button. Colours: -3 to +3dB: Black, +3 to +9dB: Red, +9 to +15dB: Amber, +15dB to 21dB: Green, +21dB: Blue
-        \n\nCoverage:\nTo model a heatmap of RF coverage, check the show coverage box in the settings and add a radio. Drag the marker to model coverage or click the play button. Colours are set in the template.
+        \n\nLinks:\nTo model SNR links, check the links box in the settings and add multiple radios. Drag the markers to move them around or click the play button. Colours: -3 to +3dB: Black, +3 to +9dB: Red, +9 to +15dB: Amber, +15dB to 21dB: Green, +21dB: Blue
+        \n\nCoverage:\nTo model a heatmap of RF coverage, check the coverage box in the settings and add a radio. Drag the marker to model coverage or click the play button. Colours are set in the template.
         \n\nBounds box:\nTo focus output on a user defined area, click the polygon button and draw a shape. Any coverage calculations will only test the polygon.
+        \n\nCo-opt feature:\nTo model live data taken from the map in ATAK, click the deputy badge and then assign templates to the callsigns in the list. Only data with altitude will be shown. Click start to automatically model the data after an interval or when it moves.
         \n\nSatellite coverage:\nTo test satellite coverage, click the satellite button and search for a satellite by name. Select a time/day and then drag the satellite marker to trigger a satellite calculation.
         \n\nRadio templates are downloaded automatically from your account or can be added as .json files to the SD card atak/SOOTHSAYER/templates folder.\nDocs, videos and templates are available at https://cloudrf.com/atak
+        \n\nFor more information visit https://cloudrf.com/documentation
         \n\nMAKE THIS BETTER: Report bugs and request features at support@cloudrf.com</string>
     <string name="soothsayer_layer">SOOTHSAYER Layer</string>
     <string name="layer">%1$s Layer</string>

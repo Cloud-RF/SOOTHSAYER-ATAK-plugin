@@ -50,8 +50,8 @@ class PluginRepository {
         requestQueue.execute {
             val currentTime = SystemClock.elapsedRealtime()
             val timeSinceLastRequest = currentTime - lastRequestTime
-            if (timeSinceLastRequest < 2000) {
-                SystemClock.sleep(2000 - timeSinceLastRequest)
+            if (timeSinceLastRequest < 1000) {
+                SystemClock.sleep(1000 - timeSinceLastRequest)
             }
             lastRequestTime = SystemClock.elapsedRealtime()
             task()

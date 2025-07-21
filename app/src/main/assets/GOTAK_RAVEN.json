@@ -1,0 +1,72 @@
+{
+    "version": "CloudRF-API-v3.11",
+    "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
+    "customIcon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAACNVJREFUeJzVWv1vW2cVfu6nff3t2CHpRxaSiG1aBRISGQNpo1RD4seKqfsHQBMCxC9M+wOQ+GmCnyokpK7SQKMCNCQQH0Id6gqIIAJrqq20zZKmSdPEqR3H39e+n5zz2jdxlmhS7egGTnVjx3nte573nOec57yuiv9zU4/iQ86dO6ueIrNt+0uKojyxurq6Ho1Gb2iaVhwZGdl5660r5lHc5zAbGsDly5eiS0tLb+7s7Hz11q1bqcnJScRiMZRKJY8A1CqVSvns2ReWCdh7ruv+mwAtzszMrLz++g9r/xMA7t27971CofDyysoK2u22uDqdDshxeWJiIrOxsZEh56dVVf2KLMtotVrY2triqBXo9ZV4PF7M5/M/uHTp8j+PBcDc3Ny3TdPE+Pg4dF1HuVwW1/T0NOr1ugDDRs6CIgAG4fs+CNA4rR9PJBIcMfvtt3914aWXLvihA3AcJ+Z5nnjOzhAPkMvl0Gw2xU632x0CpgnHv/DFWWxsbIIogkajIUA5jou1tbXZGzdunKCP2AgdADvMFoCQJEk8LxS24EEiVKOISCZk30I6EcHT557H1avvYunDFYqIJ6JCEUvfvn174lgAcIoQWfe9xqkE+HBtB45VxMknsnh2KonGxk20dz7AZzMOdtJxVPwkzGaJoiPpy8vLyUHuPzQASgOdd5zzmo0f8wkVmak0/n6nhPFUFC88mcSv36sQJBWxiA6qWHjxTBq/XyjDpfWyrKgUycixABgbG7MoCganAqcPX6rsI2V0wXzmdAx//KABSVaRy+bRpNzX9SjmPmziqXEFC/dbyKdiBOKx+Xs0AGZnP2cwURcWFlCtVpFKpeArzAkgHk1DV4gHRODRfBam2YFlWfQuCS1bQj6pIJNJYWqEyFyvHA8ATZd122HiuiI1DIO2PiqTjz74nwQXkUhCEDsoqUGk4qqMfH4Eju/C853jASBJXNe5vkuYmprqvcq77KFl1uF4USqllF6WKUBwOfXIeTYKFKqVOrxMHMqAnhyJFuL89yjfJb9bSluWi0rVgus5eFC2cXJEwmqpDUXWuG+INRQDNEwPxUclYHKaKtlgrgwNoNUyRS8QfaBXicotF8urTfBGL5UcXJihstlUUG9RBOhFrjyTeQ0PazUw5EeVjnpqJGmEDmDuH3+Nv3P1KiTHg0VENuniysNdVsgFqjaOmsCf3jfx3BT1ihEdEgF1XBVN28LcpoQocebBtimVWpBCB3Dz5k2xyzo1Mr572+zmOVcaIROo09pmExXJwe/+tQ1Dl2gtXYqMaluBkhyDZNZoreYSwa3QAVy7dg0z01PI5XP45ivfwJUrv8B/FheRTCZJjVYFuTXHourTJmA+7DYlTLv7Xia/7hYQiRoUKcXKZnKNpXvL4QKYn5/H0089CZnKyamJMXzrO1/HG2/8DPfXHlI/SJLGqQghp+sqkVQRacWE50eW3R5FKBYzqMzq1ujoaGMQH4YC8Ozs5/VYPC5qOhOZ6/zk5GmsP9wU+iiTyRCIHXKY8p4iEQg+X8gHmXZeoz6iUgrJfjwR80IH0Gi2VHbK8yXcvbuIBIEJ1Ckbi7oTJ8YEgH6tFDynPieaHZlEgMMn8fqDddrVWbqoq9IYWavXCICDPVXjB5V1n3HEBJDeSvrd54gMYkMBqFTLQj6kEgaJNdI+cQO2Y2PP6/3e+4eg6YvIQGpuKABnnjkTddhhGOAq6Lo2bMve50mw21JPPvTzIPg7W3/qPY4NBcD1PKXLARcGVROrI8OiBoW+PO9/5DGTyR0MQH27r5LEiIYOoEZSgIYRIZ0LhQIaNMSLCPTteD9pW5UiOo6GkxMn9n0OrZVpsFdCB1Cv1UXo2dm7d+6I8yDb6ZL4sHxPRGSYNMR/1Pj9x0LidDpF4woJNHqeTKbAPPy4XG51GNzBjWawATce14YCkMmkIx3SPSziuLMaRrQrl/098vZbsW51Bx4cjNCxkLjdaUscem5YMs28LOIc7gOicX38e/sB0qNMBB/Il6EAWIKw3SlLlviQyhMRYLeYwt3qvockIPZHjV5XqDKFfyphsQLuzbfb29uUSm2S0P5uSwpABG5rqioGmn7rRcJ3+ZRrABuSxGldphbMx4PFYhGSyjPA/irT38h2m1fvb37fGlVVw9dCREiVCj986sYKzbRR0vbl7UrP0f3+dKW0d2h55cWUeuEDYPkw1mhCjcZEFDziQ7ccHkwTHvpzSR2mxbdUekKO13YbHR+7hw6AO3E0m+DzRXEyLdGo6PLRidSt9f16hyHFIyoaXGWlgCe7f9doBI2FDoCtQ5toUBnl7wJkAuDzOSlVpf6KEwBp2p44WiEE6BefwaQ2iA0FgMZGtTyaxWg8IoQaH6eL86GuV6JC+b3f2d145hNIqyzkus7uzgV0Bad2oQKgtIlwLncVaS+rPR4X0auhvUbVWx+J7JX6fjLz8+6Z6ePbcCSmm6qqTs6TE5QCTbODRsMkiaEfkBLBTh9WVtmCE7tQARQfFYm3Eg3u2yiVyjA7fB6kHXC2axIMUqMqra+bjoiSSj869mAi7kgA0K4Zy8srIv/Nti0yRukTmzFDo3EzQpqJSixppB9/zUC16eC7v2lg4mQCCvWFxfVGL/WOQY3STSU+gQuqSPBNTSCP+XsDu92E5XJVUvDaH1xU6w4sx8fyWr37Ib3v1Pg4MnQANMBowTkok5BBBEQVR4yd3q76rFAdrG5yBd2rPF4PKIlBl+R0+EeL5ESNyRfsPjufz+cRfKEt++J7SoymVZxMKcgSB3IGcYMa2pt/K++CyGazm7QZC6EDOH/+/LsXL158xzTNF/k8lAGQwBNNTQCg3dZoZv7Ry6P4VJai0nKg0gz3flVyfjkfKdMg5GuK3MyP5H5+7fpfVkMH8Oqrr3nT0598JRqN/pQi8WnayTQDYGlNc3qHAKxoulao1d2S+syp5/x2R5U878HpsbHfatr8T9KptJdIJJt/vn69PagPR/B/Je6v0MPz/Hxzc+vQNV/+Pv+cH/ZWh9p/AWkc+KYdvTfPAAAAAElFTkSuQmCC",
+    "template": {
+        "name": "GOTAK_RAVEN",
+        "service": "CloudRF https://api.cloudrf.com",
+        "created_at": "2026-04-05T20:40:56+00:00",
+        "owner": 1,
+        "bom_value": 0
+    },
+    "site": "GOTAK",
+    "network": "GOTAK-NETWORK",
+    "engine": 1,
+    "coordinates": 1,
+    "transmitter": {
+        "lat": 51.674609,
+        "lon": -2.480428,
+        "alt": 1,
+        "frq": 433,
+        "txw": 4.8,
+        "bwi": 1.4,
+        "powerUnit": "W"
+    },
+    "receiver": {
+        "lat": 51.538744,
+        "lon": -2.590021,
+        "alt": 1,
+        "rxg": 1,
+        "rxs": -105
+    },
+    "feeder": {
+        "flt": 1,
+        "fll": 0,
+        "fcc": 0
+    },
+    "antenna": {
+        "mode": "template",
+        "txg": 1.5,
+        "txl": 0,
+        "ant": 1,
+        "azi": 0,
+        "tlt": 0,
+        "hbw": 1,
+        "vbw": 1,
+        "fbr": 1,
+        "pol": "v"
+    },
+    "model": {
+        "pm": 10,
+        "pe": 2,
+        "ked": 4,
+        "rel": 60
+    },
+    "environment": {
+        "elevation": 2,
+        "landcover": 1,
+        "buildings": 1,
+        "obstacles": 0,
+        "clt": "Temperate.clt"
+    },
+    "output": {
+        "units": "m",
+        "col": "LTE.dBm",
+        "out": 2,
+        "ber": 1,
+        "mod": 0,
+        "nf": -105,
+        "res": 6,
+        "rad": 3
+    }
+}

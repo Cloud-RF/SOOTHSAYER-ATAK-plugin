@@ -110,19 +110,18 @@ class PluginDropDownReceiver(
     private var itemPositionForEdit: Int = -1
     private val serverTypes: ArrayList<String> = ArrayList()
     private var allContacts: MutableList<Contact> = mutableListOf()
-
     private val coOptedMarkers = HashMap<String, CoOptedMarkerSettings>()
     private val trackingHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var trackingRunnable: Runnable? = null
     private val lastKnownLocations = HashMap<String, GeoPoint>()
 
+    // Initialise views, listeners and handle map clicks
     init {
         initViews()
         initListeners()
         initSpotBeam()
         Contacts.getInstance().addListener(this)
         onContactsSizeChange(null)
-        
         // Register for map events to capture marker taps
         mapView?.mapEventDispatcher?.addMapEventListener(MapEvent.ITEM_CLICK, this)
     }
@@ -224,6 +223,7 @@ class PluginDropDownReceiver(
         }
     }
 
+    // List of radio templates. They can be selected to edit settings etc
     private fun initRecyclerview() {
         val recyclerView: RecyclerView = templateView.findViewById(R.id.rvTemplates)
         markerAdapter = RecyclerViewAdapter(markersList, mapView, pluginContext, onItemRemove = {
@@ -315,6 +315,9 @@ class PluginDropDownReceiver(
         }
     }
 
+    // A 1000x1000px image is 1MP and can be considered average for a 2024 phone
+    // You can load a 16MP image on a phone but this may crash an older model with an OOM error
+    // In the early days of CloudRF's Android app (2012), the resolution was limited by device mem at 0.09MP (300x300px)
     var megapixels = 1.0;
 
     private fun initMegapixelSpinner(){
@@ -343,6 +346,9 @@ class PluginDropDownReceiver(
         }
     }
 
+    // Auto-scale the resolution to match the desired megapixel.
+    // The API does this automatically to enforce different plans but those MP limits are higher for laptops etc
+
     private fun megapixelCalculator(radius: Double): Double {
         // Calculate the resolution based upon the desired radius
         var diameter_m = (radius * 2) * 1e3 //eg. 4000m
@@ -361,7 +367,6 @@ class PluginDropDownReceiver(
     private fun initSettings() {
         etLoginServerUrl = settingView.findViewById(R.id.etLoginServerUrl)
         etLoginServerUrl?.setText(Constant.sServerUrl)
-
         etUsername = settingView.findViewById(R.id.etUserName)
         etUsername?.setText(Constant.sUsername)
     }
@@ -454,11 +459,6 @@ class PluginDropDownReceiver(
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
 
-                        if(cbLinkLines.isChecked) {
-                            markersList[itemPositionForEdit].markerDetails = marker
-                            updateLinkLinesOnMarkerDragging(markersList[itemPositionForEdit])
-                        }
-
                         itemPositionForEdit = -1
                     }
                 }
@@ -531,6 +531,7 @@ class PluginDropDownReceiver(
         return isValid
     }
 
+    // used to adjust radius for polygons far away
     fun haversine(fromLat: Double, fromLon: Double, toLat: Double, toLon: Double): Double {
         val dLat = Math.toRadians(toLat - fromLat)
         val dLon = Math.toRadians(toLon - fromLon)
@@ -542,12 +543,11 @@ class PluginDropDownReceiver(
         return 6372.8 * c
     }
 
+
     private fun calculate(item: MarkerDataModel?){
         val showLinks = sharedPrefs?.get(Constant.PreferenceKey.sLinkLinesVisibility, true) ?: true
         val showCoverage = sharedPrefs?.get(Constant.PreferenceKey.sKmzVisibility, true) ?: true
-        val useGpu = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
-
-        removeLinkLinesFromMap(item)
+        val multisiteMode = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
 
         if(!showLinks && !showCoverage) {
             toast("You need either links or coverage enabled")
@@ -560,23 +560,19 @@ class PluginDropDownReceiver(
 
         item?.let {
             if(showLinks) {
-                updateLinkLinesOnMarkerDragging(item)
+                updateLinkLines(item)
             }
         }
 
-        if (useGpu) {
-
+        // A Multisite API call simulates many towers at once and uses a GPU
+        if (multisiteMode) {
             item?.markerDetails?.let { template ->
                 val polygon = CustomPolygonTool.getMaskingPolygon()
-                val remote = false
 
+                // Bounded area for focused calculations
                 if(polygon != null) {
-                    Log.d(TAG,polygon.toString())
-
                     val area = polygon.area
-                    val newres = min(10.0,ceil(sqrt(area) / 1000.0) + 1.0)
-                    template.output.res = newres
-                    
+                    template.output.res = min(10.0,ceil(sqrt(area) / 1000.0) + 1.0) // adjust resolution based upon polygon size
                     val txlat = item.markerDetails.transmitter?.lat
                     val txlon = item.markerDetails.transmitter?.lon
 
@@ -584,19 +580,16 @@ class PluginDropDownReceiver(
                         val polyLon = (GeoImageMasker.getBounds(polygon.points).east + GeoImageMasker.getBounds(polygon.points).west) / 2
                         val polyLat = (GeoImageMasker.getBounds(polygon.points).north + GeoImageMasker.getBounds(polygon.points).south) / 2
                         val haversineDistance = haversine(txlat, txlon, polyLat, polyLon)
-                        Log.d(TAG, "polygon2tx = $haversineDistance" )
                         if(haversineDistance > item.markerDetails.output.rad){
                             item.markerDetails.output.rad = haversineDistance*1.1
                         }
                     }
-
                     val newbounds = Bounds(GeoImageMasker.getBounds(polygon.points).north,GeoImageMasker.getBounds(polygon.points).east,GeoImageMasker.getBounds(polygon.points).south,GeoImageMasker.getBounds(polygon.points).west)
                     template.output.bounds = newbounds
-                    //remote = true // setting remote = true is for satellite mode where altitude is AMSL
                 }else{
                     template.output.bounds = null
                 }
-
+                // in a multisite call, each transmitter can have its own location, frequency, altitude and antenna
                 val txlist: List<MultiSiteTransmitter> =
                         markersList.mapNotNull { marker ->
                             marker.markerDetails.transmitter?.run {
@@ -609,7 +602,7 @@ class PluginDropDownReceiver(
                                         powerUnit,
                                         txw,
                                         marker.markerDetails.antenna,
-                                        remote
+                                        false // remote is false unless we're doing a satellite call far away
                                 )
                             }
                         }
@@ -617,7 +610,7 @@ class PluginDropDownReceiver(
                 val request = MultisiteRequest(
                         template.site,
                         template.network,
-                        txlist,
+                        txlist, // array of transmitters :)
                         template.receiver,
                         template.model,
                         template.environment,
@@ -641,7 +634,6 @@ class PluginDropDownReceiver(
     private fun addCustomMarker() {
         val uid = UUID.randomUUID().toString()
         val location = mapView.centerPoint.get()
-        Log.d(TAG, "location : $location")
         val marker = Marker(location, uid)
         marker.setMetaBoolean("readiness", true)
         marker.setMetaBoolean("archive", true)
@@ -681,7 +673,6 @@ class PluginDropDownReceiver(
                         val item: MarkerDataModel? = markersList.find { marker ->
                             marker.markerID == mapItem.uid
                         }
-                        
                         removeMarkerFromList(item)
                         removeLinkLinesFromMap(item)
                     }
@@ -691,33 +682,15 @@ class PluginDropDownReceiver(
                     MapEvent.ITEM_DRAG_DROPPED -> {
                         val latitude = marker.geoPointMetaData.get().latitude
                         val longitude = marker.geoPointMetaData.get().longitude
-                        Log.d(
-                            "SOOTHSAYER",
-                            "DragDropped latitude: $latitude Longitude: $longitude Marker_id: ${mapItem.uid} actual uid = $uid"
-                        )
-                        Log.d(
-                            "SOOTHSAYER",
-                            "MapItem: ${mapItem.altitudeMode} radialMenuPath: ${mapItem.radialMenuPath} serialId: ${mapItem.serialId} zOrder: ${mapItem.zOrder} "
-                        )
-
                         val item = markersList.find { it.markerID == mapItem.uid }
                         item?.let {
                             val index = markersList.indexOf(item)
-                            Log.d(
-                                TAG,
-                                "Before latitude: ${markersList[index].markerDetails.transmitter?.lat} Longitude: ${markersList[index].markerDetails.transmitter?.lon}"
-                            )
                             item.markerDetails.transmitter?.lat = latitude.roundValue()
                             item.markerDetails.transmitter?.lon = longitude.roundValue()
-
                             saveMarkerListToPref()
-                            Log.d(
-                                TAG,
-                                "After latitude: ${markersList[index].markerDetails.transmitter?.lat} Longitude: ${markersList[index].markerDetails.transmitter?.lon}"
-                            )
                             markerAdapter?.notifyItemChanged(markersList.indexOf(item))
                         }
-                        
+
                         calculate(item)
                     }
                 }
@@ -746,11 +719,10 @@ class PluginDropDownReceiver(
             saveMarkerListToPref()
             markerAdapter?.notifyItemInserted(markersList.indexOf(markerItem))
         }
-
-        Log.d(TAG, "${markersList.size} listData : ${Gson().toJson(markersList)}")
     }
 
     private fun getLinksBetween(marker: MarkerDataModel?) {
+        Log.d(TAG, "getLinksBetween: "+marker.toString())
         marker?.let {
             val points: List<Point> = markersList.mapNotNull { data ->
                 if (data.markerID != marker.markerID) {
@@ -764,7 +736,6 @@ class PluginDropDownReceiver(
                     null
                 }
             }
-            Log.d(TAG, "getLinksBetween Points: ${Gson().toJson(points)}")
 
             val thisRx = Receiver(
                     marker.markerDetails.transmitter?.alt ?: 1.0,
@@ -787,44 +758,43 @@ class PluginDropDownReceiver(
             val linkDataModel = LinkDataModel(it.markerID, linkRequest, ArrayList(), null)
 
             if (markerLinkList.isEmpty()) {
-                Log.d(TAG, "getLinksBetween markerLinkList empty")
                 markerLinkList.add(linkDataModel)
-            } else {
-                Log.d(TAG, "getLinksBetween markerLinkList not empty")
-                repository.getLinks(linkDataModel.linkRequest,
-                    object : PluginRepository.ApiCallBacks {
-                        override fun onLoading() {
-                        }
+            }
 
-                        override fun onSuccess(response: Any?) {
-                            linkDataModel.linkResponse = response as LinkResponse
-                            markerLinkList.add(linkDataModel)
-                            linkDataModel.linkRequest.transmitter?.let { transmitter ->
-                                linkDataModel.linkResponse?.let { linkResponse ->
-                                    for (data in linkResponse.transmitters) {
-                                        //Log.d(TAG, "link SNR = "+data.signalToNoiseRatioDB)
-                                        pluginContext.getLineColor(data.signalToNoiseRatioDB)
-                                            ?.let { color ->
-                                                drawLine(
-                                                    data.markerId,
-                                                    linkDataModel.links,
-                                                    GeoPoint(transmitter.lat, transmitter.lon,transmitter.alt),
-                                                    GeoPoint(data.latitude, data.longitude,data.antennaHeight),
-                                                    color,
-                                                    data.signalToNoiseRatioDB.toInt()
-                                                )
-                                            }
-                                    }
+            repository.getLinks(linkDataModel.linkRequest,
+                object : PluginRepository.ApiCallBacks {
+                    override fun onLoading() {
+                    }
+
+                    override fun onSuccess(response: Any?) {
+                        linkDataModel.linkResponse = response as LinkResponse
+                        markerLinkList.add(linkDataModel)
+                        linkDataModel.linkRequest.transmitter?.let { transmitter ->
+                            linkDataModel.linkResponse?.let { linkResponse ->
+                                for (data in linkResponse.transmitters) {
+                                    // Line colours are dynamic, based upon the SNR
+                                    pluginContext.getLineColor(data.signalToNoiseRatioDB)
+                                        ?.let { color ->
+                                            drawLine(
+                                                data.markerId,
+                                                linkDataModel.links,
+                                                GeoPoint(transmitter.lat, transmitter.lon,transmitter.alt),
+                                                GeoPoint((transmitter.lat + data.latitude)/2, (transmitter.lon+data.longitude)/2,data.antennaHeight),
+                                                color,
+                                                data.signalToNoiseRatioDB.toInt()
+                                            )
+                                        }
                                 }
                             }
                         }
+                    }
 
-                        override fun onFailed(error: String?, responseCode: Int?) {
-                            pluginContext.toast("onFailed creating link : $error")
-                        }
+                    override fun onFailed(error: String?, responseCode: Int?) {
+                        pluginContext.toast("onFailed creating link : $error")
+                    }
 
-                    })
-            }
+                })
+
         }
     }
 
@@ -858,11 +828,6 @@ class PluginDropDownReceiver(
         mp.title = "${snr} dB"
         mp.lineLabel = "${snr} dB"
         mp.hideLabels(false)
-
-        // TODO: Figure out how to adjust HAE. May have to start over with polygons..
-        mp.heightExtrudeMode = 1
-        //mp.height = 123.0 // raises all vertices meh
-
         mp.toggleMetaData("labels_on", true)
         links.add(Link(lineUid, startPoint, endPoint))
         for (item in markerLinkList) {
@@ -873,9 +838,14 @@ class PluginDropDownReceiver(
         handleLinkLineVisibility()
     }
 
-    private fun updateLinkLinesOnMarkerDragging(markerItem: MarkerDataModel){
-        removeLinkLinesFromMap(markerItem)
-        getLinksBetween(markerItem)
+    private fun updateLinkLines(markerItem: MarkerDataModel){
+
+        // many to many now ;)
+        markersList.forEach{
+            removeLinkLinesFromMap(it)
+            getLinksBetween(it)
+        }
+
     }
 
     private fun getModifiedMarker(marker: TemplateDataModel): TemplateDataModel {
@@ -912,28 +882,24 @@ class PluginDropDownReceiver(
         }
 
     }
+    // The Area API simulates one transmitter only and can use a CPU or a GPU
     private fun sendSingleSiteDataToServer(marker: TemplateDataModel?) {
         if (pluginContext.isConnected()) {
             marker?.let {
-                Log.d(TAG, "sendSingleSiteDataToServer: old:$marker")
                 val markerData = getModifiedMarker(marker)
 
                 markerData.receiver = getModifiedReceiver(marker.receiver)
-                Log.d(TAG, "sendSingleSiteDataToServer: old:$marker \n request: ${Gson().toJson(markerData)}")
                 repository.sendSingleSiteMarkerData(
                     markerData,
                     object : PluginRepository.ApiCallBacks {
                         override fun onLoading() {
-                            //pluginContext.toast(pluginContext.getString(R.string.loading_msg))
                         }
 
                         override fun onSuccess(response: Any?) {
                             showHidePlayBtn();
-                            Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
                             if (response is ResponseModel) {
-                                /*
-                                Fetch the PNG image from the JSON response and create a layer using the bounds metadata
-                                 */
+
+                                // Fetch the PNG image from the JSON response and create a layer using the bounds metadata
                                 repository.downloadFile(response.PNG_WGS84,
                                     FOLDER_PATH,
                                     PNG_IMAGE.getFileName(),
@@ -948,14 +914,9 @@ class PluginDropDownReceiver(
                                     })
                             }
                         }
-
+                        // The API will return an error for bad inputs like a transmitter inside a hill instead of atop it
                         override fun onFailed(error: String?, responseCode: Int?) {
                             showHidePlayBtn();
-                            Log.e(
-                                TAG,
-                                "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
-                            )
-
                             val builderSingle = AlertDialog.Builder(mapView.context)
                             builderSingle.setTitle("API error")
                             builderSingle.setMessage(error)
@@ -982,7 +943,6 @@ class PluginDropDownReceiver(
                         }
                         override fun onSuccess(response: Any?) {
                             showHidePlayBtn();
-                            Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
                             if (response is ResponseModel) {
                                 /*
                                 Fetch the PNG image from the JSON response and create a layer using the bounds metadata
@@ -1000,10 +960,6 @@ class PluginDropDownReceiver(
 
                         override fun onFailed(error: String?, responseCode: Int?) {
                             showHidePlayBtn();
-                            Log.e(
-                                TAG,
-                                "onFailed called token: ${Constant.sAccessToken} error:$error responseCode:$responseCode"
-                            )
                             if (error != null) {
                                 val builderSingle = AlertDialog.Builder(mapView.context)
                                 builderSingle.setTitle("API error")
@@ -1042,6 +998,7 @@ class PluginDropDownReceiver(
         }
     }
 
+    // Known issue here: During intensive use, links can get orphaned. Solution is to iterate over them all and check for markers
     private fun removeLinkLinesFromMap(marker: MarkerDataModel?) {
         marker?.let {
             val data = markerLinkList.find {
@@ -1173,7 +1130,6 @@ class PluginDropDownReceiver(
             if (pluginContext.isConnected()) {
 
                 RetrofitClient.BASE_URL = etLoginServerUrl?.text.toString()
-
                 repository.loginUser(
                     etUsername?.text.toString(),
                     etPassword?.text.toString(),
@@ -1186,6 +1142,7 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             if (response is LoginResponse) {
                                 response.apiKey?.let {
+                                    // A hack but not for long as auth is moving to the API to make it standard across SOOTHSAYER and CloudRF
                                     if(etLoginServerUrl?.text.toString() == "https://cloudrf.com"){
                                         RetrofitClient.BASE_URL = "https://api.cloudrf.com"
                                     }
@@ -1230,13 +1187,11 @@ class PluginDropDownReceiver(
         repository.downloadTemplates(
             object : PluginRepository.ApiCallBacks {
                 override fun onLoading() {
-                    Log.d(TAG, "onLoading: downloadTemplatesFromApi")
                     pluginContext.shortToast(pluginContext.getString(R.string.template_downloading))
                 }
 
                 override fun onSuccess(response: Any?) {
                     if (response is TemplatesResponse) {
-                        Log.d(TAG, "onLoading: fetchTemplateDetail")
                         fetchTemplateDetail(response)
                     }
                 }
@@ -1252,7 +1207,6 @@ class PluginDropDownReceiver(
 
     private fun fetchTemplateDetail(items: TemplatesResponse){
         if (items.isEmpty()) {
-            Log.d(TAG, "onLoading: fetchTemplateDetail no more items")
             return
         }
 
@@ -1315,15 +1269,9 @@ class PluginDropDownReceiver(
         val action = intent.action ?: return
         when (action) {
             SHOW_PLUGIN -> {
-                Log.d(TAG, "showing plugin drop down")
                 showDropDown(
                     templateView, HALF_WIDTH, FULL_HEIGHT, FULL_WIDTH,
                     HALF_HEIGHT, false, this
-                )
-                Log.d(TAG, "Group Items: ${mapView.rootGroup.items}")
-                Log.d(
-                    TAG,
-                    "Pref Items: ${sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null)}"
                 )
                 try {
                     val templateList: ArrayList<MarkerDataModel>? =
@@ -1335,7 +1283,6 @@ class PluginDropDownReceiver(
                     val commonList = templateList?.filter { marker ->
                         mapView.rootGroup.items.any { items -> marker.markerID == items.uid }
                     }
-                    Log.d(TAG, "Group Items: commonList : $commonList")
                 } catch (e: java.lang.Exception) {
                     Log.e(TAG, "error", e)
                 }
@@ -1343,15 +1290,8 @@ class PluginDropDownReceiver(
                 setDataFromPref()
                 Constant.sServerUrl = etLoginServerUrl?.text.toString()
                 Constant.sAccessToken = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "") ?: ""
-
             }
             GRG_TOGGLE_VISIBILITY, LAYER_VISIBILITY -> {
-                Log.d(
-                    TAG,
-                    "used the custom action to toggle layer visibility on: "
-                            + intent
-                        .getStringExtra("uid")
-                )
                 val l: CloudRFLayer? = mapOverlay.findLayer(
                     intent
                         .getStringExtra("uid")
@@ -1362,12 +1302,6 @@ class PluginDropDownReceiver(
                 refreshView()
             }
             GRG_DELETE, LAYER_DELETE -> {
-                Log.d(
-                    TAG,
-                    "used the custom action to delete the layer on: "
-                            + intent
-                        .getStringExtra("uid")
-                )
                 val l = mapOverlay.findLayer(intent.getStringExtra("uid"))
                 if (l != null) {
                     promptDelete(l)
@@ -1410,7 +1344,6 @@ class PluginDropDownReceiver(
                 val item = markersList.find {
                     it.markerID == id
                 }
-                Log.d(TAG, "used the custom action to RADIO_DELETE the layer on: $id")
                 item?.let { marker ->
                     mapView.context.showAlert(pluginContext.getString(R.string.alert_title), "${pluginContext.getString(R.string.delete)} ${marker.markerDetails.template.name}",
                         pluginContext.getString(R.string.yes), pluginContext.getString(R.string.cancel)) {
@@ -1463,11 +1396,8 @@ class PluginDropDownReceiver(
 
         val pathsToDelete: ArrayList<String> = ArrayList()
         pathsToDelete.add(layer.fileUri)
-        val fileName = File(layer.fileUri).name.substringBeforeLast('.', "")
-        val kmzFilePath = File(KMZ_FOLDER, "$fileName$KMZ_FILE").absolutePath
-        pathsToDelete.add(kmzFilePath)
+
         for (path in pathsToDelete) {
-            Log.d(TAG, "Deleting at $path")
             val intent = Intent(
                 ImportExportMapComponent.ACTION_DELETE_DATA
             )
@@ -1523,7 +1453,6 @@ class PluginDropDownReceiver(
 
     override fun onContactsSizeChange(contacts: Contacts?) {
         allContacts = Contacts.getInstance().getAllContacts() ?: mutableListOf()
-        Log.d(TAG, "Contacts list size changed: ${allContacts.size} contacts found.")
     }
 
     override fun onContactChanged(uuid: String?) {
@@ -1534,7 +1463,6 @@ class PluginDropDownReceiver(
         if (event.type == MapEvent.ITEM_CLICK && coOptView.visibility == View.VISIBLE) {
             val clickedItem = event.item
             if (clickedItem != null) {
-                Log.d(TAG, "Marker tapped: ${clickedItem.uid}, title: ${clickedItem.title}")
                 scrollToMarkerInCoOptList(clickedItem.uid)
             }
         }
@@ -1590,11 +1518,10 @@ class PluginDropDownReceiver(
     var spotBeamView = templateView.findViewById<LinearLayout>(R.id.sbmainll)
     var resolution = 20
 
+    // WARNING: Satellite functionality may get canned as GS has largely been killed by Starlink et al
     private fun initSpotBeam() {
-
         spotBeamView = templateView.findViewById(R.id.sbmainll)
         val sbtopbar = spotBeamView.findViewById<LinearLayout>(R.id.sbtopbar)
-
         val sbBack = sbtopbar.findViewById<ImageView>(R.id.sbBack)
         sbBack.setOnClickListener {
             setDataFromPref()
@@ -1612,9 +1539,7 @@ class PluginDropDownReceiver(
 
         val btnPlayBtn = templateView.findViewById<ImageButton>(R.id.btnPlayBtn)
         btnPlayBtn.setOnClickListener {
-
             val item: MarkerDataModel? = markersList.findLast { true }
-
             if(item == null){
                 toast("Add a radio marker to the map first")
             }
@@ -1629,13 +1554,10 @@ class PluginDropDownReceiver(
         
         val currentDate = Date()
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-
         val editDate = spotBeamView.findViewById<EditText>(R.id.editDate)
         editDate.setText(dateFormat.format(currentDate))
-
         val editTime = spotBeamView.findViewById<EditText>(R.id.editTime)
         editTime.setText("12:00:00")
-
         val satelliteSearch = spotBeamView.findViewById<AutoCompleteTextView>(R.id.sbSatelliteSearch)
 
         satelliteSearch.setOnFocusChangeListener { _, b ->
@@ -1659,11 +1581,9 @@ class PluginDropDownReceiver(
         val adapter = ArrayAdapter(pluginContext,
             android.R.layout.simple_spinner_dropdown_item, items)
         resolutionSpinner.adapter = adapter
-
         resolutionSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
-
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 resolution = if (position == 0) 20
                 else if (position == 1) 10
@@ -1673,11 +1593,9 @@ class PluginDropDownReceiver(
     }
 
     fun addSpotBeamAreaMarker() {
-
         for (marker in mapView.rootGroup.items)
             if (marker.title == "Satellite coverage")
                 mapView.rootGroup.removeItem(marker)
-
         val uid = UUID.randomUUID().toString()
         val location = mapView.centerPoint.get()
         val marker = Marker(location, uid)
@@ -1689,28 +1607,21 @@ class PluginDropDownReceiver(
         val b = outputStream.toByteArray()
         val encoded = "base64://" + Base64.encodeToString(b, Base64.NO_WRAP or Base64.URL_SAFE)
         val markerIconBuilder = Icon.Builder().setImageUri(0, encoded)
-
         marker.setMetaBoolean("CLOUDRF", true)
-
         marker.icon = markerIconBuilder.build()
-
         marker.setMetaBoolean("movable", true)
         mapView.rootGroup.addItem(marker)
-
         mapView.mapEventDispatcher.addMapItemEventListener(
             marker
         ) { _, mapEvent ->
             when (mapEvent.type) {
                 MapEvent.ITEM_DRAG_DROPPED -> {
                     pluginContext.toast("Calculating coverage...")
-
                     val latitude = marker.geoPointMetaData.get().latitude
                     val longitude = marker.geoPointMetaData.get().longitude
-
                     val editDate = spotBeamView.findViewById<EditText>(R.id.editDate).text
                     val editTime = spotBeamView.findViewById<EditText>(R.id.editTime).text
                     val dateTime: String = (editDate.toString() + "T" + editTime.toString() + "Z")
-
                     SpotBeamCall.callAPI(satellite, latitude, longitude, this,
                         sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "") ?: "", RetrofitClient.BASE_URL, dateTime)
                 }
@@ -1725,12 +1636,10 @@ class PluginDropDownReceiver(
     fun drawLine(p1: Array<Double>, p2: Array<Double>, label: Boolean, azi: Double, elev: Double) {
         val line = Polyline(UUID.randomUUID().toString())
         line.toggleMetaData("labels_on", label)
-
         line.setPoints(arrayOf(GeoPoint(p1[0], p1[1]), GeoPoint(p2[0], p2[1])))
         line.title = "AZIMUTH"
         line.lineLabel = "AZ: " + Math.round(azi*10)/10 + "° EL: " + Math.round(elev*10)/10 + "°"
         line.setLabelTextSize(72, Typeface.DEFAULT)
-
         mapView.rootGroup.addItem(line)
     }
 
@@ -1757,7 +1666,7 @@ class PluginDropDownReceiver(
             mapView.rootGroup.deepFindItem("uid", it.getUID())
         }.toMutableList()
         Log.d(TAG, "Found ${callsignMarkers.size} map items from ${allContacts.size} contacts.")
-        
+
         // Add self marker
         val self = mapView.selfMarker
         if (!callsignMarkers.any { it.uid == self.uid }) {
@@ -1914,14 +1823,14 @@ class PluginDropDownReceiver(
             } else {
                 stopTrackingLoop()
             }
-            
+
             showCoOptView(false)
         }
     }
 
     private fun sortMarkersWithCheckedFirst(adapter: CoOptAdapter) {
         val currentMarkers = adapter.getCurrentMarkers()
-        
+
         // Sort markers: checked/enabled first, then by original order
         val sortedMarkers = currentMarkers.sortedWith(compareBy<MapItem> { mapItem ->
             // Get the checkbox state for this marker
@@ -1972,7 +1881,6 @@ class PluginDropDownReceiver(
 
     private fun startTrackingLoop() {
         stopTrackingLoop()
-
         runCoOptUpdate()
 
         var timeEnabled = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshEnabled, true) ?: true
@@ -1994,7 +1902,6 @@ class PluginDropDownReceiver(
         }
 
         templateView.findViewById<ImageButton>(R.id.btnPlayBtn).setImageResource(android.R.drawable.ic_media_pause)
-       // templateView.findViewById<ImageButton>(R.id.stopCoOptButton).visibility = View.VISIBLE
 
         val nextUpdateTextView = templateView.findViewById<TextView>(R.id.co_opt_next_update_textview)
         var refreshIntervalSeconds = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshInterval, 30L) ?: 30L
@@ -2007,7 +1914,6 @@ class PluginDropDownReceiver(
                 timeEnabled = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshEnabled, true) ?: true
                 distanceEnabled = sharedPrefs?.get(Constant.PreferenceKey.sCoOptDistanceRefreshEnabled, false) ?: false
                 refreshIntervalSeconds = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshInterval, 30L) ?: 30L
-
 
                 var periodicUpdateJustHappened = false
                 if (timeEnabled && refreshIntervalSeconds > 1) {
@@ -2052,7 +1958,7 @@ class PluginDropDownReceiver(
 
                 // altitude was set automatically in populateCoOptList
 
-                if((altitude - hae) < 50.0){
+                if((altitude - hae) < 100.0){
                     // Height is assumed to be AGL. Use value and units from template
                     markerInList.markerDetails.output.units = "m"
                 }else{
@@ -2079,7 +1985,6 @@ class PluginDropDownReceiver(
     private fun checkDistanceAndRecalculate() {
         var needsRecalculation = false
         var lastUpdatedMarkerForRecalc: MarkerDataModel? = null
-
         val refreshDistance = sharedPrefs?.get(Constant.PreferenceKey.sCoOptDistanceRefreshThreshold, 100.0) ?: 100.0
 
         for ((uid, settings) in coOptedMarkers) {
@@ -2104,7 +2009,7 @@ class PluginDropDownReceiver(
                         var altitude = currentMarker.point.altitude
                         Log.d(TAG, "runCoOptUPdate() hae:"+hae+", altitude:"+currentMarker.point.altitude+", delta="+(altitude-hae).toString())
 
-                        if((altitude - hae) < 50.0){
+                        if((altitude - hae) < 100.0){
                             // Height is assumed to be AGL. Use value and units from template
                             markerInList.markerDetails.output.units = "m"
                         }else{

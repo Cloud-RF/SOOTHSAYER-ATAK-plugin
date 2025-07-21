@@ -56,6 +56,7 @@ import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
 import com.atakmap.android.soothsayer.util.*
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
+import com.atakmap.coremap.maps.conversion.EGM96
 import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
@@ -130,7 +131,8 @@ class PluginDropDownReceiver(
         pluginContext.createAndStoreFiles(getAllFilesFromAssets())
         initSettings()
         initRadioSettingView()
-        initSpinner()
+        initTemplateSpinner()
+        initMegapixelSpinner()
         initLoginView()
         initRecyclerview()
     }
@@ -238,7 +240,7 @@ class PluginDropDownReceiver(
         recyclerView.adapter = markerAdapter
     }
 
-    private fun initSpinner() {
+    private fun initTemplateSpinner() {
         val spinner: Spinner = templateView.findViewById(R.id.spTemplate)
         templateItems.addAll(getTemplatesFromFolder())
         val validTemplateItems = templateItems.filter { it.template != null }
@@ -313,6 +315,49 @@ class PluginDropDownReceiver(
         }
     }
 
+    var megapixels = 1.0;
+
+    private fun initMegapixelSpinner(){
+        val mpSpinner = settingView.findViewById<Spinner>(R.id.megapixelSpinner)
+        val items = arrayOf("Low res (0.25MP)", "Mid res (1.0MP)", "High res (4.0MP)")
+        val adapter = ArrayAdapter(pluginContext,
+                android.R.layout.simple_spinner_dropdown_item, items)
+        mpSpinner.adapter = adapter
+
+        mpSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                // Kotlin has a when statement which is painful.
+                if(position==0){
+                    megapixels=0.25
+                }
+                if(position==1){
+                    megapixels=1.0
+                }
+                if(position==2){
+                    megapixels=4.0
+                }
+            }
+        }
+    }
+
+    private fun megapixelCalculator(radius: Double): Double {
+        // Calculate the resolution based upon the desired radius
+        var diameter_m = (radius * 2) * 1e3 //eg. 4000m
+        var res = diameter_m / sqrt(megapixels*1e6)  //eg. 4000 / 1000 = 4
+
+        if(res < 1){
+            res = 1.0
+        }
+
+        if(res > 180){
+            res = 180.0
+        }
+
+        return res
+    }
     private fun initSettings() {
         etLoginServerUrl = settingView.findViewById(R.id.etLoginServerUrl)
         etLoginServerUrl?.setText(Constant.sServerUrl)
@@ -509,18 +554,21 @@ class PluginDropDownReceiver(
             return
         }
 
+        // Dynamic resolution
+        var radius = item?.markerDetails!!.output.rad
+        item?.markerDetails?.output?.res = megapixelCalculator(radius)
+
         item?.let {
             if(showLinks) {
                 updateLinkLinesOnMarkerDragging(item)
             }
         }
 
-
         if (useGpu) {
 
             item?.markerDetails?.let { template ->
                 val polygon = CustomPolygonTool.getMaskingPolygon()
-                var remote = false
+                val remote = false
 
                 if(polygon != null) {
                     Log.d(TAG,polygon.toString())
@@ -883,12 +931,15 @@ class PluginDropDownReceiver(
                             showHidePlayBtn();
                             Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
                             if (response is ResponseModel) {
+                                /*
+                                Fetch the PNG image from the JSON response and create a layer using the bounds metadata
+                                 */
                                 repository.downloadFile(response.PNG_WGS84,
                                     FOLDER_PATH,
                                     PNG_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            addSingleKMZLayer(
+                                            addSingleLayer(
                                                 markerData.template.name,
                                                 filePath,
                                                 response.bounds
@@ -927,19 +978,21 @@ class PluginDropDownReceiver(
                     markerData,
                     object : PluginRepository.ApiCallBacks {
                         override fun onLoading() {
-                            //pluginContext.toast(pluginContext.getString(R.string.loading_msg))
-                        }
 
+                        }
                         override fun onSuccess(response: Any?) {
                             showHidePlayBtn();
                             Log.d(TAG, "onSuccess called response: ${Gson().toJson(response)}")
                             if (response is ResponseModel) {
+                                /*
+                                Fetch the PNG image from the JSON response and create a layer using the bounds metadata
+                                 */
                                 repository.downloadFile(response.PNG_WGS84,
                                     FOLDER_PATH,
                                     PNG_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            addKMZLayer(filePath, response.bounds)
+                                            addLayer(filePath, response.bounds)
                                         }
                                     })
                             }
@@ -1022,7 +1075,7 @@ class PluginDropDownReceiver(
         etCoOptDistanceThreshold.setText((sharedPrefs?.get(Constant.PreferenceKey.sCoOptDistanceRefreshThreshold, 100.0) ?: 100.0).toString())
     }
 
-    fun addSingleKMZLayer(layerName: String, filePath: String, bounds: List<Double>) {
+    fun addSingleLayer(layerName: String, filePath: String, bounds: List<Double>) {
         val file = File(filePath)
         synchronized(this@PluginDropDownReceiver) {
             if (singleSiteCloudRFLayer != null) { 
@@ -1073,13 +1126,13 @@ class PluginDropDownReceiver(
             )
             singleSiteCloudRFLayer?.isVisible = true
             
-            handleKmzLayerVisibility()
+            handleLayerVisibility()
             
             refreshView()
         }
     }
 
-    private fun addKMZLayer(filePath: String, bounds: List<Double>) {
+    private fun addLayer(filePath: String, bounds: List<Double>) {
         val file = File(filePath)
         synchronized(this@PluginDropDownReceiver) {
             if (cloudRFLayer != null) { 
@@ -1109,8 +1162,8 @@ class PluginDropDownReceiver(
                 cloudRFLayer
             )
             cloudRFLayer?.isVisible = true
-            handleKmzLayerVisibility()
-            
+            handleLayerVisibility()
+
             refreshView()
         }
     }
@@ -1438,8 +1491,8 @@ class PluginDropDownReceiver(
         refreshView()
     }
     
-    private fun handleKmzLayerVisibility() {
-        if (mapOverlay.hideAllKmzLayer(pluginContext.getString(R.string.soothsayer_layer), cbCoverageLayer.isChecked)) {
+    private fun handleLayerVisibility() {
+        if (mapOverlay.hideAllLayer(pluginContext.getString(R.string.soothsayer_layer), cbCoverageLayer.isChecked)) {
            refreshView()
         }
     }
@@ -1534,9 +1587,7 @@ class PluginDropDownReceiver(
 
     var names = arrayOf("")
     var satellite = Satellite()
-
     var spotBeamView = templateView.findViewById<LinearLayout>(R.id.sbmainll)
-
     var resolution = 20
 
     private fun initSpotBeam() {
@@ -1603,7 +1654,7 @@ class PluginDropDownReceiver(
             satelliteSearch.threshold = 2
         }
 
-        val resolutionSpinner = spotBeamView.findViewById<Spinner>(R.id.resolutionSpinner)
+        val resolutionSpinner = spotBeamView.findViewById<Spinner>(R.id.megapixelSpinner)
         val items = arrayOf("Low (20m)", "Medium (10m)", "High (2m)")
         val adapter = ArrayAdapter(pluginContext,
             android.R.layout.simple_spinner_dropdown_item, items)
@@ -1837,8 +1888,7 @@ class PluginDropDownReceiver(
                             ),
                             transmitter = config.template!!.transmitter?.copy(
                                 lat = Math.round(originalMarker.point.latitude * 1e5).toDouble() / 1e5,
-                                lon = Math.round(originalMarker.point.longitude * 1e5).toDouble() / 1e5,
-                                alt = Math.round(originalMarker.point.altitude * 10).toDouble() / 10,
+                                lon = Math.round(originalMarker.point.longitude * 1e5).toDouble() / 1e5
                             )
                         ),
                         coopted_uid = uid
@@ -1993,7 +2043,25 @@ class PluginDropDownReceiver(
             if (markerInList != null && currentMarker != null) {
                 markerInList.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5
                 markerInList.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5
-                markerInList.markerDetails.transmitter?.alt = Math.round(currentMarker.point.altitude * 10).toDouble() / 10
+
+                // AGL / ASL switch here:
+                // If a 1.5m AGL portable is on a 1000m mountain, we compare with terrain alt to decide
+                var hae = EGM96.getHAE(currentMarker.point.latitude, currentMarker.point.longitude,0.0)
+                var altitude = currentMarker.point.altitude // height + terrain
+                Log.d(TAG, "runCoOptUPdate() hae:"+hae+", altitude:"+currentMarker.point.altitude+", delta="+(altitude-hae).toString())
+
+                // altitude was set automatically in populateCoOptList
+
+                if((altitude - hae) < 50.0){
+                    // Height is assumed to be AGL. Use value and units from template
+                    markerInList.markerDetails.output.units = "m"
+                }else{
+                    // height is likely AMSL... Use altitude from the marker and set the units to AMSL
+                    // set receiver alt to hae
+                    markerInList.markerDetails.transmitter?.alt = Math.round(altitude-hae).toDouble()
+                    markerInList.markerDetails.receiver.alt = hae
+                    markerInList.markerDetails.output.units = "m_amsl"
+                }
 
                 val index = markersList.indexOf(markerInList)
                 if (index != -1) {
@@ -2031,7 +2099,21 @@ class PluginDropDownReceiver(
                     if (markerInList != null) {
                         markerInList.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5;
                         markerInList.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5;
-                        markerInList.markerDetails.transmitter?.alt = Math.round(currentMarker.point.altitude * 10).toDouble() / 10
+
+                        var hae = EGM96.getHAE(currentMarker.point.latitude, currentMarker.point.longitude,0.0)
+                        var altitude = currentMarker.point.altitude
+                        Log.d(TAG, "runCoOptUPdate() hae:"+hae+", altitude:"+currentMarker.point.altitude+", delta="+(altitude-hae).toString())
+
+                        if((altitude - hae) < 50.0){
+                            // Height is assumed to be AGL. Use value and units from template
+                            markerInList.markerDetails.output.units = "m"
+                        }else{
+                            // height is likely AMSL. Use altitude from marker and set units to AMSL
+                            // set receiver alt to hae
+                            markerInList.markerDetails.transmitter?.alt = Math.round(altitude-hae).toDouble()
+                            markerInList.markerDetails.receiver.alt = hae
+                            markerInList.markerDetails.output.units = "m_amsl"
+                        }
 
                         val index = markersList.indexOf(markerInList)
                         if (index != -1) {
@@ -2059,6 +2141,6 @@ class PluginDropDownReceiver(
         }
         templateView.findViewById<TextView>(R.id.co_opt_next_update_textview).visibility = View.GONE
         templateView.findViewById<ImageButton>(R.id.btnPlayBtn).setImageResource(android.R.drawable.ic_media_play)
-        //templateView.findViewById<ImageButton>(R.id.stopCoOptButton).visibility = View.GONE
     }
+
 }

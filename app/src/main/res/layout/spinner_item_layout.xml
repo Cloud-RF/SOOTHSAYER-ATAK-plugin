@@ -9,5 +9,4 @@
     android:padding="@dimen/dp_6"
     android:singleLine="true"
     android:textColor="@android:color/black"
-    android:textSize="14sp"
-    tools:text="iudiudeiwjudiowiodjueiodrwruiowruioewuiijfijierfjioerw" />
+    android:textSize="14sp" />

@@ -62,11 +62,11 @@ data class Model(
 data class Output(
         val col: String,
         val mod: Int,
-        var nf: String, // noise floor
+        var nf: String, // noise floor. Can be -100 or database
         val `out`: Int,
         var rad: Double,
         var res: Double,
-        val units: String,
+        var units: String, // m or m_amsl
         var bounds: Bounds?
 ): Serializable
 

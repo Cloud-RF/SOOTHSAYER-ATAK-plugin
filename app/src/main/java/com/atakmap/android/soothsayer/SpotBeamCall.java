@@ -193,7 +193,7 @@ public class SpotBeamCall {
         fis.close();
         bis.close();
 
-        receiver.addSingleKMZLayer("SPOTBEAM", "/sdcard/atak/SOOTHSAYER/KMZ/" + satName + ".png", bounds);
+        receiver.addSingleLayer("SPOTBEAM", "/sdcard/atak/SOOTHSAYER/KMZ/" + satName + ".png", bounds);
     }
 
     private static double[] endpointFromPointBearingDistance(double latitude, double longitude, double bearingDegrees, double distanceMeters) {

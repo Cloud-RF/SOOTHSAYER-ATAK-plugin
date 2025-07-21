@@ -61,7 +61,7 @@ object RetrofitClient {
 
 
     /*
-    Support self signed SSL certificates for private SOOTHSAYER servers.
+    This app supports self signed SSL certificates for private SOOTHSAYER servers. Deal with it.
      */
     fun getUnsafeOkHttpClient(): OkHttpClient.Builder {
         try {

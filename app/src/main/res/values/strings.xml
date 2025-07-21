@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER v1.6</string>
+    <string name="help_title">SOOTHSAYER</string>
     <!-- description -->
     <string name="app_desc">Interface to the CloudRF/SOOTHSAYER API</string>
     <string name="example_layer_description">This is an example layer.</string>
@@ -75,8 +75,8 @@
     <!--below is the name of group for drawing link lines on map-->
     <string name="drawing_objects">Drawing Objects</string>
 
-    <string name="kmzlayer">Show coverage</string>
-    <string name="link_lines">Show links</string>
+    <string name="kmzlayer">Coverage</string>
+    <string name="link_lines">Links</string>
 
     <string name="radio_settings">Edit (%1$s)</string>
     <string name="radio_height">Height (m)</string>

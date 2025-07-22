@@ -8,7 +8,7 @@ import java.io.Serializable
 data class TemplateDataModel(
     val antenna: Antenna,
     val coordinates: Int,
-    val engine: Int,
+    var engine: Int,
     val environment: Environment,
     val feeder: Feeder,
     val model: Model,

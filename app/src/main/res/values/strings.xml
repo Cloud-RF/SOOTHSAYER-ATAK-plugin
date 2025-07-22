@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER help</string>
+    <string name="help_title">SOOTHSAYER v2.0</string>
     <!-- description -->
     <string name="app_desc">Interface to the CloudRF/SOOTHSAYER API</string>
     <string name="example_layer_description">This is an example layer.</string>
@@ -35,8 +35,8 @@
     <string name="marker_error">Please login to the server first.</string>
     <string name="empty_api_key">Please enter your API key.</string>
     <string name="api_mode">Mode</string>
-    <string name="single">Single</string>
-    <string name="multiple">Multisite</string>
+    <string name="single">Single (CPU)</string>
+    <string name="multiple">Multisite (GPU)</string>
     <string name="help">Help</string>
     <string name="ok_txt">OK</string>
     <string name="help_msg">This plugin simulates radio coverage for any radio system or platform.
@@ -53,7 +53,7 @@
         \n\nMAKE THIS BETTER: Report bugs and request features at support@cloudrf.com</string>
     <string name="soothsayer_layer">SOOTHSAYER Layer</string>
     <string name="layer">%1$s Layer</string>
-    <string name="multisite_layer">Multisite Layer</string>
+    <string name="coverage_layer">RF coverage layer</string>
 
     <!--Prompt Dialog strings-->
     <string name="civ_delete_layer">Delete layer</string>

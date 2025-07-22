@@ -85,8 +85,8 @@ object RetrofitClient {
             val sslSocketFactory = sslContext.socketFactory
 
             val builder = OkHttpClient.Builder()
-                .connectTimeout(120, TimeUnit.SECONDS)
-                .readTimeout(120, TimeUnit.SECONDS)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
 //                .addInterceptor(LOGGING_INTERCEPTOR)
                 .addInterceptor(AuthorizationInterceptor())
             builder.sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)

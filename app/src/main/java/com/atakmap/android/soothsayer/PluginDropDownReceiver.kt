@@ -554,42 +554,54 @@ class PluginDropDownReceiver(
             return
         }
 
+        if(markersList.size < 1) {
+            toast("You need to add a radio first")
+            return
+        }
+
         // Dynamic resolution
         var radius = item?.markerDetails!!.output.rad
         item?.markerDetails?.output?.res = megapixelCalculator(radius)
 
+        // Force engine. 1=GPU, 2=CPU
+        if(multisiteMode){
+            item?.markerDetails?.engine = 1
+        }else{
+            item?.markerDetails?.engine = 2
+        }
+
         item?.let {
-            if(showLinks) {
+            if(showLinks && markersList.size > 1) {
                 updateLinkLines(item)
             }
+        }
+
+        val polygon = CustomPolygonTool.getMaskingPolygon()
+        // Bounded area for focused calculations (CPU & GPU)
+        if(polygon != null) {
+            val area = polygon.area
+            item?.markerDetails?.output?.res = min(10.0,ceil(sqrt(area) / 1000.0) + 1.0) // adjust resolution based upon polygon size
+            val txlat = item.markerDetails.transmitter?.lat
+            val txlon = item.markerDetails.transmitter?.lon
+
+            if(txlat != null && txlon != null) {
+                val polyLon = (GeoImageMasker.getBounds(polygon.points).east + GeoImageMasker.getBounds(polygon.points).west) / 2
+                val polyLat = (GeoImageMasker.getBounds(polygon.points).north + GeoImageMasker.getBounds(polygon.points).south) / 2
+                val haversineDistance = haversine(txlat, txlon, polyLat, polyLon)
+                if(haversineDistance > item.markerDetails.output.rad){
+                    item.markerDetails.output.rad = haversineDistance*1.1
+                }
+            }
+            val newbounds = Bounds(GeoImageMasker.getBounds(polygon.points).north,GeoImageMasker.getBounds(polygon.points).east,GeoImageMasker.getBounds(polygon.points).south,GeoImageMasker.getBounds(polygon.points).west)
+            item?.markerDetails?.output?.bounds = newbounds
+        }else{
+            item?.markerDetails?.output?.bounds = null
         }
 
         // A Multisite API call simulates many towers at once and uses a GPU
         if (multisiteMode) {
             item?.markerDetails?.let { template ->
-                val polygon = CustomPolygonTool.getMaskingPolygon()
-
-                // Bounded area for focused calculations
-                if(polygon != null) {
-                    val area = polygon.area
-                    template.output.res = min(10.0,ceil(sqrt(area) / 1000.0) + 1.0) // adjust resolution based upon polygon size
-                    val txlat = item.markerDetails.transmitter?.lat
-                    val txlon = item.markerDetails.transmitter?.lon
-
-                    if(txlat != null && txlon != null) {
-                        val polyLon = (GeoImageMasker.getBounds(polygon.points).east + GeoImageMasker.getBounds(polygon.points).west) / 2
-                        val polyLat = (GeoImageMasker.getBounds(polygon.points).north + GeoImageMasker.getBounds(polygon.points).south) / 2
-                        val haversineDistance = haversine(txlat, txlon, polyLat, polyLon)
-                        if(haversineDistance > item.markerDetails.output.rad){
-                            item.markerDetails.output.rad = haversineDistance*1.1
-                        }
-                    }
-                    val newbounds = Bounds(GeoImageMasker.getBounds(polygon.points).north,GeoImageMasker.getBounds(polygon.points).east,GeoImageMasker.getBounds(polygon.points).south,GeoImageMasker.getBounds(polygon.points).west)
-                    template.output.bounds = newbounds
-                }else{
-                    template.output.bounds = null
-                }
-                // in a multisite call, each transmitter can have its own location, frequency, altitude and antenna
+                 // in a multisite call, each transmitter can have its own location, frequency, altitude and antenna
                 val txlist: List<MultiSiteTransmitter> =
                         markersList.mapNotNull { marker ->
                             marker.markerDetails.transmitter?.run {
@@ -905,11 +917,12 @@ class PluginDropDownReceiver(
                                     PNG_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            addSingleLayer(
+                                            addLayer(filePath, response.bounds)
+                                            /*addSingleLayer(
                                                 markerData.template.name,
                                                 filePath,
                                                 response.bounds
-                                            )
+                                            )*/
                                         }
                                     })
                             }
@@ -1098,7 +1111,7 @@ class PluginDropDownReceiver(
                 GLLayerFactory.unregister(GLCloudRFLayer.SPI)
             }
             GLLayerFactory.register(GLCloudRFLayer.SPI)
-            val layerName = pluginContext.getString(R.string.multisite_layer)
+            val layerName = pluginContext.getString(R.string.coverage_layer)
             cloudRFLayer =
                 CloudRFLayer(
                     pluginContext,

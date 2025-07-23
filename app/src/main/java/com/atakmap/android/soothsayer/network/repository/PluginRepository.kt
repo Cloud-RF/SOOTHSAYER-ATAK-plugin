@@ -36,6 +36,7 @@ import android.os.SystemClock
 class PluginRepository {
 
     private var lastRequestTime = 0L
+    private var requestInterval = 1000 // Linked to CloudRF plan. If you want to do links, a Bronze plan will do. Want Multisite coverage = Silver. Want both, at scale = Gold.
     private val requestQueue = Executors.newSingleThreadExecutor()
 
     companion object {
@@ -50,8 +51,8 @@ class PluginRepository {
         requestQueue.execute {
             val currentTime = SystemClock.elapsedRealtime()
             val timeSinceLastRequest = currentTime - lastRequestTime
-            if (timeSinceLastRequest < 1000) {
-                SystemClock.sleep(1000 - timeSinceLastRequest)
+            if (timeSinceLastRequest < requestInterval) {
+                SystemClock.sleep(requestInterval - timeSinceLastRequest)
             }
             lastRequestTime = SystemClock.elapsedRealtime()
             task()
@@ -60,6 +61,7 @@ class PluginRepository {
 
     fun sendSingleSiteMarkerData(request: TemplateDataModel, callback: ApiCallBacks? = null) {
         callback?.onLoading()
+
         executeThrottled {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
                 RetrofitClient.apiService()?.sendSingleSiteDataToServer(request = request)
@@ -156,6 +158,7 @@ class PluginRepository {
 
     fun sendMultiSiteMarkerData(request: MultisiteRequest, callback: ApiCallBacks? = null) {
         callback?.onLoading()
+
         executeThrottled {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
                 Log.d(
@@ -203,6 +206,7 @@ class PluginRepository {
 
     fun getLinks(request: LinkRequest, callback: ApiCallBacks? = null){
         callback?.onLoading()
+
         executeThrottled {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
                 Log.d(PluginDropDownReceiver.TAG, "sendLinks Request :${Gson().toJson(request)}")

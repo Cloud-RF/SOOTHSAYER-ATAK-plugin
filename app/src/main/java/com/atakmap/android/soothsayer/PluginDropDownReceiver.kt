@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Typeface
+import android.os.SystemClock
 import android.text.InputType
 import android.util.Base64
 import android.util.Log

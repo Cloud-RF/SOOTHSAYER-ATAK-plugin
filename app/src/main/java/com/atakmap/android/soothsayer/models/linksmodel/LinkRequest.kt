@@ -16,24 +16,6 @@ data class LinkRequest(
     val transmitter: Transmitter?
 )
 
-//
-//data class Environment(
-//    val buildings: Int,
-//    val clt: String,
-//    val elevation: Int,
-//    val landcover: Int,
-//    val obstacles: Int
-//)
-
-//data class Model(
-//    val cli: Int,
-//    val ked: Int,
-//    val pe: Int,
-//    val pm: Int,
-//    val rel: Int,
-//    val ter: Int
-//)
-
 data class Point(
     val markerId: String,
     val alt: Double?,

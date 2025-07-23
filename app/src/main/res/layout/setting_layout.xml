@@ -37,7 +37,7 @@
 
 
     <RelativeLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp">
 
@@ -62,60 +62,180 @@
             android:textStyle="bold"
             android:textSize="@dimen/sp_14"
             android:thumbTextPadding="4dp" />
+
     </RelativeLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginVertical="@dimen/dp_8">
+    <LinearLayout
+        android:layout_width="369dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/dp_8"
+        android:orientation="vertical">
 
-        <CheckBox
-            android:id="@+id/cbKmzLayer"
-            android:text="@string/kmzlayer"
-            android:checked="true"
+        <!-- Co-Opt Refresh Settings -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/cbLinkLines"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/link_lines"
+                android:textSize="12sp" />
+
+            <CheckBox
+                android:id="@+id/cbKmzLayer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/kmzlayer"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:text="Co-opt refresh"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
 
-        <CheckBox
-            android:id="@+id/cbLinkLines"
-            android:text="@string/link_lines"
-            android:checked="true"
-            android:layout_below="@id/cbKmzLayer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <ImageButton
-            android:id="@+id/tvDocs"
-            style="@style/darkButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_alignParentBottom="true"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:src="@android:drawable/ic_dialog_info" />
+            <!-- Time Refresh Section -->
+            <CheckBox
+                android:id="@+id/cbCoOptTimeRefresh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Interval (s)"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/etCoOptTimeInterval"
+                android:layout_width="25dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:background="@drawable/et_background"
+                android:inputType="number"
+                android:numeric="integer"
+                android:padding="4dp"
+                android:text="60"
+                android:textColor="@color/darker_gray"
+                android:textSize="12sp" />
+
+            <!-- Distance Refresh Section -->
+            <CheckBox
+                android:id="@+id/cbCoOptDistanceRefresh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Distance (m)"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/etCoOptDistanceThreshold"
+                android:layout_width="35dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"
+                android:background="@drawable/et_background"
+                android:inputType="number"
+                android:numeric="integer"
+                android:padding="4dp"
+                android:text="100"
+                android:textColor="@color/darker_gray"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <TableLayout
+            android:layout_width="382dp"
+            android:layout_height="wrap_content">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="4dp"
+                    android:text="Resolution"
+                    android:textColor="#FFFFFF"
+                    android:textSize="@dimen/dp_12" />
+
+                <Spinner
+                    android:id="@+id/megapixelSpinner"
+                    android:layout_width="313dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:drawable/screen_background_dark"
+                    android:popupBackground="@android:drawable/screen_background_dark"
+                    android:spinnerMode="dropdown" />
+            </TableRow>
+
+        </TableLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="369dp"
+        android:layout_height="46dp"
+        android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/tvHelp"
             style="@style/darkButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_alignParentBottom="true"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
             android:src="@android:drawable/ic_dialog_info" />
 
         <ImageButton
+            android:id="@+id/btnSpotBeam"
+            style="@style/darkButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/spotbeam_marker_icon"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp" />
+
+        <ImageButton
             android:id="@+id/btnSettingLogin"
             style="@style/darkButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_centerInParent="true"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
+            android:paddingBottom="6dp"
             android:src="@drawable/account" />
-    </RelativeLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

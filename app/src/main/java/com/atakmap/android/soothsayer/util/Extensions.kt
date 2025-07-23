@@ -31,10 +31,8 @@ import kotlin.math.round
 
 val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/atak/SOOTHSAYER"
 private val TEMPLATES_PATH = "$FOLDER_PATH/templates"
-val KMZ_FOLDER = "$FOLDER_PATH/KMZ"
-const val SOOTHSAYER = "SOOTHSAYER_"
+const val SOOTHSAYER = "SOOTHSAYER"
 const val PNG_IMAGE = ".png"
-const val KMZ_FILE = ".kmz"
 
 /**
  * Note - this will become a API offering in 4.5.1 and beyond.
@@ -62,6 +60,7 @@ fun Context.getBitmap(drawableId: Int): Bitmap? {
     }
 }
 
+// Creates ./templates then loads all .json files from assets
 fun Context.createAndStoreFiles(fileList: List<String>?) {
     val folder = File(TEMPLATES_PATH)
     if (!folder.exists()) {

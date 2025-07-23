@@ -45,11 +45,9 @@ public class CloudRFLayer extends AbstractLayer {
 
     public CloudRFLayer(Context plugin, final String name, final String description, final String uri, final List<Double> bounds, final CloudRFLayerListener listener) {
         super(name);
-
         this.description = description;
         this.fileUri = uri;
         this.cloudRFLayerListener = listener;
-
         this.upperLeft = GeoPoint.createMutable();
         this.upperRight = GeoPoint.createMutable();
         this.lowerRight = GeoPoint.createMutable();
@@ -64,8 +62,7 @@ public class CloudRFLayer extends AbstractLayer {
             bitmap = BitmapFactory.decodeFile(uri);
         }
 
-                
-//        north, east, south, west
+        //    north, east, south, west
         if(bounds.size() == 4) {
             upperLeft.set(bounds.get(0), bounds.get(3));  // north, west
             upperRight.set(bounds.get(0), bounds.get(1)); // north,east

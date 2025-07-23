@@ -1,32 +1,32 @@
 {
-    "version": "CloudRF-API-v3.8.3",
+    "version": "CloudRF-API-v3.8.4",
     "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
     "template": {
-        "name": "FENIX_TALON_2.5G_BW4_SNR4",
+        "name": "UHF450_4W_DMR_MOB",
         "service": "CloudRF https://api.cloudrf.com",
-        "created_at": "2023-05-03T17:28:56+00:00",
-        "owner": 34858,
+        "created_at": "2023-06-19T14:29:43+00:00",
+        "owner": 1,
         "bom_value": 0
     },
-    "site": "RadioA",
-    "network": "TALON",
+    "site": "Site",
+    "network": "UHF",
     "engine": 1,
     "coordinates": 1,
     "transmitter": {
-        "lat": 51.858204,
-        "lon": -2.251795,
+        "lat": 51.755735,
+        "lon": -2.364494,
         "alt": 2,
-        "frq": 2450,
-        "txw": 1,
-        "bwi": 4,
+        "frq": 450,
+        "txw": 4,
+        "bwi": 0.1,
         "powerUnit": "W"
     },
     "receiver": {
-        "lat": 0,
-        "lon": 0,
+        "lat": 38.913,
+        "lon": 1.45,
         "alt": 1,
-        "rxg": 2,
-        "rxs": 2
+        "rxg": 1,
+        "rxs": -105
     },
     "feeder": {
         "flt": 1,
@@ -35,35 +35,37 @@
     },
     "antenna": {
         "mode": "template",
-        "txg": 2.15,
+        "txg": 2,
         "txl": 0,
-        "ant": 39,
+        "ant": 1,
         "azi": 0,
         "tlt": 0,
         "hbw": 1,
         "vbw": 1,
-        "fbr": 2.15,
+        "fbr": 0,
         "pol": "v"
     },
     "model": {
-        "pm": 11,
+        "pm": 10,
         "pe": 2,
-        "ked": 1,
-        "rel": 50
+        "ked": 4,
+        "rel": 60
     },
     "environment": {
-        "clm": 0,
-        "cll": 0,
-        "clt": "Minimal.clt"
+        "elevation": 2,
+        "landcover": 1,
+        "buildings": 1,
+        "obstacles": 0,
+        "clt": "FOREST.clt"
     },
     "output": {
         "units": "m",
-        "col": "SNR4.dB",
-        "out": 4,
+        "col": "LTE.dBm",
+        "out": 2,
         "ber": 1,
         "mod": 0,
-        "nf": -108,
-        "res": 2,
-        "rad": 0.5
+        "nf": -105,
+        "res": 10,
+        "rad": 5
     }
 }

@@ -9,16 +9,16 @@
         "bom_value": 0
     },
     "site": "Site",
-    "network": "sigma415",
+    "network": "CUAS-LOS",
     "engine": 2,
     "coordinates": 1,
     "transmitter": {
         "lat": 51.23854,
         "lon": -2.979421,
         "alt": 4,
-        "frq": 2450,
+        "frq": 1000,
         "txw": 0.1,
-        "bwi": 20,
+        "bwi": 1.2,
         "powerUnit": "W"
     },
     "receiver": {
@@ -49,14 +49,14 @@
         "pm": 10,
         "pe": 2,
         "ked": 0,
-        "rel": 80
+        "rel": 50
     },
     "environment": {
         "elevation": 2,
         "landcover": 1,
         "buildings": 1,
         "obstacles": 0,
-        "clt": "Minimal.clt"
+        "clt": "FOREST.clt"
     },
     "output": {
         "units": "m",
@@ -64,7 +64,7 @@
         "out": 2,
         "ber": 1,
         "mod": 0,
-        "nf": -113,
+        "nf": -100,
         "res": 5,
         "rad": 5
     }

@@ -82,34 +82,6 @@ public class GLCloudRFLayer extends GLAbstractLayer {
         super.release();
     }
 
-    public void setData(int[] argb, final int width, final int height,
-            GeoPoint upperLeft,
-            GeoPoint upperRight, GeoPoint lowerRight, GeoPoint lowerLeft) {
-
-        // this example makes use of Bitmap, but does not need to.
-
-        final Bitmap bitmap = Bitmap.createBitmap(width, height,
-                Bitmap.Config.ARGB_8888);
-        final GeoPoint ul = new GeoPoint(upperLeft);
-        final GeoPoint ur = new GeoPoint(upperRight);
-        final GeoPoint lr = new GeoPoint(lowerRight);
-        final GeoPoint ll = new GeoPoint(lowerLeft);
-
-        // offload the actual update to the GL thread -- GL objects may only be
-        // updated on the GL thread (e.g. texture).
-        this.renderContext.queueEvent(new Runnable() {
-            public void run() {
-                try {
-                    if (frame != null)
-                        frame.update(bitmap, width, height, ul, ur,
-                                lr, ll);
-                } finally {
-                    // cleanup the bitmap
-                    bitmap.recycle();
-                }
-            }
-        });
-    }
 
     public void setData(final Bitmap bitmap, final int width, final int height,
                         GeoPoint upperLeft,

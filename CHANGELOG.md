@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 2.0.0 19/07/2025
+- Co-opt feature to model live data
+- Co-opt settings for time / distance refresh
+- Noise database support via environment.nf = database
+
+## 1.5.0 24/03/2025
+- Feature: Output bounds polygon
+- Feature: Play button for manual calculations as well as dragging
+- Refactored calculate functions
+- Tidied edit labels
+
+## 1.4.2 15/11/2024
+- Updated for ATAK 5.2 / SDK 34
+- Updated proguard to 7.4.2
+- Fix: Sending empty key in header during login
+
 ## 1.3.4 06/07/2024
 - Fix: Templates with floats for heights weren't working
 - Fix: Templates with multi azimuth values eg. "0,90,180" weren't working

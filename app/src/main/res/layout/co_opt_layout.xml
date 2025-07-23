@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    This layout defines the main dialog for the Co-Opt feature.
+    It will contain a RecyclerView to display a list of all active callsigns.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Co-opt transmitters"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+
+    <EditText
+        android:id="@+id/co_opt_search_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:layout_marginBottom="3dp"
+        android:background="@android:color/transparent"
+        android:drawableStart="@android:drawable/ic_menu_search"
+        android:drawablePadding="6dp"
+        android:hint="Name..."
+        android:inputType="text"
+        android:paddingStart="8dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="4dp"
+        android:textSize="12sp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/co_opt_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/altitudeTip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Only data with an altitude > 0 is shown" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/co_opt_cancel_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="0.5"
+            android:text="Cancel"
+            android:textColor="@color/red"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/co_opt_ok_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="0.5"
+            android:text="Start"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/green"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+</LinearLayout> 

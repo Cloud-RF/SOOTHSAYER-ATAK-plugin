@@ -71,6 +71,7 @@ import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.math.sqrt
 
+
 class PluginDropDownReceiver(
     mapView: MapView?,
     val pluginContext: Context, private val mapOverlay: PluginMapOverlay
@@ -376,7 +377,7 @@ class PluginDropDownReceiver(
         etLoginServerUrl = loginView.findViewById(R.id.etLoginServerUrl)
         etUsername = loginView.findViewById(R.id.etUserName)
 
-        val server: String? = sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, "https://cloudrf.com")
+        val server: String? = sharedPrefs?.get(Constant.PreferenceKey.sServerUrl, "https://api.cloudrf.com")
         val username: String? = sharedPrefs?.get(Constant.PreferenceKey.etUsername, "")
         val apiKey: String? = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "")
 
@@ -1156,10 +1157,6 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             if (response is LoginResponse) {
                                 response.apiKey?.let {
-                                    // A hack but not for long as auth is moving to the API to make it standard across SOOTHSAYER and CloudRF
-                                    if(etLoginServerUrl?.text.toString() == "https://cloudrf.com"){
-                                        RetrofitClient.BASE_URL = "https://api.cloudrf.com"
-                                    }
                                     Log.d(TAG, "SOOTHSAYER API key: "+response.apiKey)
                                     Constant.sAccessToken = it
 
@@ -1967,21 +1964,21 @@ class PluginDropDownReceiver(
                 // AGL / ASL switch here:
                 // If a 1.5m AGL portable is on a 1000m mountain, we compare with terrain alt to decide
                 var hae = EGM96.getHAE(currentMarker.point.latitude, currentMarker.point.longitude,0.0)
-                var altitude = currentMarker.point.altitude // height + terrain
-                Log.d(TAG, "runCoOptUPdate() hae:"+hae+", altitude:"+currentMarker.point.altitude+", delta="+(altitude-hae).toString())
+                var htMSL = EGM96.getMSL(currentMarker.point.latitude, currentMarker.point.longitude,0.0)
+                var htAGL = EGM96.getAGL(currentMarker.point,0.0)
+                var altitude = currentMarker.point.altitude
+                Log.d(TAG, "runCoOptUPdate() hae:"+hae+", htMSL:"+htMSL+", htAGL:"+htAGL+", altitude:"+altitude+", delta="+(altitude-hae).toString())
 
-                // altitude was set automatically in populateCoOptList
-
-                if((altitude - hae) < 100.0){
-                    // Height is assumed to be AGL. Use value and units from template
+                // This proved harder than it should be
+                /*
+                if(altitude < 4000.0){
                     markerInList.markerDetails.output.units = "m"
                 }else{
-                    // height is likely AMSL... Use altitude from the marker and set the units to AMSL
-                    // set receiver alt to hae
                     markerInList.markerDetails.transmitter?.alt = Math.round(altitude-hae).toDouble()
-                    markerInList.markerDetails.receiver.alt = hae
+                    markerInList.markerDetails.receiver.alt = htAGL
                     markerInList.markerDetails.output.units = "m_amsl"
                 }
+                */
 
                 val index = markersList.indexOf(markerInList)
                 if (index != -1) {
@@ -2011,28 +2008,35 @@ class PluginDropDownReceiver(
                 Log.d(TAG, "Late initialization of tracking for marker $uid")
             } else {
                 val distanceMoved = lastLocation.distanceTo(currentMarker.point)
-                Log.d(TAG, "Marker $uid moved ${distanceMoved}m (threshold: ${refreshDistance}m)")
+
                 
                 if (distanceMoved >= refreshDistance) {
+                    Log.d(TAG, "Marker $uid moved ${distanceMoved}m (threshold: ${refreshDistance}m)")
                     val markerInList = markersList.find { it.coopted_uid == uid }
                     if (markerInList != null) {
                         markerInList.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5;
                         markerInList.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5;
 
                         var hae = EGM96.getHAE(currentMarker.point.latitude, currentMarker.point.longitude,0.0)
+                        var htMSL = EGM96.getMSL(currentMarker.point.latitude, currentMarker.point.longitude,0.0)
+                        var htAGL = EGM96.getAGL(currentMarker.point,0.0)
                         var altitude = currentMarker.point.altitude
-                        Log.d(TAG, "runCoOptUPdate() hae:"+hae+", altitude:"+currentMarker.point.altitude+", delta="+(altitude-hae).toString())
+                        Log.d(TAG, "runCoOptUPdate() hae:"+hae+", htMSL:"+htMSL+", htAGL:"+htAGL+", altitude:"+altitude+", delta="+(altitude-hae).toString())
 
-                        if((altitude - hae) < 100.0){
-                            // Height is assumed to be AGL. Use value and units from template
+                        // getHAE and getMSL return 49....everywhere?
+                        // getAGL == point.altitude
+                        // runCoOptUPdate() hae:49.844478619865086, htMSL:-49.844478619865086, htAGL:52.80000000000109, altitude:52.80000000000109, delta=2.9555213801360054
+
+                        // This proved harder than it should be
+                        /*
+                        if(altitude < 4000.0){
                             markerInList.markerDetails.output.units = "m"
                         }else{
-                            // height is likely AMSL. Use altitude from marker and set units to AMSL
-                            // set receiver alt to hae
                             markerInList.markerDetails.transmitter?.alt = Math.round(altitude-hae).toDouble()
-                            markerInList.markerDetails.receiver.alt = hae
+                            markerInList.markerDetails.receiver.alt = htAGL
                             markerInList.markerDetails.output.units = "m_amsl"
                         }
+                        */
 
                         val index = markersList.indexOf(markerInList)
                         if (index != -1) {

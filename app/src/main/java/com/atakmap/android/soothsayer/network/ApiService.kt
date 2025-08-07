@@ -34,7 +34,7 @@ interface ApiService {
     ): Call<LinkResponse>
 
     @FormUrlEncoded
-    @POST("/ui/login?external=true")
+    @POST("/auth")
     fun loginUser(
         @Field("user") userName: String?,
         @Field("pass") password: String?

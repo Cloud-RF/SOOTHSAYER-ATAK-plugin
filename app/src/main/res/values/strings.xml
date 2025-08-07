@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER v2.0</string>
+    <string name="help_title">SOOTHSAYER v2.1</string>
     <!-- description -->
     <string name="app_desc">Interface to the CloudRF/SOOTHSAYER API</string>
     <string name="example_layer_description">This is an example layer.</string>
@@ -25,7 +25,7 @@
     <string name="loading_msg">Calculating coverage...</string>
     <string name="loading_link_msg">Finding Links…</string>
     <string name="error_msg">Something went wrong</string>
-    <string name="internet_error">Please check your internet connection</string>
+    <string name="internet_error">Network not found. Connect to a network</string>
     <string name="unauthorized_error">API key is invalid. Do you have an account? https://cloudrf.com/plans</string>
     <string name="host_not_resolved">Unable to resolve host</string>
     <string name="invalid_url_error">Please add a valid server url.</string>

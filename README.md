@@ -6,7 +6,7 @@ Presently, users can task the `Area`, `Multisite`, `Points` and `Satellite` APIs
 
 ![SOOTHSAYER ATAK plugin](help/soothsayer_atak.jpg "SOOTHSAYER ATAK plugin")
 
-[![SOOTHSAYER ATAK plugin v2.0](https://img.youtube.com/vi/HTd3ejfeyJc/0.jpg)](https://youtu.be/HTd3ejfeyJc)
+[![SOOTHSAYER ATAK plugin v2.0](https://img.youtube.com/vi/HTd3ejfeyJc/0.jpg)](https://www.youtube.com/watch?v=HTd3ejfeyJc)
 
 # Latest release
 

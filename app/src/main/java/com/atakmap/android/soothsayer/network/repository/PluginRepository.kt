@@ -36,7 +36,7 @@ import android.os.SystemClock
 class PluginRepository {
 
     private var lastRequestTime = 0L
-    private var requestInterval = 1000 // Linked to CloudRF plan. If you want to do links, a Bronze plan will do. Want Multisite coverage = Silver. Want both, at scale = Gold.
+    private var requestInterval = 2000 // Linked to CloudRF plan. If you want to do links, a Bronze plan will do. Want Multisite coverage = Silver. Want both, at scale = Gold.
     private val requestQueue = Executors.newSingleThreadExecutor()
 
     companion object {
@@ -158,6 +158,7 @@ class PluginRepository {
 
     fun sendMultiSiteMarkerData(request: MultisiteRequest, callback: ApiCallBacks? = null) {
         callback?.onLoading()
+        requestInterval=2000
 
         executeThrottled {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
@@ -206,6 +207,8 @@ class PluginRepository {
 
     fun getLinks(request: LinkRequest, callback: ApiCallBacks? = null){
         callback?.onLoading()
+
+        requestInterval=200 // points API has bursting logic to support fast MANET links
 
         executeThrottled {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {

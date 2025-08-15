@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER v2.1</string>
+    <string name="help_title">SOOTHSAYER v2.2</string>
     <!-- description -->
     <string name="app_desc">Interface to the CloudRF/SOOTHSAYER API</string>
     <string name="example_layer_description">This is an example layer.</string>
@@ -21,6 +21,7 @@
     <string name="api_key">API key</string>
     <string name="server">Server address</string>
     <string name="location_details">Loc: %1$s, %2$s, %3$sm (%4$sW)</string>
+    <string name="location_details_amsl">Loc: %1$s, %2$s, %3$sm AMSL (%4$sW)</string>
     <string name="success_msg">Loading overlay...</string>
     <string name="loading_msg">Calculating coverage...</string>
     <string name="loading_link_msg">Finding Links…</string>

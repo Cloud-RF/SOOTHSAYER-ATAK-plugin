@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Typeface
-import android.os.SystemClock
 import android.text.InputType
 import android.util.Base64
 import android.util.Log
@@ -13,15 +12,26 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.Spinner
+import android.widget.Switch
+import android.widget.TextView
+import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
 import com.atakmap.android.contact.Contact
 import com.atakmap.android.contact.Contacts
-import com.atakmap.android.maps.MapEvent
-import com.atakmap.android.maps.MapEventDispatcher
 import com.atakmap.android.drawing.mapItems.DrawingShape
 import com.atakmap.android.dropdown.DropDown.OnStateListener
 import com.atakmap.android.dropdown.DropDownReceiver
@@ -30,7 +40,15 @@ import com.atakmap.android.hierarchy.HierarchyListReceiver
 import com.atakmap.android.importexport.ImportExportMapComponent
 import com.atakmap.android.importexport.ImportReceiver
 import com.atakmap.android.ipc.AtakBroadcast
-import com.atakmap.android.maps.*
+import com.atakmap.android.maps.MapEvent
+import com.atakmap.android.maps.MapEventDispatcher
+import com.atakmap.android.maps.MapGroup
+import com.atakmap.android.maps.MapItem
+import com.atakmap.android.maps.MapView
+import com.atakmap.android.maps.Marker
+import com.atakmap.android.maps.MultiPolyline
+import com.atakmap.android.maps.PointMapItem
+import com.atakmap.android.maps.Polyline
 import com.atakmap.android.menu.PluginMenuParser
 import com.atakmap.android.preference.AtakPreferences
 import com.atakmap.android.soothsayer.interfaces.CloudRFLayerListener
@@ -39,7 +57,11 @@ import com.atakmap.android.soothsayer.layers.GLCloudRFLayer
 import com.atakmap.android.soothsayer.layers.PluginMapOverlay
 import com.atakmap.android.soothsayer.models.common.CoOptedMarkerSettings
 import com.atakmap.android.soothsayer.models.common.MarkerDataModel
-import com.atakmap.android.soothsayer.models.linksmodel.*
+import com.atakmap.android.soothsayer.models.linksmodel.Link
+import com.atakmap.android.soothsayer.models.linksmodel.LinkDataModel
+import com.atakmap.android.soothsayer.models.linksmodel.LinkRequest
+import com.atakmap.android.soothsayer.models.linksmodel.LinkResponse
+import com.atakmap.android.soothsayer.models.linksmodel.Point
 import com.atakmap.android.soothsayer.models.request.Bounds
 import com.atakmap.android.soothsayer.models.request.MultiSiteTransmitter
 import com.atakmap.android.soothsayer.models.request.MultisiteRequest
@@ -54,19 +76,39 @@ import com.atakmap.android.soothsayer.network.repository.PluginRepository
 import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.soothsayer.recyclerview.CoOptAdapter
 import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
-import com.atakmap.android.soothsayer.util.*
+import com.atakmap.android.soothsayer.util.Constant
+import com.atakmap.android.soothsayer.util.FOLDER_PATH
+import com.atakmap.android.soothsayer.util.PNG_IMAGE
+import com.atakmap.android.soothsayer.util.base64StringToBitmap
+import com.atakmap.android.soothsayer.util.createAndStoreDownloadedFile
+import com.atakmap.android.soothsayer.util.createAndStoreFiles
+import com.atakmap.android.soothsayer.util.getBitmap
+import com.atakmap.android.soothsayer.util.getFileName
+import com.atakmap.android.soothsayer.util.getLineColor
+import com.atakmap.android.soothsayer.util.getTemplatesFromFolder
+import com.atakmap.android.soothsayer.util.isConnected
+import com.atakmap.android.soothsayer.util.roundValue
+import com.atakmap.android.soothsayer.util.setSpannableText
+import com.atakmap.android.soothsayer.util.shortToast
+import com.atakmap.android.soothsayer.util.showAlert
+import com.atakmap.android.soothsayer.util.toast
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.coremap.maps.conversion.EGM96
 import com.atakmap.coremap.maps.coords.GeoPoint
+import com.atakmap.map.elevation.ElevationData
+import com.atakmap.map.elevation.ElevationManager
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.io.*
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+import java.util.Date
+import java.util.UUID
 import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -202,7 +244,7 @@ class PluginDropDownReceiver(
         val btnAddMarker = templateView.findViewById<ImageButton>(R.id.btnAddMarker)
         btnAddMarker.setOnClickListener {
             if (Constant.sAccessToken != "") {
-                pluginContext.shortToast("Drag marker(s) to calculate")
+                pluginContext.shortToast("Drag marker(s) or click play to calculate")
                 addCustomMarker()
             } else {
                 pluginContext.toast(pluginContext.getString(R.string.marker_error))
@@ -579,8 +621,11 @@ class PluginDropDownReceiver(
         }
 
         val polygon = CustomPolygonTool.getMaskingPolygon()
+
         // Bounded area for focused calculations (CPU & GPU)
         if(polygon != null) {
+            Log.d(TAG,polygon.toString());
+
             val area = polygon.area
             item?.markerDetails?.output?.res = min(10.0,ceil(sqrt(area) / 1000.0) + 1.0) // adjust resolution based upon polygon size
             val txlat = item.markerDetails.transmitter?.lat
@@ -687,8 +732,9 @@ class PluginDropDownReceiver(
                         val item: MarkerDataModel? = markersList.find { marker ->
                             marker.markerID == mapItem.uid
                         }
-                        removeMarkerFromList(item)
                         removeLinkLinesFromMap(item)
+                        removeMarkerFromList(item)
+
                     }
                     MapEvent.ITEM_RELEASE -> {
                         Log.d(TAG, "mapItem : ITEM_RELEASE ")
@@ -1013,12 +1059,14 @@ class PluginDropDownReceiver(
         }
     }
 
-    // Known issue here: During intensive use, links can get orphaned. Solution is to iterate over them all and check for markers
-    private fun removeLinkLinesFromMap(marker: MarkerDataModel?) {
+     private fun removeLinkLinesFromMap(marker: MarkerDataModel?) {
+
         marker?.let {
             val data = markerLinkList.find {
-                marker.markerID == it.markerId
+                //marker.markerID == it.markerId
+                true // all the links now since noise floor doesn't stay still ;)
             }
+
             data?.let {
                 for(link in data.links){
                     val mapGroup = mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
@@ -1026,10 +1074,13 @@ class PluginDropDownReceiver(
                         mapItem.uid == link.linkId
                     }
                     mapGroup.removeItem(item)
+
                 }
                 markerLinkList.remove(it)
             }
         }
+
+
     }
 
     private fun getAllFilesFromAssets(): List<String>? {
@@ -1449,10 +1500,11 @@ class PluginDropDownReceiver(
                 stopTrackingLoop()
             }
         }
-        
+
+        removeLinkLinesFromMap(marker)
         removeMarkerFromList(marker)
         removeMarkerFromMap(marker)
-        removeLinkLinesFromMap(marker)
+
     }
 
     override fun onDropDownSelectionRemoved() {}
@@ -1950,35 +2002,37 @@ class PluginDropDownReceiver(
         }
         trackingHandler.post(trackingRunnable as Runnable)
     }
-    
+
     private fun runCoOptUpdate() {
         Constant.sAccessToken = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "") ?: ""
         var lastUpdatedMarker: MarkerDataModel? = null
+
         for ((uid, _) in coOptedMarkers) {
             val markerInList = markersList.find { it.coopted_uid == uid }
             val currentMarker = mapView.rootGroup.deepFindItem("uid", uid) as? PointMapItem
+
             if (markerInList != null && currentMarker != null) {
                 markerInList.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5
                 markerInList.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5
 
-                // AGL / ASL switch here:
-                // If a 1.5m AGL portable is on a 1000m mountain, we compare with terrain alt to decide
-                var hae = EGM96.getHAE(currentMarker.point.latitude, currentMarker.point.longitude,0.0)
-                var htMSL = EGM96.getMSL(currentMarker.point.latitude, currentMarker.point.longitude,0.0)
-                var htAGL = EGM96.getAGL(currentMarker.point,0.0)
-                var altitude = currentMarker.point.altitude
-                Log.d(TAG, "runCoOptUPdate() hae:"+hae+", htMSL:"+htMSL+", htAGL:"+htAGL+", altitude:"+altitude+", delta="+(altitude-hae).toString())
+                val altitude = Math.round(currentMarker.point.altitude)
+                val DTM_FILTER = ElevationManager.QueryParameters()
+                DTM_FILTER.elevationModel = ElevationData.MODEL_TERRAIN
+                val terrain = ElevationManager.getElevation(currentMarker.point.latitude,currentMarker.point.longitude,DTM_FILTER)
 
-                // This proved harder than it should be
-                /*
-                if(altitude < 4000.0){
-                    markerInList.markerDetails.output.units = "m"
-                }else{
-                    markerInList.markerDetails.transmitter?.alt = Math.round(altitude-hae).toDouble()
-                    markerInList.markerDetails.receiver.alt = htAGL
+                Log.d(TAG, "runCoOptUpdate() AGL= "+terrain.toString())
+
+                // If Height AGL is > 120m / 400ft, this is probably flying so we switch units to meters AMSL and use GPS altitude
+                if(altitude-terrain > 120.0){
+                    markerInList.markerDetails.transmitter?.alt = altitude.toDouble()
+                    markerInList.markerDetails.receiver.alt = terrain+1
                     markerInList.markerDetails.output.units = "m_amsl"
+                }else{
+                    markerInList.markerDetails.output.units = "m"
                 }
-                */
+
+                // NOTE: If an aircraft causes a switch to AMSL, all other markers will be AMSL
+                // Users can override altitude by clicking the marker to open the edit form.
 
                 val index = markersList.indexOf(markerInList)
                 if (index != -1) {
@@ -1986,6 +2040,7 @@ class PluginDropDownReceiver(
                     lastUpdatedMarker = markerInList
                 }
             }
+
         }
         
         if (lastUpdatedMarker != null) {
@@ -2017,26 +2072,24 @@ class PluginDropDownReceiver(
                         markerInList.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5;
                         markerInList.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5;
 
-                        var hae = EGM96.getHAE(currentMarker.point.latitude, currentMarker.point.longitude,0.0)
-                        var htMSL = EGM96.getMSL(currentMarker.point.latitude, currentMarker.point.longitude,0.0)
-                        var htAGL = EGM96.getAGL(currentMarker.point,0.0)
-                        var altitude = currentMarker.point.altitude
-                        Log.d(TAG, "runCoOptUPdate() hae:"+hae+", htMSL:"+htMSL+", htAGL:"+htAGL+", altitude:"+altitude+", delta="+(altitude-hae).toString())
+                        val altitude = Math.round(currentMarker.point.altitude)
+                        val DTM_FILTER = ElevationManager.QueryParameters()
+                        DTM_FILTER.elevationModel = ElevationData.MODEL_TERRAIN
+                        val terrain = ElevationManager.getElevation(currentMarker.point.latitude,currentMarker.point.longitude,DTM_FILTER)
 
-                        // getHAE and getMSL return 49....everywhere?
-                        // getAGL == point.altitude
-                        // runCoOptUPdate() hae:49.844478619865086, htMSL:-49.844478619865086, htAGL:52.80000000000109, altitude:52.80000000000109, delta=2.9555213801360054
+                        Log.d(TAG, "checkDistanceAndRecalculate() AGL= "+terrain.toString())
 
-                        // This proved harder than it should be
-                        /*
-                        if(altitude < 4000.0){
-                            markerInList.markerDetails.output.units = "m"
-                        }else{
-                            markerInList.markerDetails.transmitter?.alt = Math.round(altitude-hae).toDouble()
-                            markerInList.markerDetails.receiver.alt = htAGL
+                        // If Height AGL is > 120m / 400ft, this is probably flying so we switch units to meters AMSL and use GPS altitude
+                        if(altitude-terrain > 120.0){
+                            markerInList.markerDetails.transmitter?.alt = altitude.toDouble()
+                            markerInList.markerDetails.receiver.alt = terrain+1
                             markerInList.markerDetails.output.units = "m_amsl"
+                        }else{
+                            markerInList.markerDetails.output.units = "m"
                         }
-                        */
+
+                        // NOTE: If an aircraft causes a switch to AMSL, all other markers will be AMSL
+                        // Users can override altitude by clicking the marker to open the edit form.
 
                         val index = markersList.indexOf(markerInList)
                         if (index != -1) {

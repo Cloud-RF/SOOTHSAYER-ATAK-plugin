@@ -202,14 +202,14 @@
 
     <LinearLayout
         android:layout_width="369dp"
-        android:layout_height="46dp"
+        android:layout_height="60dp"
         android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/tvHelp"
             style="@style/darkButton"
             android:layout_width="50dp"
-            android:layout_height="40dp"
+            android:layout_height="50dp"
             android:layout_margin="5dp"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
@@ -218,8 +218,8 @@
         <ImageButton
             android:id="@+id/btnSpotBeam"
             style="@style/darkButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:layout_margin="5dp"
             android:background="@drawable/spotbeam_marker_icon"
             android:paddingHorizontal="16dp"
@@ -229,11 +229,11 @@
             android:id="@+id/btnSettingLogin"
             style="@style/darkButton"
             android:layout_width="50dp"
-            android:layout_height="40dp"
+            android:layout_height="50dp"
             android:layout_margin="5dp"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
-            android:paddingBottom="6dp"
+            android:paddingBottom="0dp"
             android:src="@drawable/account" />
 
     </LinearLayout>

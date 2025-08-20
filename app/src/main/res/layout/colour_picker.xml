@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/dp_20">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/colourPickerBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/app_name"
+            android:padding="@dimen/dp_4"
+            android:src="@drawable/back_arrow" />
+
+        <TextView
+            android:id="@+id/tvSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/colour_picker_title"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_18" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:layout_margin="3dp"
+        android:background="@android:color/white" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="Red"
+                    android:textColor="#F00"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="Green"
+                    android:textColor="#0F0"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="Blue"
+                    android:textColor="#22F"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <SeekBar
+                    android:id="@+id/colourPickerRedBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="255"
+                    android:thumbTint="#F00"/>
+
+                <SeekBar
+                    android:id="@+id/colourPickerGreenBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="255"
+                    android:thumbTint="#0F0" />
+
+                <SeekBar
+                    android:id="@+id/colourPickerBlueBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="255"
+                    android:thumbTint="#00F" />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/colourPickerCurColour"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:background="#FF00"
+            android:foreground="#0000"/>
+
+    </LinearLayout>
+
+</LinearLayout>

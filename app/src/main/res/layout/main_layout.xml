@@ -174,6 +174,26 @@
         layout="@layout/co_opt_layout"
         android:visibility="gone" />
 
+    <include
+        android:id="@+id/settingsCoOptLayout"
+        layout="@layout/settings_co_opt_layout"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/settingsLayersLayout"
+        layout="@layout/settings_layers_layout"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/settingsOptionsLayout"
+        layout="@layout/settings_options_layout"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/colourPickerLayout"
+        layout="@layout/colour_picker"
+        android:visibility="gone"/>
+
     <TextView
         android:id="@+id/co_opt_next_update_textview"
         android:layout_width="match_parent"

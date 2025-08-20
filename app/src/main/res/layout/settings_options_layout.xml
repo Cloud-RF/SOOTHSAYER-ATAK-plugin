@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/dp_20">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/optionsBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/app_name"
+            android:padding="@dimen/dp_4"
+            android:src="@drawable/back_arrow" />
+
+        <TextView
+            android:id="@+id/tvSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_options_title"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_18" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:layout_margin="3dp"
+        android:background="@android:color/white" />
+
+    <TableLayout
+        android:layout_width="382dp"
+        android:layout_height="wrap_content">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="4dp"
+                android:text="Resolution"
+                android:textColor="#FFFFFF"
+                android:textSize="@dimen/dp_12" />
+
+            <Spinner
+                android:id="@+id/megapixelSpinner"
+                android:layout_width="313dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:drawable/screen_background_dark"
+                android:popupBackground="@android:drawable/screen_background_dark"
+                android:spinnerMode="dropdown" />
+        </TableRow>
+
+    </TableLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="#fff"
+        android:text="Colours" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <Switch
+            android:id="@+id/optionsUnitSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:textOff="dB"
+            android:textOn="dBm"
+            android:text="Unit" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnResetColours"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reset" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnOptionsColour1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#0F0"
+                    android:foreground="#0000"
+                    android:layout_weight="1" />
+
+                <EditText
+                    android:id="@+id/db1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="numberSigned"
+                    android:text="20" />
+
+                <TextView
+                    android:id="@+id/optionsUnit1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="dB" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnOptionsColour2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#F80"
+                    android:foreground="#0000"
+                    android:layout_weight="1" />
+
+                <EditText
+                    android:id="@+id/db2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="numberSigned"
+                    android:text="10" />
+
+                <TextView
+                    android:id="@+id/optionsUnit2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="dB" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnOptionsColour3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#F00"
+                    android:foreground="#0000"
+                    android:layout_weight="1" />
+
+                <EditText
+                    android:id="@+id/db3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="numberSigned"
+                    android:text="0" />
+
+                <TextView
+                    android:id="@+id/optionsUnit3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="dB" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnOptionsColour4"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#222"
+                    android:foreground="#0000"
+                    android:layout_weight="1" />
+
+                <EditText
+                    android:id="@+id/db4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="numberSigned"
+                    android:text="-10" />
+
+                <TextView
+                    android:id="@+id/optionsUnit4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="dB" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

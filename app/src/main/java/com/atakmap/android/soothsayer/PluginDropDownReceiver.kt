@@ -1,11 +1,15 @@
 package com.atakmap.android.soothsayer
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
+import android.text.Editable
 import android.text.InputType
+import android.text.TextWatcher
 import android.util.Base64
 import android.util.Log
 import android.view.MotionEvent
@@ -22,6 +26,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
@@ -101,6 +106,7 @@ import com.atakmap.map.elevation.ElevationManager
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import gov.tak.platform.graphics.Color
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -127,13 +133,18 @@ class PluginDropDownReceiver(
     private val settingView = templateView.findViewById<LinearLayout>(R.id.ilSettings)
     private val radioSettingView = templateView.findViewById<LinearLayout>(R.id.ilRadioSetting)
     private val coOptView: View = templateView.findViewById(R.id.ilCoOpt)
-    private val svMode: Switch = settingView.findViewById(R.id.svMode)
-    private val cbCoverageLayer: CheckBox = settingView.findViewById(R.id.cbKmzLayer)
-    private val cbLinkLines: CheckBox = settingView.findViewById(R.id.cbLinkLines)
-    private val cbCoOptTimeRefresh: CheckBox = settingView.findViewById(R.id.cbCoOptTimeRefresh)
-    private val etCoOptTimeInterval: EditText = settingView.findViewById(R.id.etCoOptTimeInterval)
-    private val cbCoOptDistanceRefresh: CheckBox = settingView.findViewById(R.id.cbCoOptDistanceRefresh)
-    private val etCoOptDistanceThreshold: EditText = settingView.findViewById(R.id.etCoOptDistanceThreshold)
+
+    private val settingsCooptView = templateView.findViewById<LinearLayout>(R.id.settingsCoOptLayout)
+    private val settingsLayersView = templateView.findViewById<LinearLayout>(R.id.settingsLayersLayout)
+    private val settingsOptionsView = templateView.findViewById<LinearLayout>(R.id.settingsOptionsLayout)
+    private val colourPickerView = templateView.findViewById<LinearLayout>(R.id.colourPickerLayout)
+    private val svMode: Switch = settingsLayersView.findViewById(R.id.svMode)
+    private val cbCoverageLayer: CheckBox = settingsLayersView.findViewById(R.id.cbKmzLayer)
+    private val cbLinkLines: CheckBox = settingsLayersView.findViewById(R.id.cbLinkLines)
+    private val cbCoOptTimeRefresh: CheckBox = settingsCooptView.findViewById(R.id.cbCoOptTimeRefresh)
+    private val etCoOptTimeInterval: EditText = settingsCooptView.findViewById(R.id.etCoOptTimeInterval)
+    private val cbCoOptDistanceRefresh: CheckBox = settingsCooptView.findViewById(R.id.cbCoOptDistanceRefresh)
+    private val etCoOptDistanceThreshold: EditText = settingsCooptView.findViewById(R.id.etCoOptDistanceThreshold)
     private val loginView = templateView.findViewById<LinearLayout>(R.id.ilLogin)
 
     private var etLoginServerUrl: EditText? = null
@@ -158,6 +169,36 @@ class PluginDropDownReceiver(
     private val trackingHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var trackingRunnable: Runnable? = null
     private val lastKnownLocations = HashMap<String, GeoPoint>()
+    private var colourPickerCurId: Int = 0
+
+    class ColourRef(var value: Int)
+
+    private var optionsColour1: ColourRef = ColourRef(0xFF00FF00.toInt())
+    private var optionsColour2: ColourRef = ColourRef(0xFFFF8800.toInt())
+    private var optionsColour3: ColourRef = ColourRef(0xFFFF0000.toInt())
+    private var optionsColour4: ColourRef = ColourRef(0xFF222222.toInt())
+
+    private fun getCurrentColour(): ColourRef {
+        return when (colourPickerCurId) {
+            1 -> optionsColour1
+            2 -> optionsColour2
+            3 -> optionsColour3
+            4 -> optionsColour4
+            else -> ColourRef(0)
+        }
+    }
+
+    private fun setRedChannel(colour: Int, red: Int): Int {
+        return (colour and 0xFF00FFFF.toInt()) or ((red and 0xFF) shl 16)
+    }
+
+    private fun setGreenChannel(colour: Int, green: Int): Int {
+        return (colour and 0xFFFF00FF.toInt()) or ((green and 0xFF) shl 8)
+    }
+
+    private fun setBlueChannel(colour: Int, blue: Int): Int {
+        return (colour and 0xFFFFFF00.toInt()) or (blue and 0xFF)
+    }
 
     // Initialise views, listeners and handle map clicks
     init {
@@ -180,6 +221,7 @@ class PluginDropDownReceiver(
         initRecyclerview()
     }
 
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     private fun initListeners() {
         val btnOpenSettings: ImageView = templateView.findViewById(R.id.ivSettings)
         btnOpenSettings.setOnClickListener {
@@ -193,38 +235,38 @@ class PluginDropDownReceiver(
             setLoginViewVisibility(false)
         }
 
-        val btnsvMode = settingView.findViewById<Switch>(R.id.svMode)
+        val btnsvMode = settingsLayersView.findViewById<Switch>(R.id.svMode)
         btnsvMode.setOnClickListener{
             sharedPrefs?.set(Constant.PreferenceKey.sCalculationMode, svMode.isChecked)
         }
 
-        val coverageCB = settingView.findViewById<CheckBox>(R.id.cbKmzLayer)
+        val coverageCB = settingsLayersView.findViewById<CheckBox>(R.id.cbKmzLayer)
         coverageCB.setOnClickListener{
             sharedPrefs?.set(Constant.PreferenceKey.sKmzVisibility, cbCoverageLayer.isChecked)
         }
 
-        val linksCB = settingView.findViewById<CheckBox>(R.id.cbLinkLines)
+        val linksCB = settingsLayersView.findViewById<CheckBox>(R.id.cbLinkLines)
         linksCB.setOnClickListener{
             sharedPrefs?.set(Constant.PreferenceKey.sLinkLinesVisibility, cbLinkLines.isChecked)
         }
 
-        val coOptTimeRefreshCB = settingView.findViewById<CheckBox>(R.id.cbCoOptTimeRefresh)
+        val coOptTimeRefreshCB = settingsCooptView.findViewById<CheckBox>(R.id.cbCoOptTimeRefresh)
         coOptTimeRefreshCB.setOnClickListener{
             sharedPrefs?.set(Constant.PreferenceKey.sCoOptTimeRefreshEnabled, cbCoOptTimeRefresh.isChecked)
         }
 
-        val coOptTimeIntervalET = settingView.findViewById<EditText>(R.id.etCoOptTimeInterval)
+        val coOptTimeIntervalET = settingsCooptView.findViewById<EditText>(R.id.etCoOptTimeInterval)
         coOptTimeIntervalET.addTextChangedListener {
             val value = it.toString().toLongOrNull() ?: 60L
             sharedPrefs?.set(Constant.PreferenceKey.sCoOptTimeRefreshInterval, value)
         }
 
-        val coOptDistanceRefreshCB = settingView.findViewById<CheckBox>(R.id.cbCoOptDistanceRefresh)
+        val coOptDistanceRefreshCB = settingsCooptView.findViewById<CheckBox>(R.id.cbCoOptDistanceRefresh)
         coOptDistanceRefreshCB.setOnClickListener{
             sharedPrefs?.set(Constant.PreferenceKey.sCoOptDistanceRefreshEnabled, cbCoOptDistanceRefresh.isChecked)
         }
 
-        val coOptDistanceThresholdET = settingView.findViewById<EditText>(R.id.etCoOptDistanceThreshold)
+        val coOptDistanceThresholdET = settingsCooptView.findViewById<EditText>(R.id.etCoOptDistanceThreshold)
         coOptDistanceThresholdET.addTextChangedListener {
             val value = it.toString().toDoubleOrNull() ?: 100.0
             sharedPrefs?.set(Constant.PreferenceKey.sCoOptDistanceRefreshThreshold, value)
@@ -265,6 +307,276 @@ class PluginDropDownReceiver(
         templateView.findViewById<ImageButton>(R.id.stopCoOptButton).setOnClickListener {
             stopTrackingLoop()
         }
+
+        val btnOpenCooptView = settingView.findViewById<Button>(R.id.btnOpenCooptSettings)
+        btnOpenCooptView.setOnClickListener {
+            settingView.visibility = View.GONE
+            settingsCooptView.visibility = View.VISIBLE
+        }
+
+        val btnOpenLayersSettings = settingView.findViewById<Button>(R.id.btnOpenLayersSettings)
+        btnOpenLayersSettings.setOnClickListener {
+            settingView.visibility = View.GONE
+            settingsLayersView.visibility = View.VISIBLE
+        }
+
+        val btnOpenOptionsSettings = settingView.findViewById<Button>(R.id.btnOpenOptionsSettings)
+        btnOpenOptionsSettings.setOnClickListener {
+            settingView.visibility = View.GONE
+            settingsOptionsView.visibility = View.VISIBLE
+        }
+
+        val btnCooptBack = settingsCooptView.findViewById<ImageView>(R.id.coOptBack)
+        btnCooptBack.setOnClickListener {
+            settingView.visibility = View.VISIBLE;
+            settingsCooptView.visibility = View.GONE;
+        }
+
+        val btnLayersBack = settingsLayersView.findViewById<ImageView>(R.id.layersBack)
+        btnLayersBack.setOnClickListener {
+            settingView.visibility = View.VISIBLE;
+            settingsLayersView.visibility = View.GONE;
+        }
+
+        val btnOptionsBack = settingsOptionsView.findViewById<ImageView>(R.id.optionsBack)
+        btnOptionsBack.setOnClickListener {
+            settingView.visibility = View.VISIBLE;
+            settingsOptionsView.visibility = View.GONE;
+        }
+
+        val curColourView = colourPickerView.findViewById<View>(R.id.colourPickerCurColour)
+
+        val colourPickerRedBar = colourPickerView.findViewById<SeekBar>(R.id.colourPickerRedBar);
+        val colourPickerGreenBar = colourPickerView.findViewById<SeekBar>(R.id.colourPickerGreenBar);
+        val colourPickerBlueBar = colourPickerView.findViewById<SeekBar>(R.id.colourPickerBlueBar);
+
+        val btnOptionsColour1 = settingsOptionsView.findViewById<Button>(R.id.btnOptionsColour1)
+        btnOptionsColour1.setOnClickListener {
+            colourPickerCurId = 1;
+            settingsOptionsView.visibility = View.GONE
+            colourPickerView.visibility = View.VISIBLE
+            colourPickerRedBar.progress = Color.red(optionsColour1.value)
+            colourPickerGreenBar.progress = Color.green(optionsColour1.value)
+            colourPickerBlueBar.progress = Color.blue(optionsColour1.value)
+        }
+
+        val btnOptionsColour2 = settingsOptionsView.findViewById<Button>(R.id.btnOptionsColour2)
+        btnOptionsColour2.setOnClickListener {
+            colourPickerCurId = 2;
+            settingsOptionsView.visibility = View.GONE
+            colourPickerView.visibility = View.VISIBLE
+            colourPickerRedBar.progress = Color.red(optionsColour2.value)
+            colourPickerGreenBar.progress = Color.green(optionsColour2.value)
+            colourPickerBlueBar.progress = Color.blue(optionsColour2.value)
+        }
+
+        val btnOptionsColour3 = settingsOptionsView.findViewById<Button>(R.id.btnOptionsColour3)
+        btnOptionsColour3.setOnClickListener {
+            colourPickerCurId = 3;
+            settingsOptionsView.visibility = View.GONE
+            colourPickerView.visibility = View.VISIBLE
+            colourPickerRedBar.progress = Color.red(optionsColour3.value)
+            colourPickerGreenBar.progress = Color.green(optionsColour3.value)
+            colourPickerBlueBar.progress = Color.blue(optionsColour3.value)
+        }
+
+        val btnOptionsColour4 = settingsOptionsView.findViewById<Button>(R.id.btnOptionsColour4)
+        btnOptionsColour4.setOnClickListener {
+            colourPickerCurId = 4;
+            settingsOptionsView.visibility = View.GONE
+            colourPickerView.visibility = View.VISIBLE
+            colourPickerRedBar.progress = Color.red(optionsColour4.value)
+            colourPickerGreenBar.progress = Color.green(optionsColour4.value)
+            colourPickerBlueBar.progress = Color.blue(optionsColour4.value)
+        }
+
+        colourPickerRedBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                var curColour = getCurrentColour()
+                curColour.value = setRedChannel(curColour.value, progress)
+                curColourView.setBackgroundColor(curColour.value)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
+            override fun onStopTrackingTouch(seekBar: SeekBar?) { }
+        })
+
+        colourPickerGreenBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                var curColour = getCurrentColour()
+                curColour.value = setGreenChannel(curColour.value, progress)
+                curColourView.setBackgroundColor(curColour.value)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
+            override fun onStopTrackingTouch(seekBar: SeekBar?) { }
+        })
+
+        colourPickerBlueBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                var curColour = getCurrentColour()
+                curColour.value = setBlueChannel(curColour.value, progress)
+                curColourView.setBackgroundColor(curColour.value)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
+            override fun onStopTrackingTouch(seekBar: SeekBar?) { }
+        })
+
+        val btnColourPickerBack = colourPickerView.findViewById<ImageView>(R.id.colourPickerBack)
+        btnColourPickerBack.setOnClickListener {
+            val colour = getCurrentColour()
+
+            when (colourPickerCurId) {
+                1 -> btnOptionsColour1.setBackgroundColor(colour.value)
+                2 -> btnOptionsColour2.setBackgroundColor(colour.value)
+                3 -> btnOptionsColour3.setBackgroundColor(colour.value)
+                4 -> btnOptionsColour4.setBackgroundColor(colour.value)
+                else -> {}
+            }
+
+            colourPickerCurId = 0
+
+            colourPickerView.visibility = View.GONE
+            settingsOptionsView.visibility = View.VISIBLE
+        }
+
+        val optionsUnitSwitch = settingsOptionsView.findViewById<Switch>(R.id.optionsUnitSwitch)
+        val optionsUnitView1 = settingsOptionsView.findViewById<TextView>(R.id.optionsUnit1)
+        val optionsUnitView2 = settingsOptionsView.findViewById<TextView>(R.id.optionsUnit2)
+        val optionsUnitView3 = settingsOptionsView.findViewById<TextView>(R.id.optionsUnit3)
+        val optionsUnitView4 = settingsOptionsView.findViewById<TextView>(R.id.optionsUnit4)
+
+        var settingsOptionsDB1 = settingsOptionsView.findViewById<EditText>(R.id.db1)
+        var settingsOptionsDB2 = settingsOptionsView.findViewById<EditText>(R.id.db2)
+        var settingsOptionsDB3 = settingsOptionsView.findViewById<EditText>(R.id.db3)
+        var settingsOptionsDB4 = settingsOptionsView.findViewById<EditText>(R.id.db4)
+
+        var optionsUnitSwitchActivated = false
+        optionsUnitSwitch.setOnCheckedChangeListener { _, isChecked ->
+            optionsUnitSwitchActivated = isChecked
+            optionsUnitView1.text = if (optionsUnitSwitchActivated) "dBm" else "dB"
+            optionsUnitView2.text = if (optionsUnitSwitchActivated) "dBm" else "dB"
+            optionsUnitView3.text = if (optionsUnitSwitchActivated) "dBm" else "dB"
+            optionsUnitView4.text = if (optionsUnitSwitchActivated) "dBm" else "dB"
+
+            settingsOptionsDB1.setText(settingsOptionsDB1.text)
+            settingsOptionsDB2.setText(settingsOptionsDB2.text)
+            settingsOptionsDB3.setText(settingsOptionsDB3.text)
+            settingsOptionsDB4.setText(settingsOptionsDB4.text)
+        }
+
+        val btnResetColours = settingsOptionsView.findViewById<Button>(R.id.btnResetColours)
+        btnResetColours.setOnClickListener {
+            btnOptionsColour1.setBackgroundColor(0xFF00FF00.toInt())
+            btnOptionsColour2.setBackgroundColor(0xFFFF8800.toInt())
+            btnOptionsColour3.setBackgroundColor(0xFFFF0000.toInt())
+            btnOptionsColour4.setBackgroundColor(0xFF222222.toInt())
+
+            optionsColour1.value = 0xFF00FF00.toInt()
+            optionsColour2.value = 0xFFFF8800.toInt()
+            optionsColour3.value = 0xFFFF0000.toInt()
+            optionsColour4.value = 0xFF222222.toInt()
+
+            optionsUnitSwitch.isChecked = false
+
+            optionsUnitView1.text = "dB"
+            optionsUnitView2.text = "dB"
+            optionsUnitView3.text = "dB"
+            optionsUnitView4.text = "dB"
+
+            settingsOptionsDB1.setText("20")
+            settingsOptionsDB2.setText("10")
+            settingsOptionsDB3.setText("0")
+            settingsOptionsDB4.setText("-10")
+        }
+
+        settingsOptionsDB1.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+            override fun afterTextChanged(editable: Editable?) {
+                if (editable.toString().isEmpty() || editable.toString().equals("-"))
+                    return
+
+                var value = editable.toString().toInt()
+                val min = if (optionsUnitSwitchActivated) -140 else -20
+                val max = if (optionsUnitSwitchActivated) 0 else 90
+
+                if (value < min)
+                    value = min
+                else if (value > max)
+                    value = max
+                else return
+
+                settingsOptionsDB1.removeTextChangedListener(this)
+                settingsOptionsDB1.setText(value.toString())
+                settingsOptionsDB1.addTextChangedListener(this)
+            }
+        })
+
+        settingsOptionsDB2.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+            override fun afterTextChanged(editable: Editable?) {
+                if (editable.toString().isEmpty() || editable.toString().equals("-"))
+                    return
+
+                var value = editable.toString().toInt()
+                val min = if (optionsUnitSwitchActivated) -140 else -20
+                val max = if (optionsUnitSwitchActivated) 0 else 90
+
+                if (value < min)
+                    value = min
+                else if (value > max)
+                    value = max
+                else return
+
+                settingsOptionsDB2.removeTextChangedListener(this)
+                settingsOptionsDB2.setText(value.toString())
+                settingsOptionsDB2.addTextChangedListener(this)            }
+        })
+
+        settingsOptionsDB3.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+            override fun afterTextChanged(editable: Editable?) {
+                if (editable.toString().isEmpty() || editable.toString().equals("-"))
+                    return
+
+                var value = editable.toString().toInt()
+                val min = if (optionsUnitSwitchActivated) -140 else -20
+                val max = if (optionsUnitSwitchActivated) 0 else 90
+
+                if (value < min)
+                    value = min
+                else if (value > max)
+                    value = max
+                else return
+
+                settingsOptionsDB3.removeTextChangedListener(this)
+                settingsOptionsDB3.setText(value.toString())
+                settingsOptionsDB3.addTextChangedListener(this)            }
+        })
+
+        settingsOptionsDB4.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+            override fun afterTextChanged(editable: Editable?) {
+                if (editable.toString().isEmpty() || editable.toString().equals("-"))
+                    return
+
+                var value = editable.toString().toInt()
+                val min = if (optionsUnitSwitchActivated) -140 else -20
+                val max = if (optionsUnitSwitchActivated) 0 else 90
+
+                if (value < min)
+                    value = min
+                else if (value > max)
+                    value = max
+                else return
+
+                settingsOptionsDB4.removeTextChangedListener(this)
+                settingsOptionsDB4.setText(value.toString())
+                settingsOptionsDB4.addTextChangedListener(this)            }
+        })
+
     }
 
     // List of radio templates. They can be selected to edit settings etc
@@ -365,7 +677,7 @@ class PluginDropDownReceiver(
     var megapixels = 1.0;
 
     private fun initMegapixelSpinner(){
-        val mpSpinner = settingView.findViewById<Spinner>(R.id.megapixelSpinner)
+        val mpSpinner = settingsOptionsView.findViewById<Spinner>(R.id.megapixelSpinner)
         val items = arrayOf("Low res (0.25MP)", "Mid res (1.0MP)", "High res (4.0MP)")
         val adapter = ArrayAdapter(pluginContext,
                 android.R.layout.simple_spinner_dropdown_item, items)

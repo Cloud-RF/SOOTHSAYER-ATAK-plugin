@@ -102,4 +102,13 @@
     <string name="empty_password">Please enter password.</string>
     <string name="template_downloading">Synchronising templates..</string>
     <string name="login_loading">Attempting login..</string>
+
+    <string name="settings_layers_button">Layers</string>
+    <string name="settings_coopt_button">Co-Opt</string>
+    <string name="settings_options_button">Options</string>
+    <string name="settings_layers_title">Settings - Layers</string>
+    <string name="settings_coopt_title">Settings - Co-Opt</string>
+    <string name="settings_options_title">Settings - Options</string>
+    <string name="settings_options_colours_unit">dB</string>
+    <string name="colour_picker_title">Pick Colour</string>
 </resources>

@@ -99,7 +99,6 @@ import com.atakmap.android.soothsayer.util.showAlert
 import com.atakmap.android.soothsayer.util.toast
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
-import com.atakmap.coremap.maps.conversion.EGM96
 import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.map.elevation.ElevationData
 import com.atakmap.map.elevation.ElevationManager
@@ -916,7 +915,7 @@ class PluginDropDownReceiver(
         }
 
         // Dynamic resolution
-        var radius = item?.markerDetails!!.output.rad
+        val radius = item?.markerDetails!!.output.rad
         item?.markerDetails?.output?.res = megapixelCalculator(radius)
 
         // Force engine. 1=GPU, 2=CPU
@@ -926,10 +925,11 @@ class PluginDropDownReceiver(
             item?.markerDetails?.engine = 2
         }
 
-        item?.let {
-            if(showLinks && markersList.size > 1) {
-                updateLinkLines(item)
-            }
+
+        if(showLinks && markersList.size > 1) {
+            updateLinkLines(item)
+        }else{
+            removeLinkLinesFromMap(item)
         }
 
         val polygon = CustomPolygonTool.getMaskingPolygon()
@@ -1094,7 +1094,7 @@ class PluginDropDownReceiver(
     }
 
     private fun getLinksBetween(marker: MarkerDataModel?) {
-        Log.d(TAG, "getLinksBetween: "+marker.toString())
+       // Log.d(TAG, "getLinksBetween: "+marker.toString())
         marker?.let {
             val points: List<Point> = markersList.mapNotNull { data ->
                 if (data.markerID != marker.markerID) {
@@ -1162,7 +1162,8 @@ class PluginDropDownReceiver(
                     }
 
                     override fun onFailed(error: String?, responseCode: Int?) {
-                        pluginContext.toast("onFailed creating link : $error")
+                        stopTrackingLoop()
+                        pluginContext.toast("Link error: $error")
                     }
 
                 })
@@ -1190,6 +1191,7 @@ class PluginDropDownReceiver(
         ds.points = arrayOf(startPoint, endPoint)
         ds.hideLabels(false)
         ds.lineLabel = "${snr} dB"
+        ds.remarks = "SOOTHSAYER" // used for id for removal later
         dslist.add(ds)
 
         val lineUid = UUID.randomUUID().toString()
@@ -1333,6 +1335,7 @@ class PluginDropDownReceiver(
 
                         override fun onFailed(error: String?, responseCode: Int?) {
                             showHidePlayBtn();
+                            stopTrackingLoop()
                             if (error != null) {
                                 val builderSingle = AlertDialog.Builder(mapView.context)
                                 builderSingle.setTitle("API error")
@@ -1373,26 +1376,15 @@ class PluginDropDownReceiver(
 
      private fun removeLinkLinesFromMap(marker: MarkerDataModel?) {
 
-        marker?.let {
-            val data = markerLinkList.find {
-                //marker.markerID == it.markerId
-                true // all the links now since noise floor doesn't stay still ;)
-            }
+        val data = mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
 
-            data?.let {
-                for(link in data.links){
-                    val mapGroup = mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
-                    val item: MapItem? = mapGroup.items.find { mapItem ->
-                        mapItem.uid == link.linkId
-                    }
-                    mapGroup.removeItem(item)
+         for (it in data.items){
+             if(it.title.contains(" dB")){
+                 Log.d(TAG,"Removing "+it.toString())
+                 data.removeItem(it)
+             }
 
-                }
-                markerLinkList.remove(it)
-            }
-        }
-
-
+         }
     }
 
     private fun getAllFilesFromAssets(): List<String>? {
@@ -2255,6 +2247,8 @@ class PluginDropDownReceiver(
     }
 
     private fun startTrackingLoop() {
+        Log.d(TAG, "startTrackingLoop()")
+
         stopTrackingLoop()
         runCoOptUpdate()
 
@@ -2282,7 +2276,7 @@ class PluginDropDownReceiver(
         var refreshIntervalSeconds = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshInterval, 30L) ?: 30L
 
         trackingRunnable = object : Runnable {
-            var countdown = if (timeEnabled) refreshIntervalSeconds else Long.MAX_VALUE
+            var countdown = refreshIntervalSeconds
 
             override fun run() {
                 // keep checking for changes to preferences..
@@ -2309,6 +2303,7 @@ class PluginDropDownReceiver(
                     checkDistanceAndRecalculate()
                 }
 
+                // 1 second count
                 trackingHandler.postDelayed(this, 1000)
             }
         }
@@ -2423,8 +2418,10 @@ class PluginDropDownReceiver(
     }
 
     private fun stopTrackingLoop() {
+        Log.d(TAG, "stopTrackingLoop()")
+        trackingHandler.removeCallbacksAndMessages(null);
+
         trackingRunnable?.let {
-            trackingHandler.removeCallbacks(it)
             trackingRunnable = null
         }
         templateView.findViewById<TextView>(R.id.co_opt_next_update_textview).visibility = View.GONE

@@ -164,11 +164,11 @@ fun Context.isConnected(): Boolean {
 }
 
 fun String.getFileName():String{
-   return "${SimpleDateFormat("ddHHmmSS", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
+   return "${SimpleDateFormat("HHmm", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
 }
 
 fun Context.getLineColor(signalValue:Double): Int?{
-    Log.d(PluginDropDownReceiver.TAG, "getLineColor : $signalValue")
+    //Log.d(PluginDropDownReceiver.TAG, "getLineColor : $signalValue")
     val colorId = when{
         signalValue >= 21.0 -> R.color.blue
         signalValue >= 15.0 -> R.color.green

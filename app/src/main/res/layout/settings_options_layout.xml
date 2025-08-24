@@ -35,45 +35,18 @@
         android:layout_margin="3dp"
         android:background="@android:color/white" />
 
-    <TableLayout
-        android:layout_width="382dp"
-        android:layout_height="wrap_content">
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/textView3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="4dp"
-                android:text="Resolution"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/dp_12" />
-
-            <Spinner
-                android:id="@+id/megapixelSpinner"
-                android:layout_width="313dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:drawable/screen_background_dark"
-                android:popupBackground="@android:drawable/screen_background_dark"
-                android:spinnerMode="dropdown" />
-        </TableRow>
-
-    </TableLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textColor="#fff"
-        android:text="Colours" />
+        android:layout_margin="2dp">
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Colours"
+            android:textColor="#fff"
+            android:textSize="20sp" />
 
         <View
             android:layout_width="0dp"
@@ -85,26 +58,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
+            android:text="Units"
             android:textOff="dB"
-            android:textOn="dBm"
-            android:text="Unit" />
+            android:textOn="dBm" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="170dp"
+        android:layout_margin="2dp"
         android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/btnResetColours"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Reset" />
 
         <View
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -120,9 +88,9 @@
                     android:id="@+id/btnOptionsColour1"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#0F0"
-                    android:foreground="#0000"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:background="#11FF00"
+                    android:foreground="#0000" />
 
                 <EditText
                     android:id="@+id/db1"
@@ -150,9 +118,9 @@
                     android:id="@+id/btnOptionsColour2"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#F80"
-                    android:foreground="#0000"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:background="#FFB600"
+                    android:foreground="#0000" />
 
                 <EditText
                     android:id="@+id/db2"
@@ -180,9 +148,9 @@
                     android:id="@+id/btnOptionsColour3"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:background="#F00"
-                    android:foreground="#0000"
-                    android:layout_weight="1" />
+                    android:foreground="#0000" />
 
                 <EditText
                     android:id="@+id/db3"
@@ -210,9 +178,9 @@
                     android:id="@+id/btnOptionsColour4"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:background="#222"
-                    android:foreground="#0000"
-                    android:layout_weight="1" />
+                    android:foreground="#0000" />
 
                 <EditText
                     android:id="@+id/db4"
@@ -231,6 +199,24 @@
                     android:text="dB" />
             </LinearLayout>
         </LinearLayout>
+
+        <Button
+            android:id="@+id/btnResetColoursSNR"
+            android:layout_width="156dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layoutDirection="rtl"
+            android:text="SNR default" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_margin="2dp"
+        android:layoutDirection="rtl"
+        android:orientation="horizontal">
 
     </LinearLayout>
 

@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Typeface
-import android.graphics.drawable.ColorDrawable
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -89,7 +88,6 @@ import com.atakmap.android.soothsayer.util.createAndStoreDownloadedFile
 import com.atakmap.android.soothsayer.util.createAndStoreFiles
 import com.atakmap.android.soothsayer.util.getBitmap
 import com.atakmap.android.soothsayer.util.getFileName
-import com.atakmap.android.soothsayer.util.getLineColor
 import com.atakmap.android.soothsayer.util.getTemplatesFromFolder
 import com.atakmap.android.soothsayer.util.isConnected
 import com.atakmap.android.soothsayer.util.roundValue
@@ -173,9 +171,11 @@ class PluginDropDownReceiver(
     class ColourRef(var value: Int)
 
     private var optionsColour1: ColourRef = ColourRef(0xFF00FF00.toInt())
-    private var optionsColour2: ColourRef = ColourRef(0xFFFF8800.toInt())
+    private var optionsColour2: ColourRef = ColourRef(0xFFFFb600.toInt())
     private var optionsColour3: ColourRef = ColourRef(0xFFFF0000.toInt())
     private var optionsColour4: ColourRef = ColourRef(0xFF222222.toInt())
+
+    private var linkUnits = "dB"
 
     private fun getCurrentColour(): ColourRef {
         return when (colourPickerCurId) {
@@ -319,7 +319,7 @@ class PluginDropDownReceiver(
             settingsLayersView.visibility = View.VISIBLE
         }
 
-        val btnOpenOptionsSettings = settingView.findViewById<Button>(R.id.btnOpenOptionsSettings)
+        val btnOpenOptionsSettings = settingView.findViewById<Button>(R.id.btnOpenLinksSettings)
         btnOpenOptionsSettings.setOnClickListener {
             settingView.visibility = View.GONE
             settingsOptionsView.visibility = View.VISIBLE
@@ -456,21 +456,37 @@ class PluginDropDownReceiver(
             optionsUnitView3.text = if (optionsUnitSwitchActivated) "dBm" else "dB"
             optionsUnitView4.text = if (optionsUnitSwitchActivated) "dBm" else "dB"
 
-            settingsOptionsDB1.setText(settingsOptionsDB1.text)
-            settingsOptionsDB2.setText(settingsOptionsDB2.text)
-            settingsOptionsDB3.setText(settingsOptionsDB3.text)
-            settingsOptionsDB4.setText(settingsOptionsDB4.text)
+            if(optionsUnitSwitchActivated) {
+                linkUnits = "dBm"
+                settingsOptionsDB1.setText("-80")
+                settingsOptionsDB2.setText("-90")
+                settingsOptionsDB3.setText("-100")
+                settingsOptionsDB4.setText("-110")
+            }else{
+                linkUnits = "dB"
+                settingsOptionsDB1.setText("20")
+                settingsOptionsDB2.setText("10")
+                settingsOptionsDB3.setText("0")
+                settingsOptionsDB4.setText("-10")
+            }
+
+
+            val btnOpenTemplateManager = settingView.findViewById<Button>(R.id.btnOpenTemplateManager)
+            btnOpenTemplateManager.setOnClickListener {
+                pluginContext.toast("Coming soon!")
+            }
         }
 
-        val btnResetColours = settingsOptionsView.findViewById<Button>(R.id.btnResetColours)
-        btnResetColours.setOnClickListener {
+        val btnResetColoursSNR = settingsOptionsView.findViewById<Button>(R.id.btnResetColoursSNR)
+
+        btnResetColoursSNR.setOnClickListener {
             btnOptionsColour1.setBackgroundColor(0xFF00FF00.toInt())
-            btnOptionsColour2.setBackgroundColor(0xFFFF8800.toInt())
+            btnOptionsColour2.setBackgroundColor(0xFFFFb600.toInt())
             btnOptionsColour3.setBackgroundColor(0xFFFF0000.toInt())
             btnOptionsColour4.setBackgroundColor(0xFF222222.toInt())
 
             optionsColour1.value = 0xFF00FF00.toInt()
-            optionsColour2.value = 0xFFFF8800.toInt()
+            optionsColour2.value = 0xFFFFb600.toInt()
             optionsColour3.value = 0xFFFF0000.toInt()
             optionsColour4.value = 0xFF222222.toInt()
 
@@ -676,7 +692,7 @@ class PluginDropDownReceiver(
     var megapixels = 1.0;
 
     private fun initMegapixelSpinner(){
-        val mpSpinner = settingsOptionsView.findViewById<Spinner>(R.id.megapixelSpinner)
+        val mpSpinner = settingsLayersView.findViewById<Spinner>(R.id.megapixelSpinner)
         val items = arrayOf("Low res (0.25MP)", "Mid res (1.0MP)", "High res (4.0MP)")
         val adapter = ArrayAdapter(pluginContext,
                 android.R.layout.simple_spinner_dropdown_item, items)
@@ -1144,16 +1160,22 @@ class PluginDropDownReceiver(
                         linkDataModel.linkRequest.transmitter?.let { transmitter ->
                             linkDataModel.linkResponse?.let { linkResponse ->
                                 for (data in linkResponse.transmitters) {
-                                    // Line colours are dynamic, based upon the SNR
-                                    pluginContext.getLineColor(data.signalToNoiseRatioDB)
+
+                                    // SNR or RSSI?
+                                    var powerLevel = data.signalToNoiseRatioDB
+
+                                    if(linkUnits == "dBm"){
+                                        powerLevel = data.signalPowerAtReceiverDBm
+                                    }
+
+                                    getLineColour(powerLevel)
                                         ?.let { color ->
                                             drawLine(
                                                 data.markerId,
                                                 linkDataModel.links,
                                                 GeoPoint(transmitter.lat, transmitter.lon,transmitter.alt),
                                                 GeoPoint((transmitter.lat + data.latitude)/2, (transmitter.lon+data.longitude)/2,data.antennaHeight),
-                                                color,
-                                                data.signalToNoiseRatioDB.toInt()
+                                                color, powerLevel.toInt()
                                             )
                                         }
                                 }
@@ -1171,6 +1193,27 @@ class PluginDropDownReceiver(
         }
     }
 
+    private fun getLineColour(db:Double): Int?{
+        var settingsOptionsDB1 = settingsOptionsView.findViewById<EditText>(R.id.db1).text.toString().toDouble()
+        var settingsOptionsDB2 = settingsOptionsView.findViewById<EditText>(R.id.db2).text.toString().toDouble()
+        var settingsOptionsDB3 = settingsOptionsView.findViewById<EditText>(R.id.db3).text.toString().toDouble()
+        var settingsOptionsDB4 = settingsOptionsView.findViewById<EditText>(R.id.db4).text.toString().toDouble()
+
+        if(db > settingsOptionsDB1){
+            return optionsColour1.value
+        }
+        if(db > settingsOptionsDB2){
+            return optionsColour2.value
+        }
+        if(db > settingsOptionsDB3){
+            return optionsColour3.value
+        }
+        if(db > settingsOptionsDB4){
+            return optionsColour4.value
+        }
+        return null
+    }
+
     private fun drawLine(
         linkToId: String?,
         links: ArrayList<Link>,
@@ -1179,6 +1222,7 @@ class PluginDropDownReceiver(
         lineColor: Int,
         snr: Int
     ) {
+
         val mapView = mapView
         if(lineGroup == null) {
             lineGroup = mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
@@ -1190,7 +1234,7 @@ class PluginDropDownReceiver(
         ds.strokeColor = lineColor
         ds.points = arrayOf(startPoint, endPoint)
         ds.hideLabels(false)
-        ds.lineLabel = "${snr} dB"
+        ds.lineLabel = "${snr} ${linkUnits}" // is either dB or dBm
         ds.remarks = "SOOTHSAYER" // used for id for removal later
         dslist.add(ds)
 
@@ -1199,8 +1243,8 @@ class PluginDropDownReceiver(
 
         lineGroup?.addItem(mp)
         mp.movable = true
-        mp.title = "${snr} dB"
-        mp.lineLabel = "${snr} dB"
+        mp.title = "${snr} ${linkUnits}"
+        mp.lineLabel = "${snr} ${linkUnits}"
         mp.hideLabels(false)
         mp.toggleMetaData("labels_on", true)
         links.add(Link(lineUid, startPoint, endPoint))

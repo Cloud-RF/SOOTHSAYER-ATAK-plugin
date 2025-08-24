@@ -38,7 +38,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="15dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
@@ -47,10 +47,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Interval (s)"
+            android:text="Interval (s)    "
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@android:color/white"
-            android:textSize="12sp" />
+            android:textSize="16sp" />
 
         <CheckBox
             android:id="@+id/cbCoOptTimeRefresh"
@@ -60,7 +60,7 @@
 
         <EditText
             android:id="@+id/etCoOptTimeInterval"
-            android:layout_width="25dp"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="2dp"
             android:layout_marginEnd="2dp"
@@ -68,9 +68,9 @@
             android:inputType="number"
             android:numeric="integer"
             android:padding="4dp"
-            android:text="60"
+            android:text="20"
             android:textColor="@color/darker_gray"
-            android:textSize="12sp" />
+            android:textSize="16sp" />
 
     </LinearLayout>
 
@@ -90,7 +90,7 @@
             android:text="Distance (m)"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@android:color/white"
-            android:textSize="12sp" />
+            android:textSize="16sp" />
 
         <CheckBox
             android:id="@+id/cbCoOptDistanceRefresh"
@@ -99,7 +99,7 @@
 
         <EditText
             android:id="@+id/etCoOptDistanceThreshold"
-            android:layout_width="35dp"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="2dp"
             android:background="@drawable/et_background"
@@ -108,7 +108,13 @@
             android:padding="4dp"
             android:text="100"
             android:textColor="@color/darker_gray"
-            android:textSize="12sp" />
+            android:textSize="16sp" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Use with care. Setting these too low can generate a lot of API calls and network traffic. Recommended settings are a 20s refresh for a dynamic map OR a 100m distance trigger for less frequent requests" />
 
 </LinearLayout>

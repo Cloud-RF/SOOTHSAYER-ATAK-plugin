@@ -8,7 +8,7 @@
 
 buildscript {
 
-    ext.PLUGIN_VERSION = "2.2"
+    ext.PLUGIN_VERSION = "2.3"
     ext.ATAK_VERSION = "5.2.0"
 
     def takdevVersion = '2.+'
@@ -64,7 +64,7 @@ buildscript {
             exclude group: "net.sf.proguard", module:
                     "proguard-gradle"
         }
-        classpath 'com.guardsquare:proguard-gradle:7.4.2'
+        classpath 'com.guardsquare:proguard-gradle:7.7.0'
         if(isDevKitEnabled()) {
             classpath "com.atakmap.gradle:atak-gradle-takdev:${takdevVersion}"
         } else {

@@ -19,7 +19,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.atakmap.android.soothsayer.PluginDropDownReceiver
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
-import com.atakmap.android.soothsayer.plugin.R
 import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.File
@@ -165,25 +164,6 @@ fun Context.isConnected(): Boolean {
 
 fun String.getFileName():String{
    return "${SimpleDateFormat("HHmm", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
-}
-
-fun Context.getLineColor(signalValue:Double): Int?{
-    //Log.d(PluginDropDownReceiver.TAG, "getLineColor : $signalValue")
-    val colorId = when{
-        signalValue >= 21.0 -> R.color.blue
-        signalValue >= 15.0 -> R.color.green
-        signalValue >= 9.0 -> R.color.yellow
-        signalValue >= 3.0 -> R.color.red
-        signalValue >= -3.0 -> R.color.darker_gray
-        else -> null // no link!
-    }
-    return if(colorId == null){
-        null
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        this.resources.getColor(colorId, this.theme)
-    } else {
-        this.resources.getColor(colorId)
-    }
 }
 
 fun String.setSpannableText():SpannableStringBuilder{

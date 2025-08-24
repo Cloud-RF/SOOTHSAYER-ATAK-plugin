@@ -50,7 +50,7 @@
             android:layout_toStartOf="@id/svMode"
             android:text="@string/api_mode"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/sp_14" />
+            android:textSize="16sp" />
 
         <Switch
             android:id="@+id/svMode"
@@ -67,10 +67,10 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="8dp">
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
 
         <CheckBox
             android:id="@+id/cbLinkLines"
@@ -78,7 +78,7 @@
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="@string/link_lines"
-            android:textSize="12sp" />
+            android:textSize="16sp" />
 
         <View
             android:layout_width="0dp"
@@ -88,15 +88,15 @@
         <ImageView
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:src="@drawable/link_icon"/>
+            android:src="@drawable/link_icon" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="8dp">
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
 
         <CheckBox
             android:id="@+id/cbKmzLayer"
@@ -104,7 +104,7 @@
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="@string/kmzlayer"
-            android:textSize="12sp" />
+            android:textSize="16sp" />
 
         <View
             android:layout_width="0dp"
@@ -118,5 +118,34 @@
 
 
     </LinearLayout>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="4dp"
+                android:text="Resolution"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+            <Spinner
+                android:id="@+id/megapixelSpinner"
+                android:layout_width="313dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?android:attr/windowBackground"
+                android:popupBackground="?android:attr/windowBackground"
+                android:spinnerMode="dropdown" />
+        </TableRow>
+
+    </TableLayout>
 
 </LinearLayout>

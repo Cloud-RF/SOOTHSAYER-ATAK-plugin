@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER v2.2</string>
+    <string name="help_title">SOOTHSAYER v2.3</string>
     <!-- description -->
     <string name="app_desc">Interface to the CloudRF/SOOTHSAYER API</string>
     <string name="example_layer_description">This is an example layer.</string>
@@ -42,9 +42,9 @@
     <string name="ok_txt">OK</string>
     <string name="help_msg">This plugin simulates radio coverage for any radio system or platform.
         \nIt requires a server with an account to function.
-        \nYou can use the public system at https://cloudrf.com or a private SOOTHSAYER server eg. https://192.168.0.123
+        \nYou can use the public API at https://api.cloudrf.com or a private server (SOOTHSAYER > 1.9) with an IP like https://192.168.0.123
         \n\nTo use: Choose a template from the list then click the marker button to add a radio to the map. From there, either drag it or click the play button to calculate coverage. You can test a single radio or many with multisite mode (GPU required).
-        \n\nLinks:\nTo model SNR links, check the links box in the settings and add multiple radios. Drag the markers to move them around or click the play button. Colours: -3 to +3dB: Black, +3 to +9dB: Red, +9 to +15dB: Amber, +15dB to 21dB: Green, +21dB: Blue
+        \n\nLinks:\nTo model SNR links, check the links box in the settings and add multiple radios. Drag the markers to move them around or click the play button. Colours and units are user defined within the links settings.
         \n\nCoverage:\nTo model a heatmap of RF coverage, check the coverage box in the settings and add a radio. Drag the marker to model coverage or click the play button. Colours are set in the template.
         \n\nBounds box:\nTo focus output on a user defined area, click the polygon button and draw a shape. Any coverage calculations will only test the polygon.
         \n\nCo-opt feature:\nTo model live data taken from the map in ATAK, click the deputy badge and then assign templates to the callsigns in the list. Only data with altitude will be shown. Click start to automatically model the data after an interval or when it moves.
@@ -102,4 +102,14 @@
     <string name="empty_password">Please enter password.</string>
     <string name="template_downloading">Synchronising templates..</string>
     <string name="login_loading">Attempting login..</string>
+
+    <string name="settings_layers_button">Layers</string>
+    <string name="settings_coopt_button">Co-Opt</string>
+    <string name="settings_options_button">Options</string>
+    <string name="settings_links_button">Links</string>
+    <string name="settings_layers_title">Settings - Layers</string>
+    <string name="settings_coopt_title">Settings - Co-Opt</string>
+    <string name="settings_options_title">Settings - Links</string>
+    <string name="settings_options_colours_unit">dB</string>
+    <string name="colour_picker_title">Pick Colour</string>
 </resources>

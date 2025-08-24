@@ -8,7 +8,7 @@
 
 buildscript {
 
-    ext.PLUGIN_VERSION = "2.2"
+    ext.PLUGIN_VERSION = "2.3"
     ext.ATAK_VERSION = "5.2.0"
 
     def takdevVersion = '2.+'
@@ -60,11 +60,11 @@ buildscript {
     }
     dependencies {
 
-        classpath('com.android.tools.build:gradle:4.2.2') {
+        classpath('com.android.tools.build:gradle:8.9.3') {
             exclude group: "net.sf.proguard", module:
                     "proguard-gradle"
         }
-        classpath 'com.guardsquare:proguard-gradle:7.4.2'
+        classpath 'com.guardsquare:proguard-gradle:7.7.0'
         if(isDevKitEnabled()) {
             classpath "com.atakmap.gradle:atak-gradle-takdev:${takdevVersion}"
         } else {
@@ -202,6 +202,12 @@ android {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86"
         }
     }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+    namespace 'com.atakmap.android.soothsayer.plugin'
+
 }
 
 

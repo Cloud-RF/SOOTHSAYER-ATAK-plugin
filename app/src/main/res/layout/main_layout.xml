@@ -15,7 +15,8 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@android:color/black">
 
 
             <ImageButton
@@ -47,7 +48,7 @@
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
                 android:layout_toRightOf="@id/coOptButton"
-                android:padding="5dp"
+                android:padding="7dp"
                 android:src="@drawable/polygon" />
 
             <ImageButton
@@ -90,6 +91,7 @@
                 android:layout_marginTop="3dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
+                android:background="@drawable/btn_gray"
                 android:contentDescription="@string/app_name"
                 android:padding="5dp"
                 android:src="@drawable/ic_settings" />
@@ -105,7 +107,7 @@
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
                 android:background="@drawable/new_dark_button_selected"
-                android:padding="5dp"
+                android:padding="2dp"
                 android:src="@android:drawable/ic_media_play" />
 
             <ProgressBar
@@ -173,6 +175,26 @@
         android:id="@+id/ilCoOpt"
         layout="@layout/co_opt_layout"
         android:visibility="gone" />
+
+    <include
+        android:id="@+id/settingsCoOptLayout"
+        layout="@layout/settings_co_opt_layout"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/settingsLayersLayout"
+        layout="@layout/settings_layers_layout"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/settingsOptionsLayout"
+        layout="@layout/settings_options_layout"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/colourPickerLayout"
+        layout="@layout/colour_picker"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/co_opt_next_update_textview"

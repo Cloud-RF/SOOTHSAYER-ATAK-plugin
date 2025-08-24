@@ -119,7 +119,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="?android:attr/colorPrimary"
-            android:textColor="#FFFFFF" />
+            android:text="Templates"
+            android:textColor="@color/light_gray" />
 
     </LinearLayout>
 

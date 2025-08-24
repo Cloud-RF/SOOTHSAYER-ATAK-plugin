@@ -60,7 +60,7 @@ buildscript {
     }
     dependencies {
 
-        classpath('com.android.tools.build:gradle:4.2.2') {
+        classpath('com.android.tools.build:gradle:8.9.3') {
             exclude group: "net.sf.proguard", module:
                     "proguard-gradle"
         }
@@ -207,6 +207,7 @@ android {
         jvmTarget = "1.8"
     }
     namespace 'com.atakmap.android.soothsayer.plugin'
+
 }
 
 

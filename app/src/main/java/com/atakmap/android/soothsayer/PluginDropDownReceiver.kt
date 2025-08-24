@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.Typeface
 import android.text.Editable
 import android.text.InputType
@@ -103,7 +104,6 @@ import com.atakmap.map.elevation.ElevationManager
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import gov.tak.platform.graphics.Color
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -477,9 +477,9 @@ class PluginDropDownReceiver(
             }
         }
 
-        val btnResetColoursSNR = settingsOptionsView.findViewById<Button>(R.id.btnResetColoursSNR)
+        val btnManetColours = settingsOptionsView.findViewById<Button>(R.id.btnManetColours)
 
-        btnResetColoursSNR.setOnClickListener {
+        btnManetColours.setOnClickListener {
             btnOptionsColour1.setBackgroundColor(0xFF00FF00.toInt())
             btnOptionsColour2.setBackgroundColor(0xFFFFb600.toInt())
             btnOptionsColour3.setBackgroundColor(0xFFFF0000.toInt())
@@ -501,6 +501,32 @@ class PluginDropDownReceiver(
             settingsOptionsDB2.setText("10")
             settingsOptionsDB3.setText("0")
             settingsOptionsDB4.setText("-10")
+        }
+
+        val btnLpwanColours = settingsOptionsView.findViewById<Button>(R.id.btnLpwanColours)
+
+        btnLpwanColours.setOnClickListener {
+            btnOptionsColour1.setBackgroundColor(0xFFf4fc05.toInt())
+            btnOptionsColour2.setBackgroundColor(0xFF00FF00.toInt())
+            btnOptionsColour3.setBackgroundColor(0xFF055cfc.toInt())
+            btnOptionsColour4.setBackgroundColor(0xFFc305fc.toInt())
+
+            optionsColour1.value = 0xFFf4fc05.toInt()
+            optionsColour2.value = 0xFF00FF00.toInt()
+            optionsColour3.value = 0xFF055cfc.toInt()
+            optionsColour4.value = 0xFFc305fc.toInt()
+
+            optionsUnitSwitch.isChecked = true
+
+            optionsUnitView1.text = "dBm"
+            optionsUnitView2.text = "dBm"
+            optionsUnitView3.text = "dBm"
+            optionsUnitView4.text = "dBm"
+
+            settingsOptionsDB1.setText("-100")
+            settingsOptionsDB2.setText("-110")
+            settingsOptionsDB3.setText("-120")
+            settingsOptionsDB4.setText("-130")
         }
 
         settingsOptionsDB1.addTextChangedListener(object : TextWatcher {
@@ -920,10 +946,18 @@ class PluginDropDownReceiver(
         val showCoverage = sharedPrefs?.get(Constant.PreferenceKey.sKmzVisibility, true) ?: true
         val multisiteMode = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
 
+        // Nothing selected!
         if(!showLinks && !showCoverage) {
-            toast("You need either links or coverage enabled")
+            toast("You need links or coverage layers enabled")
             return
         }
+
+        // Links only but no-one to link to :(
+        if(showLinks && !showCoverage && markersList.size == 1) {
+            toast("You should enable the coverage layer")
+            return
+        }
+
 
         if(markersList.size < 1) {
             toast("You need to add a radio first")
@@ -1581,9 +1615,12 @@ class PluginDropDownReceiver(
                         }
 
                         override fun onFailed(error: String?, responseCode: Int?) {
-                            pluginContext.toast(
-                                error ?: pluginContext.getString(R.string.error_msg)
-                            )
+                            if(error != null){
+                                pluginContext.toast(error)
+                            }
+                            if(responseCode == 404){
+                                pluginContext.toast("This plugin needs SOOTHSAYER > v1.9. Try an older plugin from CloudRF.com")
+                            }
                         }
 
                     })

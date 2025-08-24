@@ -42,7 +42,7 @@
     <string name="ok_txt">OK</string>
     <string name="help_msg">This plugin simulates radio coverage for any radio system or platform.
         \nIt requires a server with an account to function.
-        \nYou can use the public system at https://api.cloudrf.com or a private SOOTHSAYER server eg. https://192.168.0.123
+        \nYou can use the public API at https://api.cloudrf.com or a private server (SOOTHSAYER > 1.9) with an IP like https://192.168.0.123
         \n\nTo use: Choose a template from the list then click the marker button to add a radio to the map. From there, either drag it or click the play button to calculate coverage. You can test a single radio or many with multisite mode (GPU required).
         \n\nLinks:\nTo model SNR links, check the links box in the settings and add multiple radios. Drag the markers to move them around or click the play button. Colours and units are user defined within the links settings.
         \n\nCoverage:\nTo model a heatmap of RF coverage, check the coverage box in the settings and add a radio. Drag the marker to model coverage or click the play button. Colours are set in the template.

@@ -57,7 +57,7 @@
         "landcover": 1,
         "buildings": 1,
         "obstacles": 0,
-        "clt": "Minimal.clt"
+        "clt": "Temperate.clt"
     },
     "output": {
         "units": "m",

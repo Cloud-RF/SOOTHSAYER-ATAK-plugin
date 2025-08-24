@@ -23,11 +23,11 @@
         "powerUnit": "W"
     },
     "receiver": {
-        "lat": 51.53874497567418,
-        "lon": -2.5900211090812704,
+        "lat": 51.538,
+        "lon": -2.590,
         "alt": 2,
         "rxg": 2,
-        "rxs": 0
+        "rxs": -105
     },
     "feeder": {
         "flt": 1,
@@ -50,23 +50,23 @@
         "pm": 10,
         "pe": 2,
         "ked": 4,
-        "rel": 70
+        "rel": 60
     },
     "environment": {
         "elevation": 2,
         "landcover": 1,
         "buildings": 1,
         "obstacles": 0,
-        "clt": "FOREST.clt"
+        "clt": "Temperate.clt"
     },
     "output": {
         "units": "m",
-        "col": "SNR1.dB",
-        "out": 4,
+        "col": "LTE.dBm",
+        "out": 2,
         "ber": 1,
         "mod": 0,
         "nf": -100,
-        "res": 4,
-        "rad": 4
+        "res": 5,
+        "rad": 3
     }
 }

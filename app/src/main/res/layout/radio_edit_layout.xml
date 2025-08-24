@@ -258,6 +258,6 @@
         android:layout_marginTop="@dimen/dp_8"
         android:paddingHorizontal="16dp"
         android:paddingVertical="8dp"
-        android:text="@string/radio_recalculate" />
+        android:text="Save" />
 
 </LinearLayout>

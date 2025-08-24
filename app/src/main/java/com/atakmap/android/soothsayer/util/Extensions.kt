@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.round
 
+
 val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/atak/SOOTHSAYER"
 private val TEMPLATES_PATH = "$FOLDER_PATH/templates"
 const val SOOTHSAYER = "SOOTHSAYER"

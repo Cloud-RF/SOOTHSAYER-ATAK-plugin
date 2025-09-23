@@ -196,6 +196,20 @@
         layout="@layout/colour_picker"
         android:visibility="gone"/>
 
+    <include
+        android:id="@+id/templatesMenuLayout"
+        layout="@layout/templates_layout"
+        android:visibility="gone"/>
+
+    <include
+        android:id="@+id/newTemplateMenuLayout"
+        layout="@layout/new_template_layout"
+        android:visibility="gone"/>
+    <include
+        android:id="@+id/pickIconLayout"
+        layout="@layout/pick_icon_layout"
+        android:visibility="gone"/>
+
     <TextView
         android:id="@+id/co_opt_next_update_textview"
         android:layout_width="match_parent"

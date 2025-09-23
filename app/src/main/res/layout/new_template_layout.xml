@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/dp_20">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/newTemplateBackBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/app_name"
+            android:padding="@dimen/dp_4"
+            android:src="@drawable/back_arrow" />
+
+        <TextView
+            android:id="@+id/tvSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/new_template_title"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_18" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:layout_margin="@dimen/dp_3"
+        android:background="@android:color/white" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/template_title"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnNewTemplatePickFile"
+            android:layout_width="wrap_content"
+            android:layout_margin="@dimen/dp_2"
+            android:layout_height="45dp"
+            android:background="@drawable/btn_gray"
+            android:textColor="#FFF"
+            android:padding="5dp"
+            android:text="@string/new_template_pick_file_btn"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/tvNewTemplateFileName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Icon"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnNewTemplatePickIcon"
+            android:layout_width="wrap_content"
+            android:layout_margin="@dimen/dp_2"
+            android:layout_height="45dp"
+            android:background="@drawable/btn_gray"
+            android:textColor="#FFF"
+            android:padding="5dp"
+            android:text="@string/new_template_pick_icon_btn"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/tvNewTemplateIconName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/ivNewTemplateIcon"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_margin="@dimen/dp_2"
+            android:contentDescription="@string/app_name" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnCancelNewTemplate"
+            android:text="@string/cancel_new_template"
+            android:textColor="#FFF"
+            android:background="@drawable/btn_gray"
+            android:layout_margin="@dimen/dp_2"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/btnConfirmNewTemplate"
+            android:text="@string/confirm_new_template"
+            android:textColor="#FFF"
+            android:background="@drawable/btn_gray"
+            android:layout_margin="@dimen/dp_2"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+</LinearLayout>

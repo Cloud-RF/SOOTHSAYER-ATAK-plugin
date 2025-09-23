@@ -112,4 +112,19 @@
     <string name="settings_options_title">Settings - Links</string>
     <string name="settings_options_colours_unit">dB</string>
     <string name="colour_picker_title">Pick Colour</string>
+
+    <string name="template_title">Template</string>
+    <string name="templates_title">SOOTHSAYER - Templates</string>
+    <string name="template_button">Templates</string>
+    <string name="new_template_title">New Template</string>
+    <string name="new_template_pick_file_btn">Pick File</string>
+    <string name="cancel_new_template">Cancel</string>
+    <string name="confirm_new_template">Import</string>
+    <string name="new_template_pick_icon_title">Template - Pick Icon</string>
+    <string name="new_template_pick_icon_btn">Pick Icon</string>
+    <string name="new_template_icon_pick_file_btn">Pick File</string>
+    <string name="no_template">Template list is empty. Click the add button to import.</string>
+    <string name="template_limit">"You can only add up to %1$s templates"</string>
+    <string name="choose_file">"Please choose file and icon both to import."</string>
+    <string name="all_txt">ALL</string>
 </resources>

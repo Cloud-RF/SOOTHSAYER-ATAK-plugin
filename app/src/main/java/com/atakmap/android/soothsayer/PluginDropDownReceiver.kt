@@ -1,15 +1,15 @@
 package com.atakmap.android.soothsayer
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.Typeface
-import android.text.Editable
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.text.InputType
-import android.text.TextWatcher
 import android.util.Base64
 import android.util.Log
 import android.view.MotionEvent
@@ -26,51 +26,39 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atak.plugins.impl.PluginLayoutInflater
 import com.atakmap.android.contact.Contact
 import com.atakmap.android.contact.Contacts
-import com.atakmap.android.drawing.mapItems.DrawingShape
 import com.atakmap.android.dropdown.DropDown.OnStateListener
 import com.atakmap.android.dropdown.DropDownReceiver
-import com.atakmap.android.grg.GRGMapComponent
 import com.atakmap.android.hierarchy.HierarchyListReceiver
-import com.atakmap.android.importexport.ImportExportMapComponent
-import com.atakmap.android.importexport.ImportReceiver
 import com.atakmap.android.ipc.AtakBroadcast
 import com.atakmap.android.maps.MapEvent
 import com.atakmap.android.maps.MapEventDispatcher
 import com.atakmap.android.maps.MapGroup
-import com.atakmap.android.maps.MapItem
 import com.atakmap.android.maps.MapView
 import com.atakmap.android.maps.Marker
-import com.atakmap.android.maps.MultiPolyline
 import com.atakmap.android.maps.PointMapItem
-import com.atakmap.android.maps.Polyline
-import com.atakmap.android.menu.PluginMenuParser
 import com.atakmap.android.preference.AtakPreferences
+import com.atakmap.android.soothsayer.TemplateRecyclerViewAdapter.Companion.MAX_ITEMS
 import com.atakmap.android.soothsayer.interfaces.CloudRFLayerListener
 import com.atakmap.android.soothsayer.layers.CloudRFLayer
 import com.atakmap.android.soothsayer.layers.GLCloudRFLayer
 import com.atakmap.android.soothsayer.layers.PluginMapOverlay
 import com.atakmap.android.soothsayer.models.common.CoOptedMarkerSettings
 import com.atakmap.android.soothsayer.models.common.MarkerDataModel
-import com.atakmap.android.soothsayer.models.linksmodel.Link
 import com.atakmap.android.soothsayer.models.linksmodel.LinkDataModel
-import com.atakmap.android.soothsayer.models.linksmodel.LinkRequest
 import com.atakmap.android.soothsayer.models.linksmodel.LinkResponse
-import com.atakmap.android.soothsayer.models.linksmodel.Point
-import com.atakmap.android.soothsayer.models.request.Bounds
-import com.atakmap.android.soothsayer.models.request.MultiSiteTransmitter
 import com.atakmap.android.soothsayer.models.request.MultisiteRequest
-import com.atakmap.android.soothsayer.models.request.Receiver
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.atakmap.android.soothsayer.models.response.LoginResponse
 import com.atakmap.android.soothsayer.models.response.ResponseModel
@@ -81,46 +69,54 @@ import com.atakmap.android.soothsayer.network.repository.PluginRepository
 import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.soothsayer.recyclerview.CoOptAdapter
 import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
+import com.atakmap.android.soothsayer.util.CalculationManager
 import com.atakmap.android.soothsayer.util.Constant
 import com.atakmap.android.soothsayer.util.FOLDER_PATH
 import com.atakmap.android.soothsayer.util.PNG_IMAGE
-import com.atakmap.android.soothsayer.util.base64StringToBitmap
+import com.atakmap.android.soothsayer.util.addCustomMarker
 import com.atakmap.android.soothsayer.util.createAndStoreDownloadedFile
 import com.atakmap.android.soothsayer.util.createAndStoreFiles
+import com.atakmap.android.soothsayer.util.delete
+import com.atakmap.android.soothsayer.util.deleteFilesMatchingTemplates
+import com.atakmap.android.soothsayer.util.drawLinksForResponse
+import com.atakmap.android.soothsayer.util.getAllAvailableMarkers
+import com.atakmap.android.soothsayer.util.getAllFilesFromAssets
 import com.atakmap.android.soothsayer.util.getBitmap
 import com.atakmap.android.soothsayer.util.getFileName
+import com.atakmap.android.soothsayer.util.getModifiedMarker
+import com.atakmap.android.soothsayer.util.getModifiedReceiver
+import com.atakmap.android.soothsayer.util.getSettingTemplateListFromPref
 import com.atakmap.android.soothsayer.util.getTemplatesFromFolder
+import com.atakmap.android.soothsayer.util.handleShowPlugin
 import com.atakmap.android.soothsayer.util.isConnected
-import com.atakmap.android.soothsayer.util.roundValue
+import com.atakmap.android.soothsayer.util.removeLinkLinesFromMap
+import com.atakmap.android.soothsayer.util.removeMarkerFromMap
+import com.atakmap.android.soothsayer.util.runCoOptUpdate
+import com.atakmap.android.soothsayer.util.saveMarkerListToPref
+import com.atakmap.android.soothsayer.util.saveSettingTemplateListToPref
 import com.atakmap.android.soothsayer.util.setSpannableText
 import com.atakmap.android.soothsayer.util.shortToast
 import com.atakmap.android.soothsayer.util.showAlert
+import com.atakmap.android.soothsayer.util.sortMarkersWithCheckedFirst
+import com.atakmap.android.soothsayer.util.toBase64String
+import com.atakmap.android.soothsayer.util.toLinkDataModel
 import com.atakmap.android.soothsayer.util.toast
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
-import com.atakmap.coremap.maps.coords.GeoPoint
-import com.atakmap.map.elevation.ElevationData
-import com.atakmap.map.elevation.ElevationManager
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.UUID
-import kotlin.math.ceil
-import kotlin.math.min
-import kotlin.math.sqrt
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 class PluginDropDownReceiver(
     mapView: MapView?,
     val pluginContext: Context, private val mapOverlay: PluginMapOverlay
-) : DropDownReceiver(mapView), OnStateListener, Contacts.OnContactsChangedListener, MapEventDispatcher.MapEventDispatchListener {
+) : DropDownReceiver(mapView), OnStateListener, Contacts.OnContactsChangedListener, MapEventDispatcher.MapEventDispatchListener{
     // Remember to use the PluginLayoutInflater if you are actually inflating a custom view.
     private val templateView: View = PluginLayoutInflater.inflate(
         pluginContext,
@@ -135,6 +131,9 @@ class PluginDropDownReceiver(
     private val settingsLayersView = templateView.findViewById<LinearLayout>(R.id.settingsLayersLayout)
     private val settingsOptionsView = templateView.findViewById<LinearLayout>(R.id.settingsOptionsLayout)
     private val colourPickerView = templateView.findViewById<LinearLayout>(R.id.colourPickerLayout)
+    private val templatesMenuView = templateView.findViewById<LinearLayout>(R.id.templatesMenuLayout)
+    private val pickIconMenuView = templateView.findViewById<LinearLayout>(R.id.pickIconLayout)
+    private val newTemplateMenuView = templateView.findViewById<LinearLayout>(R.id.newTemplateMenuLayout)
     private val svMode: Switch = settingsLayersView.findViewById(R.id.svMode)
     private val cbCoverageLayer: CheckBox = settingsLayersView.findViewById(R.id.cbKmzLayer)
     private val cbLinkLines: CheckBox = settingsLayersView.findViewById(R.id.cbLinkLines)
@@ -143,15 +142,20 @@ class PluginDropDownReceiver(
     private val cbCoOptDistanceRefresh: CheckBox = settingsCooptView.findViewById(R.id.cbCoOptDistanceRefresh)
     private val etCoOptDistanceThreshold: EditText = settingsCooptView.findViewById(R.id.etCoOptDistanceThreshold)
     private val loginView = templateView.findViewById<LinearLayout>(R.id.ilLogin)
+    private var templateRecyclerView: RecyclerView? = null
+    private val cbSelectAllTemplates = templatesMenuView.findViewById<CheckBox>(R.id.cbTemplatesAll)
+    private val spinner: Spinner = templateView.findViewById(R.id.spTemplate)
 
     private var etLoginServerUrl: EditText? = null
     private var etUsername: EditText? = null
     private var etPassword: EditText? = null
     private var etServerUrl: EditText? = null
     private var markersList: ArrayList<MarkerDataModel> = ArrayList()
+    private var settingTemplateList: MutableList<MutableTuple<TemplateDataModel, Boolean, String?>> = mutableListOf()
     private var selectedMarkerType: TemplateDataModel? = null
     private val templateItems: ArrayList<TemplateDataModel> = ArrayList()
     private var markerAdapter: RecyclerViewAdapter? = null
+    private var templateAdapter: TemplateRecyclerViewAdapter? = null
     private val mItemType: String = "custom-type"
     private val repository by lazy { PluginRepository.getInstance() }
     private var sharedPrefs: AtakPreferences? = AtakPreferences(mapView?.context)
@@ -165,42 +169,49 @@ class PluginDropDownReceiver(
     private val coOptedMarkers = HashMap<String, CoOptedMarkerSettings>()
     private val trackingHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var trackingRunnable: Runnable? = null
-    private val lastKnownLocations = HashMap<String, GeoPoint>()
-    private var colourPickerCurId: Int = 0
+    private var preImportTemplates: ArrayList<TemplateDataModel> = ArrayList()
+    private var spinnerAdapter: ArrayAdapter<TemplateDataModel>?=null
+    private val calcManager by lazy {
+        CalculationManager(pluginContext, sharedPrefs, mapView, markersList, this)
+    }
+    private var settingsLinksController: SettingsLinksController? = null
+    private var templateMenuController: TemplateMenuController? = null
 
-    class ColourRef(var value: Int)
+    // create a single main-thread handler
+    private val mainHandler = Handler(Looper.getMainLooper())
 
-    private var optionsColour1: ColourRef = ColourRef(0xFF00FF00.toInt())
-    private var optionsColour2: ColourRef = ColourRef(0xFFFFb600.toInt())
-    private var optionsColour3: ColourRef = ColourRef(0xFFFF0000.toInt())
-    private var optionsColour4: ColourRef = ColourRef(0xFF222222.toInt())
+    private var filePickerReceiverRegistered = false
 
-    private var linkUnits = "dB"
+    private val filePickedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action != FilePickerActivity.INTENT_ACTION) return
 
-    private fun getCurrentColour(): ColourRef {
-        return when (colourPickerCurId) {
-            1 -> optionsColour1
-            2 -> optionsColour2
-            3 -> optionsColour3
-            4 -> optionsColour4
-            else -> ColourRef(0)
+            val fileName = intent.getStringExtra(FilePickerActivity.FILE_NAME) ?: return
+            val templates = intent.getSerializableExtra(FilePickerActivity.JSON_LIST) as ArrayList<TemplateDataModel>
+                ?: return
+            val someInvalid = intent.getBooleanExtra(FilePickerActivity.SOME_INVALID, false)
+
+            // update UI on main thread
+            mainHandler.post {
+                newTemplateMenuView.findViewById<TextView>(R.id.tvNewTemplateFileName).text = fileName
+                preImportTemplates = templates
+                templateMenuController?.setPreImportTemplates(templates)
+                if (someInvalid) pluginContext.toast("Some templates were invalid, skipping…")
+            }
         }
-    }
-
-    private fun setRedChannel(colour: Int, red: Int): Int {
-        return (colour and 0xFF00FFFF.toInt()) or ((red and 0xFF) shl 16)
-    }
-
-    private fun setGreenChannel(colour: Int, green: Int): Int {
-        return (colour and 0xFFFF00FF.toInt()) or ((green and 0xFF) shl 8)
-    }
-
-    private fun setBlueChannel(colour: Int, blue: Int): Int {
-        return (colour and 0xFFFFFF00.toInt()) or (blue and 0xFF)
     }
 
     // Initialise views, listeners and handle map clicks
     init {
+        if (!filePickerReceiverRegistered) {
+            pluginContext.registerReceiver(
+                filePickedReceiver,
+                IntentFilter(FilePickerActivity.INTENT_ACTION),
+                Context.RECEIVER_EXPORTED
+            )
+            filePickerReceiverRegistered = true
+        }
+
         initViews()
         initListeners()
         initSpotBeam()
@@ -211,16 +222,22 @@ class PluginDropDownReceiver(
     }
 
     private fun initViews() {
-        pluginContext.createAndStoreFiles(getAllFilesFromAssets())
+        //stopping to reload the template again and again from the asset folder.
+        val isLoadedFirstTime = sharedPrefs?.get(Constant.PreferenceKey.sTemplatesLoadedFromAssests, true)
+       if(isLoadedFirstTime?:true) {
+           pluginContext.createAndStoreFiles(pluginContext.getAllFilesFromAssets())
+           sharedPrefs?.set(Constant.PreferenceKey.sTemplatesLoadedFromAssests, false)
+       }
         initSettings()
         initRadioSettingView()
         initTemplateSpinner()
         initMegapixelSpinner()
         initLoginView()
         initRecyclerview()
+        initSettingRecyclerview()
     }
 
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
+    @SuppressLint("UseSwitchCompatOrMaterialCode", "ImplicitSamInstance")
     private fun initListeners() {
         val btnOpenSettings: ImageView = templateView.findViewById(R.id.ivSettings)
         btnOpenSettings.setOnClickListener {
@@ -343,281 +360,35 @@ class PluginDropDownReceiver(
             settingsOptionsView.visibility = View.GONE;
         }
 
-        val curColourView = colourPickerView.findViewById<View>(R.id.colourPickerCurColour)
+        initSettingLinkController()
 
-        val colourPickerRedBar = colourPickerView.findViewById<SeekBar>(R.id.colourPickerRedBar);
-        val colourPickerGreenBar = colourPickerView.findViewById<SeekBar>(R.id.colourPickerGreenBar);
-        val colourPickerBlueBar = colourPickerView.findViewById<SeekBar>(R.id.colourPickerBlueBar);
+        initTemplateMenuController()
+    }
 
-        val btnOptionsColour1 = settingsOptionsView.findViewById<Button>(R.id.btnOptionsColour1)
-        btnOptionsColour1.setOnClickListener {
-            colourPickerCurId = 1;
-            settingsOptionsView.visibility = View.GONE
-            colourPickerView.visibility = View.VISIBLE
-            colourPickerRedBar.progress = Color.red(optionsColour1.value)
-            colourPickerGreenBar.progress = Color.green(optionsColour1.value)
-            colourPickerBlueBar.progress = Color.blue(optionsColour1.value)
-        }
+    private fun initSettingLinkController(){
+        // initilaize the settingink controller
+        settingsLinksController = SettingsLinksController(
+            pluginContext,
+            settingsOptionsView,
+            colourPickerView
+        )
+    }
 
-        val btnOptionsColour2 = settingsOptionsView.findViewById<Button>(R.id.btnOptionsColour2)
-        btnOptionsColour2.setOnClickListener {
-            colourPickerCurId = 2;
-            settingsOptionsView.visibility = View.GONE
-            colourPickerView.visibility = View.VISIBLE
-            colourPickerRedBar.progress = Color.red(optionsColour2.value)
-            colourPickerGreenBar.progress = Color.green(optionsColour2.value)
-            colourPickerBlueBar.progress = Color.blue(optionsColour2.value)
-        }
-
-        val btnOptionsColour3 = settingsOptionsView.findViewById<Button>(R.id.btnOptionsColour3)
-        btnOptionsColour3.setOnClickListener {
-            colourPickerCurId = 3;
-            settingsOptionsView.visibility = View.GONE
-            colourPickerView.visibility = View.VISIBLE
-            colourPickerRedBar.progress = Color.red(optionsColour3.value)
-            colourPickerGreenBar.progress = Color.green(optionsColour3.value)
-            colourPickerBlueBar.progress = Color.blue(optionsColour3.value)
-        }
-
-        val btnOptionsColour4 = settingsOptionsView.findViewById<Button>(R.id.btnOptionsColour4)
-        btnOptionsColour4.setOnClickListener {
-            colourPickerCurId = 4;
-            settingsOptionsView.visibility = View.GONE
-            colourPickerView.visibility = View.VISIBLE
-            colourPickerRedBar.progress = Color.red(optionsColour4.value)
-            colourPickerGreenBar.progress = Color.green(optionsColour4.value)
-            colourPickerBlueBar.progress = Color.blue(optionsColour4.value)
-        }
-
-        colourPickerRedBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                var curColour = getCurrentColour()
-                curColour.value = setRedChannel(curColour.value, progress)
-                curColourView.setBackgroundColor(curColour.value)
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
-            override fun onStopTrackingTouch(seekBar: SeekBar?) { }
-        })
-
-        colourPickerGreenBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                var curColour = getCurrentColour()
-                curColour.value = setGreenChannel(curColour.value, progress)
-                curColourView.setBackgroundColor(curColour.value)
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
-            override fun onStopTrackingTouch(seekBar: SeekBar?) { }
-        })
-
-        colourPickerBlueBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                var curColour = getCurrentColour()
-                curColour.value = setBlueChannel(curColour.value, progress)
-                curColourView.setBackgroundColor(curColour.value)
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
-            override fun onStopTrackingTouch(seekBar: SeekBar?) { }
-        })
-
-        val btnColourPickerBack = colourPickerView.findViewById<ImageView>(R.id.colourPickerBack)
-        btnColourPickerBack.setOnClickListener {
-            val colour = getCurrentColour()
-
-            when (colourPickerCurId) {
-                1 -> btnOptionsColour1.setBackgroundColor(colour.value)
-                2 -> btnOptionsColour2.setBackgroundColor(colour.value)
-                3 -> btnOptionsColour3.setBackgroundColor(colour.value)
-                4 -> btnOptionsColour4.setBackgroundColor(colour.value)
-                else -> {}
-            }
-
-            colourPickerCurId = 0
-
-            colourPickerView.visibility = View.GONE
-            settingsOptionsView.visibility = View.VISIBLE
-        }
-
-        val optionsUnitSwitch = settingsOptionsView.findViewById<Switch>(R.id.optionsUnitSwitch)
-        val optionsUnitView1 = settingsOptionsView.findViewById<TextView>(R.id.optionsUnit1)
-        val optionsUnitView2 = settingsOptionsView.findViewById<TextView>(R.id.optionsUnit2)
-        val optionsUnitView3 = settingsOptionsView.findViewById<TextView>(R.id.optionsUnit3)
-        val optionsUnitView4 = settingsOptionsView.findViewById<TextView>(R.id.optionsUnit4)
-
-        var settingsOptionsDB1 = settingsOptionsView.findViewById<EditText>(R.id.db1)
-        var settingsOptionsDB2 = settingsOptionsView.findViewById<EditText>(R.id.db2)
-        var settingsOptionsDB3 = settingsOptionsView.findViewById<EditText>(R.id.db3)
-        var settingsOptionsDB4 = settingsOptionsView.findViewById<EditText>(R.id.db4)
-
-        var optionsUnitSwitchActivated = false
-        optionsUnitSwitch.setOnCheckedChangeListener { _, isChecked ->
-            optionsUnitSwitchActivated = isChecked
-            optionsUnitView1.text = if (optionsUnitSwitchActivated) "dBm" else "dB"
-            optionsUnitView2.text = if (optionsUnitSwitchActivated) "dBm" else "dB"
-            optionsUnitView3.text = if (optionsUnitSwitchActivated) "dBm" else "dB"
-            optionsUnitView4.text = if (optionsUnitSwitchActivated) "dBm" else "dB"
-
-            if(optionsUnitSwitchActivated) {
-                linkUnits = "dBm"
-                settingsOptionsDB1.setText("-80")
-                settingsOptionsDB2.setText("-90")
-                settingsOptionsDB3.setText("-100")
-                settingsOptionsDB4.setText("-110")
-            }else{
-                linkUnits = "dB"
-                settingsOptionsDB1.setText("20")
-                settingsOptionsDB2.setText("10")
-                settingsOptionsDB3.setText("0")
-                settingsOptionsDB4.setText("-10")
-            }
-
-
-            val btnOpenTemplateManager = settingView.findViewById<Button>(R.id.btnOpenTemplateManager)
-            btnOpenTemplateManager.setOnClickListener {
-                pluginContext.toast("Coming soon!")
-            }
-        }
-
-        val btnManetColours = settingsOptionsView.findViewById<Button>(R.id.btnManetColours)
-
-        btnManetColours.setOnClickListener {
-            btnOptionsColour1.setBackgroundColor(0xFF00FF00.toInt())
-            btnOptionsColour2.setBackgroundColor(0xFFFFb600.toInt())
-            btnOptionsColour3.setBackgroundColor(0xFFFF0000.toInt())
-            btnOptionsColour4.setBackgroundColor(0xFF222222.toInt())
-
-            optionsColour1.value = 0xFF00FF00.toInt()
-            optionsColour2.value = 0xFFFFb600.toInt()
-            optionsColour3.value = 0xFFFF0000.toInt()
-            optionsColour4.value = 0xFF222222.toInt()
-
-            optionsUnitSwitch.isChecked = false
-
-            optionsUnitView1.text = "dB"
-            optionsUnitView2.text = "dB"
-            optionsUnitView3.text = "dB"
-            optionsUnitView4.text = "dB"
-
-            settingsOptionsDB1.setText("20")
-            settingsOptionsDB2.setText("10")
-            settingsOptionsDB3.setText("0")
-            settingsOptionsDB4.setText("-10")
-        }
-
-        val btnLpwanColours = settingsOptionsView.findViewById<Button>(R.id.btnLpwanColours)
-
-        btnLpwanColours.setOnClickListener {
-            btnOptionsColour1.setBackgroundColor(0xFFf4fc05.toInt())
-            btnOptionsColour2.setBackgroundColor(0xFF00FF00.toInt())
-            btnOptionsColour3.setBackgroundColor(0xFF055cfc.toInt())
-            btnOptionsColour4.setBackgroundColor(0xFFc305fc.toInt())
-
-            optionsColour1.value = 0xFFf4fc05.toInt()
-            optionsColour2.value = 0xFF00FF00.toInt()
-            optionsColour3.value = 0xFF055cfc.toInt()
-            optionsColour4.value = 0xFFc305fc.toInt()
-
-            optionsUnitSwitch.isChecked = true
-
-            optionsUnitView1.text = "dBm"
-            optionsUnitView2.text = "dBm"
-            optionsUnitView3.text = "dBm"
-            optionsUnitView4.text = "dBm"
-
-            settingsOptionsDB1.setText("-100")
-            settingsOptionsDB2.setText("-110")
-            settingsOptionsDB3.setText("-120")
-            settingsOptionsDB4.setText("-130")
-        }
-
-        settingsOptionsDB1.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
-            override fun afterTextChanged(editable: Editable?) {
-                if (editable.toString().isEmpty() || editable.toString().equals("-"))
-                    return
-
-                var value = editable.toString().toInt()
-                val min = if (optionsUnitSwitchActivated) -140 else -20
-                val max = if (optionsUnitSwitchActivated) 0 else 90
-
-                if (value < min)
-                    value = min
-                else if (value > max)
-                    value = max
-                else return
-
-                settingsOptionsDB1.removeTextChangedListener(this)
-                settingsOptionsDB1.setText(value.toString())
-                settingsOptionsDB1.addTextChangedListener(this)
-            }
-        })
-
-        settingsOptionsDB2.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
-            override fun afterTextChanged(editable: Editable?) {
-                if (editable.toString().isEmpty() || editable.toString().equals("-"))
-                    return
-
-                var value = editable.toString().toInt()
-                val min = if (optionsUnitSwitchActivated) -140 else -20
-                val max = if (optionsUnitSwitchActivated) 0 else 90
-
-                if (value < min)
-                    value = min
-                else if (value > max)
-                    value = max
-                else return
-
-                settingsOptionsDB2.removeTextChangedListener(this)
-                settingsOptionsDB2.setText(value.toString())
-                settingsOptionsDB2.addTextChangedListener(this)            }
-        })
-
-        settingsOptionsDB3.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
-            override fun afterTextChanged(editable: Editable?) {
-                if (editable.toString().isEmpty() || editable.toString().equals("-"))
-                    return
-
-                var value = editable.toString().toInt()
-                val min = if (optionsUnitSwitchActivated) -140 else -20
-                val max = if (optionsUnitSwitchActivated) 0 else 90
-
-                if (value < min)
-                    value = min
-                else if (value > max)
-                    value = max
-                else return
-
-                settingsOptionsDB3.removeTextChangedListener(this)
-                settingsOptionsDB3.setText(value.toString())
-                settingsOptionsDB3.addTextChangedListener(this)            }
-        })
-
-        settingsOptionsDB4.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
-            override fun afterTextChanged(editable: Editable?) {
-                if (editable.toString().isEmpty() || editable.toString().equals("-"))
-                    return
-
-                var value = editable.toString().toInt()
-                val min = if (optionsUnitSwitchActivated) -140 else -20
-                val max = if (optionsUnitSwitchActivated) 0 else 90
-
-                if (value < min)
-                    value = min
-                else if (value > max)
-                    value = max
-                else return
-
-                settingsOptionsDB4.removeTextChangedListener(this)
-                settingsOptionsDB4.setText(value.toString())
-                settingsOptionsDB4.addTextChangedListener(this)            }
-        })
-
+    private fun initTemplateMenuController(){
+        templateMenuController = TemplateMenuController(
+            pluginContext,
+            settingView,
+            templatesMenuView,
+            newTemplateMenuView,
+            pickIconMenuView,
+            cbSelectAllTemplates,
+            templateRecyclerView,
+            templateAdapter,
+            templateItems,
+            settingTemplateList,
+            sharedPrefs,
+            onDeleteTemplate = {deleteSelectedTemplates()}
+        )
     }
 
     // List of radio templates. They can be selected to edit settings etc
@@ -637,22 +408,84 @@ class PluginDropDownReceiver(
         recyclerView.adapter = markerAdapter
     }
 
-    private fun initTemplateSpinner() {
-        val spinner: Spinner = templateView.findViewById(R.id.spTemplate)
-        templateItems.addAll(getTemplatesFromFolder())
-        val validTemplateItems = templateItems.filter { it.template != null }
+    // List of radio templates. They can be imported or deleted.
+    private fun initSettingRecyclerview() {
+        settingTemplateList = sharedPrefs.getSettingTemplateListFromPref()?:getTemplatesForSettingView()
+        templateRecyclerView = templatesMenuView.findViewById(R.id.templatesRecyclerView)
+        templateAdapter = TemplateRecyclerViewAdapter(settingTemplateList, onItemSelected = { position, template ->
+            // Always refresh select all checkbox based on list state
+            cbSelectAllTemplates.setOnCheckedChangeListener(null) // detach
+            cbSelectAllTemplates.isChecked = settingTemplateList.all { it.second }
+            cbSelectAllTemplates.setOnCheckedChangeListener { _, isChecked -> // reattach
+                templateAdapter?.selectAll(isChecked)
+            }
+        })
+        templateRecyclerView?.adapter = templateAdapter
+        templateRecyclerView?.layoutManager = LinearLayoutManager(templateRecyclerView?.context)
+        sharedPrefs?.saveSettingTemplateListToPref(settingTemplateList)
+    }
 
-        val spinnerAdapter: ArrayAdapter<TemplateDataModel> = object :
+    private fun getTemplatesForSettingView():MutableList<MutableTuple<TemplateDataModel, Boolean, String?>>{
+        val tupleList: MutableList<MutableTuple<TemplateDataModel, Boolean, String?>> = mutableListOf()
+        // we can remove limit if required
+        for (template in getTemplatesFromFolder().take(MAX_ITEMS)) {
+            val icon = pluginContext.getBitmap(R.drawable.marker_icon_svg)
+            val tuple = MutableTuple(template, false, icon?.toBase64String())
+            tupleList.add(tuple)
+        }
+        return tupleList
+    }
+
+    private fun deleteSelectedTemplates(){
+        val toRemove = mutableListOf<Int>()
+        val toRemoveFromFolder: ArrayList<TemplateDataModel> = ArrayList()
+
+        settingTemplateList.forEachIndexed { index, item ->
+            if (item.second) {
+                toRemove.add(index)
+                toRemoveFromFolder.add(item.first)
+            }
+        }
+
+        // remove in reverse order so indices don’t shift
+        for (pos in toRemove.asReversed()) {
+            settingTemplateList.removeAt(pos)
+            templateAdapter?.notifyItemRemoved(pos)
+        }
+
+        // do heavy file deletion in background thread
+        Thread {
+            val deletedCount = toRemoveFromFolder.deleteFilesMatchingTemplates()
+            val namesToRemove = toRemoveFromFolder.map { it.template.name }.toHashSet()
+            templateItems.removeAll { it.template.name in namesToRemove }
+
+//            // back to UI thread
+            mainHandler.post {
+                spinnerAdapter?.notifyDataSetChanged()
+            }
+        }.start()
+        toRemoveFromFolder.deleteFilesMatchingTemplates()
+    }
+
+    private fun initTemplateSpinner() {
+        templateItems.apply {
+            clear()
+            addAll(getTemplatesFromFolder().filter { it.template != null }) // only picking valid templates.
+        }
+
+        spinnerAdapter = object :
             ArrayAdapter<TemplateDataModel>(
                 pluginContext,
                 R.layout.spinner_item_layout,
-                validTemplateItems
+                templateItems
             ) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val textView = super.getView(position, convertView, parent) as TextView
                 val item: TemplateDataModel? = getItem(position)
-                if (item?.template != null) {
-                    textView.text = item.template.name
+                textView.text = if (item?.template != null) {
+                     item.template.name
+                }else {
+                    ""
                 }
                 return textView
             }
@@ -664,13 +497,15 @@ class PluginDropDownReceiver(
             ): View {
                 val textView = super.getDropDownView(position, convertView, parent) as TextView
                 val item: TemplateDataModel? = getItem(position)
-                if (item?.template != null) {
-                    textView.text = item.template.name
+                textView.text = if (item?.template != null) {
+                    item.template.name
+                }else{
+                    ""
                 }
                 return textView
             }
         }
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerAdapter?.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = spinnerAdapter
         spinner.setSelection(0)
         spinner.onItemSelectedListener = object : SimpleItemSelectedListener() {
@@ -686,18 +521,21 @@ class PluginDropDownReceiver(
         spinner.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    Log.d(TAG, "extraTemplates : ACTION_DOWN clicked")
                     val extraTemplates = getTemplatesFromFolder()
-                    if (extraTemplates.isEmpty()) { 
-                        pluginContext.createAndStoreFiles(getAllFilesFromAssets())
+                    if (extraTemplates.isEmpty()) {
+//                        pluginContext.createAndStoreFiles(getAllFilesFromAssets())
                         templateItems.clear()
-                        templateItems.addAll(getTemplatesFromFolder())
+                        spinnerAdapter?.notifyDataSetChanged()
+//                        templateItems.addAll(getTemplatesFromFolder())
                     } else {
                         if (extraTemplates.size != templateItems.size) {
                             Log.d(TAG, "extraTemplates : ${extraTemplates.size}")
-                            spinner.adapter?.let { adapter ->
+                            spinnerAdapter.let { adapter ->
                                 if (adapter is ArrayAdapter<*>) {
                                     templateItems.clear()
                                     templateItems.addAll(extraTemplates)
+                                    Log.d(TAG, "extraTemplates templateItems : ${templateItems.size}")
                                     adapter.notifyDataSetChanged()
                                 }
                             }
@@ -711,11 +549,6 @@ class PluginDropDownReceiver(
             false
         }
     }
-
-    // A 1000x1000px image is 1MP and can be considered average for a 2024 phone
-    // You can load a 16MP image on a phone but this may crash an older model with an OOM error
-    // In the early days of CloudRF's Android app (2012), the resolution was limited by device mem at 0.09MP (300x300px)
-    var megapixels = 1.0;
 
     private fun initMegapixelSpinner(){
         val mpSpinner = settingsLayersView.findViewById<Spinner>(R.id.megapixelSpinner)
@@ -731,36 +564,18 @@ class PluginDropDownReceiver(
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 // Kotlin has a when statement which is painful.
                 if(position==0){
-                    megapixels=0.25
+                    calcManager.setMegaPixel(0.25)
                 }
                 if(position==1){
-                    megapixels=1.0
+                    calcManager.setMegaPixel(1.0)
                 }
                 if(position==2){
-                    megapixels=4.0
+                    calcManager.setMegaPixel(4.0)
                 }
             }
         }
     }
 
-    // Auto-scale the resolution to match the desired megapixel.
-    // The API does this automatically to enforce different plans but those MP limits are higher for laptops etc
-
-    private fun megapixelCalculator(radius: Double): Double {
-        // Calculate the resolution based upon the desired radius
-        var diameter_m = (radius * 2) * 1e3 //eg. 4000m
-        var res = diameter_m / sqrt(megapixels*1e6)  //eg. 4000 / 1000 = 4
-
-        if(res < 1){
-            res = 1.0
-        }
-
-        if(res > 180){
-            res = 180.0
-        }
-
-        return res
-    }
     private fun initSettings() {
         etLoginServerUrl = settingView.findViewById(R.id.etLoginServerUrl)
         etLoginServerUrl?.setText(Constant.sServerUrl)
@@ -865,15 +680,9 @@ class PluginDropDownReceiver(
     }
 
     private fun showHelpDialog() {
-        val builderSingle = AlertDialog.Builder(
-            mapView.context
-        )
-        builderSingle.setTitle(pluginContext.getString(R.string.help_title))
-        builderSingle.setMessage(pluginContext.getString(R.string.help_msg))
-        builderSingle.setNegativeButton(
-            pluginContext.getString(R.string.ok_txt)
-        ) { dialog, _ -> dialog.dismiss() }
-        builderSingle.show()
+        mapView.context.showAlert(pluginContext.getString(R.string.help_title),
+            pluginContext.getString(R.string.help_msg),
+            positiveText = pluginContext.getString(R.string.ok_txt))
     }
 
     private fun moveBackToMainLayout() {
@@ -928,256 +737,28 @@ class PluginDropDownReceiver(
         return isValid
     }
 
-    // used to adjust radius for polygons far away
-    fun haversine(fromLat: Double, fromLon: Double, toLat: Double, toLon: Double): Double {
-        val dLat = Math.toRadians(toLat - fromLat)
-        val dLon = Math.toRadians(toLon - fromLon)
-        val originLat = Math.toRadians(fromLat)
-        val destinationLat = Math.toRadians(toLat)
-
-        val a = Math.pow(Math.sin(dLat / 2), 2.0) + Math.pow(Math.sin(dLon / 2), 2.0) * Math.cos(originLat) * Math.cos(destinationLat)
-        val c = 2 * Math.asin(sqrt(a))
-        return 6372.8 * c
-    }
-
-
-    private fun calculate(item: MarkerDataModel?){
-        val showLinks = sharedPrefs?.get(Constant.PreferenceKey.sLinkLinesVisibility, true) ?: true
-        val showCoverage = sharedPrefs?.get(Constant.PreferenceKey.sKmzVisibility, true) ?: true
-        val multisiteMode = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
-
-        // Nothing selected!
-        if(!showLinks && !showCoverage) {
-            toast("You need links or coverage layers enabled")
-            return
-        }
-
-        // Links only but no-one to link to :(
-        if(showLinks && !showCoverage && markersList.size == 1) {
-            toast("You should enable the coverage layer")
-            return
-        }
-
-
-        if(markersList.size < 1) {
-            toast("You need to add a radio first")
-            return
-        }
-
-        // Dynamic resolution
-        val radius = item?.markerDetails!!.output.rad
-        item?.markerDetails?.output?.res = megapixelCalculator(radius)
-
-        // Force engine. 1=GPU, 2=CPU
-        if(multisiteMode){
-            item?.markerDetails?.engine = 1
-        }else{
-            item?.markerDetails?.engine = 2
-        }
-
-
-        if(showLinks && markersList.size > 1) {
-            updateLinkLines(item)
-        }else{
-            removeLinkLinesFromMap(item)
-        }
-
-        val polygon = CustomPolygonTool.getMaskingPolygon()
-
-        // Bounded area for focused calculations (CPU & GPU)
-        if(polygon != null) {
-            Log.d(TAG,polygon.toString());
-
-            val area = polygon.area
-            item?.markerDetails?.output?.res = min(10.0,ceil(sqrt(area) / 1000.0) + 1.0) // adjust resolution based upon polygon size
-            val txlat = item.markerDetails.transmitter?.lat
-            val txlon = item.markerDetails.transmitter?.lon
-
-            if(txlat != null && txlon != null) {
-                val polyLon = (GeoImageMasker.getBounds(polygon.points).east + GeoImageMasker.getBounds(polygon.points).west) / 2
-                val polyLat = (GeoImageMasker.getBounds(polygon.points).north + GeoImageMasker.getBounds(polygon.points).south) / 2
-                val haversineDistance = haversine(txlat, txlon, polyLat, polyLon)
-                if(haversineDistance > item.markerDetails.output.rad){
-                    item.markerDetails.output.rad = haversineDistance*1.1
-                }
-            }
-            val newbounds = Bounds(GeoImageMasker.getBounds(polygon.points).north,GeoImageMasker.getBounds(polygon.points).east,GeoImageMasker.getBounds(polygon.points).south,GeoImageMasker.getBounds(polygon.points).west)
-            item?.markerDetails?.output?.bounds = newbounds
-        }else{
-            item?.markerDetails?.output?.bounds = null
-        }
-
-        // A Multisite API call simulates many towers at once and uses a GPU
-        if (multisiteMode) {
-            item?.markerDetails?.let { template ->
-                 // in a multisite call, each transmitter can have its own location, frequency, altitude and antenna
-                val txlist: List<MultiSiteTransmitter> =
-                        markersList.mapNotNull { marker ->
-                            marker.markerDetails.transmitter?.run {
-                                MultiSiteTransmitter(
-                                        alt,
-                                        bwi,
-                                        frq,
-                                        lat,
-                                        lon,
-                                        powerUnit,
-                                        txw,
-                                        marker.markerDetails.antenna,
-                                        false // remote is false unless we're doing a satellite call far away
-                                )
-                            }
-                        }
-
-                val request = MultisiteRequest(
-                        template.site,
-                        template.network,
-                        txlist, // array of transmitters :)
-                        template.receiver,
-                        template.model,
-                        template.environment,
-                        template.output
-                )
-                if(showCoverage){
-                    showHidePlayBtn();
-                    sendMultiSiteDataToServer(request)
-                }
-            }
-        } else {
-            item?.let {
-                if(showCoverage) {
-                    showHidePlayBtn();
-                    sendSingleSiteDataToServer(item.markerDetails)
-                }
-            }
-        }
-    }
-
     private fun addCustomMarker() {
-        val uid = UUID.randomUUID().toString()
-        val location = mapView.centerPoint.get()
-        val marker = Marker(location, uid)
-        marker.setMetaBoolean("readiness", true)
-        marker.setMetaBoolean("archive", true)
-        marker.setMetaString("how", "h-g-i-g-o")
-        marker.setMetaBoolean("editable", true)
-        marker.setMetaBoolean("movable", true)
-        marker.setMetaBoolean("removable", true)
-        marker.setMetaString("entry", "user")
-        marker.setMetaBoolean("CLOUDRF", true)
-        marker.setMetaString("callsign", selectedMarkerType?.template?.name ?: "Test Marker")
-        marker.setMetaString(
-            "menu",
-            PluginMenuParser.getMenu(pluginContext, "menus/radio_menu.xml")
+        mapView.addCustomMarker(
+            context = pluginContext,
+            selectedMarkerType = selectedMarkerType,
+            mItemType = mItemType,
+            markersList = markersList,
+            sharedPrefs = sharedPrefs,
+            onItemInserted = {index->
+                markerAdapter?.notifyItemInserted(index)
+            },
+            onItemChanged ={index ->
+                markerAdapter?.notifyItemChanged(index)
+            },
+            onCalculate = { item -> calculate(item) },
+            onRemoveMarker = { item -> removeMarkerFromList(item) }
         )
-        marker.title = selectedMarkerType?.template?.name ?: "Test Marker"
-        marker.type = mItemType
-
-        val icon: Bitmap? = if(selectedMarkerType?.customIcon == null) pluginContext.getBitmap(R.drawable.marker_icon_svg) else selectedMarkerType?.customIcon?.base64StringToBitmap()?:pluginContext.getBitmap(R.drawable.marker_icon_svg)
-        val outputStream = ByteArrayOutputStream()
-        icon?.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-        val b = outputStream.toByteArray()
-        val encoded = "base64://" + Base64.encodeToString(b, Base64.NO_WRAP or Base64.URL_SAFE)
-        val markerIconBuilder = Icon.Builder().setImageUri(0, encoded)
-        marker.icon = markerIconBuilder.build()
-        mapView.rootGroup.addItem(marker)
-
-        mapView.mapEventDispatcher.addMapItemEventListener(
-            marker
-        ) { mapItem, mapEvent ->
-            if (mapItem.type == mItemType) {
-                when (mapEvent.type) {
-                    MapEvent.ITEM_ADDED -> {
-                        Log.d(TAG, "mapItem : Added ")
-                    }
-                    MapEvent.ITEM_REMOVED -> {
-                        Log.d(TAG, "mapItem : Removed ")
-                        val item: MarkerDataModel? = markersList.find { marker ->
-                            marker.markerID == mapItem.uid
-                        }
-                        removeLinkLinesFromMap(item)
-                        removeMarkerFromList(item)
-
-                    }
-                    MapEvent.ITEM_RELEASE -> {
-                        Log.d(TAG, "mapItem : ITEM_RELEASE ")
-                    }
-                    MapEvent.ITEM_DRAG_DROPPED -> {
-                        val latitude = marker.geoPointMetaData.get().latitude
-                        val longitude = marker.geoPointMetaData.get().longitude
-                        val item = markersList.find { it.markerID == mapItem.uid }
-                        item?.let {
-                            val index = markersList.indexOf(item)
-                            item.markerDetails.transmitter?.lat = latitude.roundValue()
-                            item.markerDetails.transmitter?.lon = longitude.roundValue()
-                            saveMarkerListToPref()
-                            markerAdapter?.notifyItemChanged(markersList.indexOf(item))
-                        }
-
-                        calculate(item)
-                    }
-                }
-            }
-        }
-
-        selectedMarkerType?.let {
-            val output = ByteArrayOutputStream()
-            val objectOutputStream = ObjectOutputStream(output)
-            objectOutputStream.writeObject(it)
-            objectOutputStream.flush()
-            objectOutputStream.close()
-            output.close()
-
-            val inputStream = ByteArrayInputStream(output.toByteArray())
-            val objectInputStream = ObjectInputStream(inputStream)
-            val copiedMarkerType = objectInputStream.readObject() as TemplateDataModel
-            objectInputStream.close()
-            inputStream.close()
-
-            val markerItem = MarkerDataModel(uid, copiedMarkerType)
-            markerItem.markerDetails.transmitter?.lat = location.latitude.roundValue()
-            markerItem.markerDetails.transmitter?.lon = location.longitude.roundValue()
-            markersList.add(markerItem)
-
-            saveMarkerListToPref()
-            markerAdapter?.notifyItemInserted(markersList.indexOf(markerItem))
-        }
     }
 
     private fun getLinksBetween(marker: MarkerDataModel?) {
        // Log.d(TAG, "getLinksBetween: "+marker.toString())
         marker?.let {
-            val points: List<Point> = markersList.mapNotNull { data ->
-                if (data.markerID != marker.markerID) {
-                    Point(
-                        data.markerID,
-                        data.markerDetails.transmitter?.alt,
-                        data.markerDetails.transmitter?.lat,
-                        data.markerDetails.transmitter?.lon
-                    )
-                } else {
-                    null
-                }
-            }
-
-            val thisRx = Receiver(
-                    marker.markerDetails.transmitter?.alt ?: 1.0,
-                    marker.markerDetails.transmitter?.lat ?: 0.0,
-                    marker.markerDetails.transmitter?.lon ?: 0.0,
-                   marker.markerDetails.antenna.txg,
-                   marker.markerDetails.receiver.rxs
-            )
-
-            val linkRequest = LinkRequest(it.markerDetails.antenna,
-                it.markerDetails.environment,
-                it.markerDetails.model,
-                it.markerDetails.network,
-                it.markerDetails.output,
-                points,
-                thisRx,
-                it.markerDetails.site,
-                it.markerDetails.transmitter
-            )
-            val linkDataModel = LinkDataModel(it.markerID, linkRequest, ArrayList(), null)
+            val linkDataModel = it.toLinkDataModel(markersList)
 
             if (markerLinkList.isEmpty()) {
                 markerLinkList.add(linkDataModel)
@@ -1191,30 +772,17 @@ class PluginDropDownReceiver(
                     override fun onSuccess(response: Any?) {
                         linkDataModel.linkResponse = response as LinkResponse
                         markerLinkList.add(linkDataModel)
-                        linkDataModel.linkRequest.transmitter?.let { transmitter ->
-                            linkDataModel.linkResponse?.let { linkResponse ->
-                                for (data in linkResponse.transmitters) {
-
-                                    // SNR or RSSI?
-                                    var powerLevel = data.signalToNoiseRatioDB
-
-                                    if(linkUnits == "dBm"){
-                                        powerLevel = data.signalPowerAtReceiverDBm
-                                    }
-
-                                    getLineColour(powerLevel)
-                                        ?.let { color ->
-                                            drawLine(
-                                                data.markerId,
-                                                linkDataModel.links,
-                                                GeoPoint(transmitter.lat, transmitter.lon,transmitter.alt),
-                                                GeoPoint((transmitter.lat + data.latitude)/2, (transmitter.lon+data.longitude)/2,data.antennaHeight),
-                                                color, powerLevel.toInt()
-                                            )
-                                        }
-                                }
-                            }
-                        }
+                        mapView.drawLinksForResponse(
+                            pluginContext,
+                            linkDataModel.linkRequest.transmitter,
+                            linkDataModel.linkResponse,
+                            settingsLinksController?.getLinkUnits?:"dB",
+                            lineGroup,
+                            linkDataModel.links,
+                            markerLinkList,
+                            ::getLineColour,
+                            ::handleLinkLineVisibility
+                        )
                     }
 
                     override fun onFailed(error: String?, responseCode: Int?) {
@@ -1227,104 +795,19 @@ class PluginDropDownReceiver(
         }
     }
 
-    private fun getLineColour(db:Double): Int?{
-        var settingsOptionsDB1 = settingsOptionsView.findViewById<EditText>(R.id.db1).text.toString().toDouble()
-        var settingsOptionsDB2 = settingsOptionsView.findViewById<EditText>(R.id.db2).text.toString().toDouble()
-        var settingsOptionsDB3 = settingsOptionsView.findViewById<EditText>(R.id.db3).text.toString().toDouble()
-        var settingsOptionsDB4 = settingsOptionsView.findViewById<EditText>(R.id.db4).text.toString().toDouble()
+    private fun getLineColour(db: Double): Int? = settingsLinksController?.getLineColour(db)
 
-        if(db > settingsOptionsDB1){
-            return optionsColour1.value
-        }
-        if(db > settingsOptionsDB2){
-            return optionsColour2.value
-        }
-        if(db > settingsOptionsDB3){
-            return optionsColour3.value
-        }
-        if(db > settingsOptionsDB4){
-            return optionsColour4.value
-        }
-        return null
-    }
-
-    private fun drawLine(
-        linkToId: String?,
-        links: ArrayList<Link>,
-        startPoint: GeoPoint,
-        endPoint: GeoPoint,
-        lineColor: Int,
-        snr: Int
-    ) {
-
-        val mapView = mapView
-        if(lineGroup == null) {
-            lineGroup = mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
-        }
-        val dslist: MutableList<DrawingShape> = ArrayList()
-        val dsUid = UUID.randomUUID().toString()
-        val ds = DrawingShape(mapView,dsUid)
-
-        ds.strokeColor = lineColor
-        ds.points = arrayOf(startPoint, endPoint)
-        ds.hideLabels(false)
-        ds.lineLabel = "${snr} ${linkUnits}" // is either dB or dBm
-        ds.remarks = "SOOTHSAYER" // used for id for removal later
-        dslist.add(ds)
-
-        val lineUid = UUID.randomUUID().toString()
-        val mp = MultiPolyline(mapView, lineGroup, dslist, lineUid)
-
-        lineGroup?.addItem(mp)
-        mp.movable = true
-        mp.title = "${snr} ${linkUnits}"
-        mp.lineLabel = "${snr} ${linkUnits}"
-        mp.hideLabels(false)
-        mp.toggleMetaData("labels_on", true)
-        links.add(Link(lineUid, startPoint, endPoint))
-        for (item in markerLinkList) {
-            if (item.markerId == linkToId) {
-                item.links.add(Link(lineUid, endPoint, startPoint))
-            }
-        }
-        handleLinkLineVisibility()
-    }
-
-    private fun updateLinkLines(markerItem: MarkerDataModel){
+    fun updateLinkLines(markerItem: MarkerDataModel?){
 
         // many to many now ;)
         markersList.forEach{
-            removeLinkLinesFromMap(it)
+            mapView.removeLinkLinesFromMap(pluginContext,it)
             getLinksBetween(it)
         }
 
     }
 
-    private fun getModifiedMarker(marker: TemplateDataModel): TemplateDataModel {
-        return TemplateDataModel(
-            marker.antenna,
-            marker.coordinates,
-            marker.engine,
-            marker.environment,
-            marker.feeder,
-            marker.model,
-            marker.network,
-            marker.output,
-            marker.receiver,
-            marker.reference,
-            marker.site,
-            marker.template,
-            marker.transmitter,
-            marker.version,
-            marker.bounds
-        )
-    }
-
-    private fun getModifiedReceiver(pReceiver: Receiver): Receiver {
-        return Receiver(pReceiver.alt, 0.0, 0.0, pReceiver.rxg, pReceiver.rxs)
-    }
-
-    private fun showHidePlayBtn(){
+    fun showHidePlayBtn(){
         if(templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility == View.VISIBLE){
             templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility = View.GONE;
             templateView.findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE;
@@ -1335,12 +818,12 @@ class PluginDropDownReceiver(
 
     }
     // The Area API simulates one transmitter only and can use a CPU or a GPU
-    private fun sendSingleSiteDataToServer(marker: TemplateDataModel?) {
+    fun sendSingleSiteDataToServer(marker: TemplateDataModel?) {
         if (pluginContext.isConnected()) {
             marker?.let {
-                val markerData = getModifiedMarker(marker)
+                val markerData = marker.getModifiedMarker()
 
-                markerData.receiver = getModifiedReceiver(marker.receiver)
+                markerData.receiver = (marker.receiver).getModifiedReceiver()
                 repository.sendSingleSiteMarkerData(
                     markerData,
                     object : PluginRepository.ApiCallBacks {
@@ -1369,14 +852,8 @@ class PluginDropDownReceiver(
                         }
                         // The API will return an error for bad inputs like a transmitter inside a hill instead of atop it
                         override fun onFailed(error: String?, responseCode: Int?) {
-                            showHidePlayBtn();
-                            val builderSingle = AlertDialog.Builder(mapView.context)
-                            builderSingle.setTitle("API error")
-                            builderSingle.setMessage(error)
-                            builderSingle.setNegativeButton(
-                                    pluginContext.getString(R.string.ok_txt)
-                            ) { dialog, _ -> dialog.dismiss() }
-                            builderSingle.show()
+                            showHidePlayBtn()
+                            mapView.context.showAlert("API error", error, positiveText = pluginContext.getString(R.string.ok_txt))
                         }
                     })
             }
@@ -1385,7 +862,7 @@ class PluginDropDownReceiver(
         }
     }
 
-    private fun sendMultiSiteDataToServer(markerData: MultisiteRequest?) {
+    fun sendMultiSiteDataToServer(markerData: MultisiteRequest?) {
         if (pluginContext.isConnected()) {
             markerData?.let {
                 repository.sendMultiSiteMarkerData(
@@ -1415,13 +892,7 @@ class PluginDropDownReceiver(
                             showHidePlayBtn();
                             stopTrackingLoop()
                             if (error != null) {
-                                val builderSingle = AlertDialog.Builder(mapView.context)
-                                builderSingle.setTitle("API error")
-                                builderSingle.setMessage(error)
-                                builderSingle.setNegativeButton(
-                                        pluginContext.getString(R.string.ok_txt)
-                                ) { dialog, _ -> dialog.dismiss() }
-                                builderSingle.show()
+                                mapView.context.showAlert("API error",error, positiveText = pluginContext.getString(R.string.ok_txt))
                             }
                         }
                     })
@@ -1434,40 +905,9 @@ class PluginDropDownReceiver(
     private fun removeMarkerFromList(item: MarkerDataModel?) {
         item?.let {
             markersList.remove(it)
-            saveMarkerListToPref()
+            sharedPrefs.saveMarkerListToPref(markersList)
             markerAdapter?.notifyDataSetChanged()
         }
-    }
-
-    private fun saveMarkerListToPref() {
-        sharedPrefs?.set(Constant.PreferenceKey.sMarkerList, Gson().toJson(markersList))
-    }
-
-    private fun removeMarkerFromMap(marker: MarkerDataModel?) {
-        marker?.let {
-            val item: MapItem? = mapView.rootGroup.items.find { mapItem ->
-                mapItem.uid == it.markerID
-            }
-            mapView.rootGroup.removeItem(item)
-        }
-    }
-
-     private fun removeLinkLinesFromMap(marker: MarkerDataModel?) {
-
-        val data = mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
-
-         for (it in data.items){
-             if(it.title.contains(" dB")){
-                 Log.d(TAG,"Removing "+it.toString())
-                 data.removeItem(it)
-             }
-
-         }
-    }
-
-    private fun getAllFilesFromAssets(): List<String>? {
-        val assetManager = pluginContext.assets
-        return assetManager.list("")?.filter { it.endsWith(Constant.TEMPLATE_FORMAT) }
     }
 
     private fun setDataFromPref() {
@@ -1483,7 +923,7 @@ class PluginDropDownReceiver(
     fun addSingleLayer(layerName: String, filePath: String, bounds: List<Double>) {
         val file = File(filePath)
         synchronized(this@PluginDropDownReceiver) {
-            if (singleSiteCloudRFLayer != null) { 
+            if (singleSiteCloudRFLayer != null) {
                 singleSiteCloudRFLayer = null
                 GLLayerFactory.unregister(GLCloudRFLayer.SPI)
             }
@@ -1530,9 +970,9 @@ class PluginDropDownReceiver(
                 singleSiteCloudRFLayer
             )
             singleSiteCloudRFLayer?.isVisible = true
-            
+
             handleLayerVisibility()
-            
+
             refreshView()
         }
     }
@@ -1540,7 +980,7 @@ class PluginDropDownReceiver(
     private fun addLayer(filePath: String, bounds: List<Double>) {
         val file = File(filePath)
         synchronized(this@PluginDropDownReceiver) {
-            if (cloudRFLayer != null) { 
+            if (cloudRFLayer != null) {
                 mapView.removeLayer(MapView.RenderStack.MAP_SURFACE_OVERLAYS, cloudRFLayer)
                 cloudRFLayer = null
                 GLLayerFactory.unregister(GLCloudRFLayer.SPI)
@@ -1715,28 +1155,11 @@ class PluginDropDownReceiver(
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action ?: return
         when (action) {
-            SHOW_PLUGIN -> {
-                showDropDown(
-                    templateView, HALF_WIDTH, FULL_HEIGHT, FULL_WIDTH,
-                    HALF_HEIGHT, false, this
-                )
-                try {
-                    val templateList: ArrayList<MarkerDataModel>? =
-                        Gson().fromJson(
-                            sharedPrefs?.get(Constant.PreferenceKey.sMarkerList, null),
-                            object : TypeToken<ArrayList<MarkerDataModel>>() {}.type
-                        )
-
-                    val commonList = templateList?.filter { marker ->
-                        mapView.rootGroup.items.any { items -> marker.markerID == items.uid }
-                    }
-                } catch (e: java.lang.Exception) {
-                    Log.e(TAG, "error", e)
-                }
-
-                setDataFromPref()
-                Constant.sServerUrl = etLoginServerUrl?.text.toString()
-                Constant.sAccessToken = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "") ?: ""
+            SHOW_PLUGIN -> { handleShowPlugin(templateView, sharedPrefs, saveData = {
+                    setDataFromPref()
+                    Constant.sServerUrl = etLoginServerUrl?.text.toString()
+                    Constant.sAccessToken = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "") ?: ""
+                })
             }
             GRG_TOGGLE_VISIBILITY, LAYER_VISIBILITY -> {
                 val l: CloudRFLayer? = mapOverlay.findLayer(
@@ -1753,7 +1176,6 @@ class PluginDropDownReceiver(
                 if (l != null) {
                     promptDelete(l)
                 }
-
             }
             RADIO_EDIT -> {
                 if(!this.isVisible) {
@@ -1793,72 +1215,29 @@ class PluginDropDownReceiver(
                 }
                 item?.let { marker ->
                     mapView.context.showAlert(pluginContext.getString(R.string.alert_title), "${pluginContext.getString(R.string.delete)} ${marker.markerDetails.template.name}",
-                        pluginContext.getString(R.string.yes), pluginContext.getString(R.string.cancel)) {
-                        removeMarker(marker)
+                        pluginContext.getString(R.string.yes), pluginContext.getString(R.string.cancel), null, positiveListener = {
+                            removeMarker(marker)
+                        }) {
                     }
                 }
             }
-            GRG_BRIGHTNESS -> {
-
-            }
-            GRG_COLOR -> {
-
-            }
-            GRG_TRANSPARENCY -> {
-
-            }
+            GRG_BRIGHTNESS -> {}
+            GRG_COLOR -> {}
+            GRG_TRANSPARENCY -> {}
         }
-
     }
 
     private fun promptDelete(layer: CloudRFLayer) {
-        val builder = AlertDialog.Builder(mapView.context)
-        builder.setTitle(pluginContext.getString(R.string.civ_delete_layer))
-        builder.setIcon(com.atakmap.app.R.drawable.ic_menu_delete)
-        builder.setMessage(
+        mapView.context.showAlert(pluginContext.getString(R.string.civ_delete_layer),
             "${pluginContext.getString(R.string.delete)} ${layer.description}${
-                pluginContext.getString(
-                    R.string.question_mark_symbol
-                )
-            }"
-        )
-        builder.setNegativeButton(pluginContext.getString(R.string.cancel), null)
-        builder.setPositiveButton(
-            pluginContext.getString(R.string.ok_txt)
-        ) { _, _ ->
-            delete(layer)
-            refreshView()
-        }
-        builder.show()
-    }
-
-    private fun delete(layer: CloudRFLayer?) {
-        if (layer?.fileUri == null) return
-
-        mapView.removeLayer(
-            MapView.RenderStack.MAP_SURFACE_OVERLAYS,
-            layer
-        )
-        mapOverlay.PluginListModel()
-
-        val pathsToDelete: ArrayList<String> = ArrayList()
-        pathsToDelete.add(layer.fileUri)
-
-        for (path in pathsToDelete) {
-            val intent = Intent(
-                ImportExportMapComponent.ACTION_DELETE_DATA
+            pluginContext.getString(
+                R.string.question_mark_symbol
             )
-            intent.putExtra(
-                ImportReceiver.EXTRA_CONTENT,
-                GRGMapComponent.IMPORTER_CONTENT_TYPE
-            )
-            intent.putExtra(
-                ImportReceiver.EXTRA_MIME_TYPE,
-                GRGMapComponent.IMPORTER_DEFAULT_MIME_TYPE
-            )
-            intent.putExtra(ImportReceiver.EXTRA_URI, path)
-            AtakBroadcast.getInstance().sendBroadcast(intent)
-        }
+        }",    pluginContext.getString(R.string.ok_txt), pluginContext.getString(R.string.cancel),
+            ContextCompat.getDrawable(pluginContext,R.drawable.ic_menu_delete), positiveListener = {
+                mapView.delete(mapOverlay, layer)
+                refreshView()
+            } )
     }
 
     private fun handleLinkLineVisibility() {
@@ -1867,7 +1246,7 @@ class PluginDropDownReceiver(
         mapGroup.visible = cbLinkLines.isChecked
         refreshView()
     }
-    
+
     private fun handleLayerVisibility() {
         if (mapOverlay.hideAllLayer(pluginContext.getString(R.string.soothsayer_layer), cbCoverageLayer.isChecked)) {
            refreshView()
@@ -1886,9 +1265,9 @@ class PluginDropDownReceiver(
             }
         }
 
-        removeLinkLinesFromMap(marker)
+        mapView.removeLinkLinesFromMap(pluginContext,marker)
         removeMarkerFromList(marker)
-        removeMarkerFromMap(marker)
+        mapView.removeMarkerFromMap(marker)
 
     }
 
@@ -1920,19 +1299,19 @@ class PluginDropDownReceiver(
         try {
             val coOptRecyclerView = coOptView.findViewById<RecyclerView>(R.id.co_opt_recycler_view)
             val adapter = coOptRecyclerView.adapter as? CoOptAdapter
-            
+
             if (adapter != null) {
                 // Find the position of the marker in the current displayed list
                 val currentMarkers = adapter.getCurrentMarkers()
                 val position = currentMarkers.indexOfFirst { it.uid == markerUid }
-                
+
                 if (position >= 0) {
                     // Use LinearLayoutManager to scroll to position at top
                     val layoutManager = coOptRecyclerView.layoutManager as? LinearLayoutManager
                     layoutManager?.scrollToPositionWithOffset(position, 0)
-                    
+
                     Log.d(TAG, "Scrolled to marker at position $position in co-opt list")
-                    
+
                     // Flash the item after a short delay to ensure it's visible
                     coOptRecyclerView.postDelayed({
                         adapter.flashItem(markerUid)
@@ -1989,7 +1368,7 @@ class PluginDropDownReceiver(
         btnPlayBtn.setOnClickListener {
             val item: MarkerDataModel? = markersList.findLast { true }
             if(item == null){
-                toast("Add a radio marker to the map first")
+                pluginContext.toast("Add a radio marker to the map first")
             }
 
             // Handle pause
@@ -1999,7 +1378,7 @@ class PluginDropDownReceiver(
                 calculate(item)
             }
         }
-        
+
         val currentDate = Date()
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         val editDate = spotBeamView.findViewById<EditText>(R.id.editDate)
@@ -2071,25 +1450,13 @@ class PluginDropDownReceiver(
                     val editTime = spotBeamView.findViewById<EditText>(R.id.editTime).text
                     val dateTime: String = (editDate.toString() + "T" + editTime.toString() + "Z")
                     SpotBeamCall.callAPI(satellite, latitude, longitude, this,
-                        sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "") ?: "", RetrofitClient.BASE_URL, dateTime)
+                        sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "") ?: "", RetrofitClient.BASE_URL, dateTime){ line->
+                        mapView.rootGroup.addItem(line)
+                    }
                 }
             }
         }
      }
-
-    fun toast(message: String) {
-        pluginContext.toast(message)
-    }
-
-    fun drawLine(p1: Array<Double>, p2: Array<Double>, label: Boolean, azi: Double, elev: Double) {
-        val line = Polyline(UUID.randomUUID().toString())
-        line.toggleMetaData("labels_on", label)
-        line.setPoints(arrayOf(GeoPoint(p1[0], p1[1]), GeoPoint(p2[0], p2[1])))
-        line.title = "AZIMUTH"
-        line.lineLabel = "AZ: " + Math.round(azi*10)/10 + "° EL: " + Math.round(elev*10)/10 + "°"
-        line.setLabelTextSize(72, Typeface.DEFAULT)
-        mapView.rootGroup.addItem(line)
-    }
 
     fun removeLines() {
         for (it in mapView.rootGroup.items)
@@ -2108,89 +1475,13 @@ class PluginDropDownReceiver(
         }
     }
 
-    private fun getAllAvailableMarkers(): List<MapItem> {
-        // Get all markers from contacts
-        val callsignMarkers = allContacts.mapNotNull {
-            mapView.rootGroup.deepFindItem("uid", it.getUID())
-        }.toMutableList()
-        Log.d(TAG, "Found ${callsignMarkers.size} map items from ${allContacts.size} contacts.")
-
-        // Add self marker
-        val self = mapView.selfMarker
-        if (!callsignMarkers.any { it.uid == self.uid }) {
-            callsignMarkers.add(self)
-        }
-
-        // Add all CoT markers from the map (excluding our own plugin markers)
-        fun collectAllMarkers(group: MapGroup): List<MapItem> {
-            val markers = mutableListOf<MapItem>()
-            for (item in group.items) {
-                if (item is Marker && !item.getMetaBoolean("CLOUDRF", false)) {
-                    // Skip markers that are already in our list and skip our plugin's markers
-                    if (!callsignMarkers.any { it.uid == item.uid } && item.height > 0) {
-                        markers.add(item)
-                    }else{
-                        Log.d(TAG, item.toString());
-                    }
-                }
-            }
-            // Recursively check child groups
-            for (childGroup in group.childGroups) {
-                markers.addAll(collectAllMarkers(childGroup))
-            }
-            return markers
-        }
-
-        val allCotMarkers = collectAllMarkers(mapView.rootGroup)
-        Log.d(TAG, "Added ${allCotMarkers.size} CoT markers from map.")
-        
-        // Debug: Log available timestamps for first few markers
-        allCotMarkers.take(3).forEach { marker ->
-            val cotTime = marker.getMetaLong("time", -1L)
-            val startTime = marker.getMetaLong("start", -1L)
-            val addedTime = marker.getMetaLong("addedTime", -1L)
-            val lastUpdateTime = marker.getMetaLong("lastUpdateTime", -1L)
-            Log.d(TAG, "Marker ${marker.title ?: marker.uid}: time=$cotTime, start=$startTime, addedTime=$addedTime, lastUpdate=$lastUpdateTime")
-        }
-
-        // Sort contacts first, then CoT markers
-        val contactMarkers = callsignMarkers.toList() // Current list contains contacts + self
-        val sortedContactMarkers = contactMarkers.sortedBy {
-            it.title?.takeIf { it.isNotBlank() }
-                ?: (it as? Marker)?.getMetaString("callsign", null)?.takeIf { it.isNotBlank() }
-                ?: it.getMetaString("name", null)?.takeIf { it.isNotBlank() }
-                ?: it.uid
-        }
-        
-        val sortedCotMarkers = allCotMarkers.sortedByDescending { marker ->
-            // Try multiple time sources to get the most accurate creation/update time
-            val cotTime = marker.getMetaLong("time", -1L)
-            val startTime = marker.getMetaLong("start", -1L) 
-            val addedTime = marker.getMetaLong("addedTime", -1L)
-            val lastUpdateTime = marker.getMetaLong("lastUpdateTime", -1L)
-            
-            // Use the most recent non-negative timestamp, or current time as fallback
-            listOf(cotTime, startTime, addedTime, lastUpdateTime, System.currentTimeMillis())
-                .filter { it > 0 }
-                .maxOrNull() ?: System.currentTimeMillis()
-        }
-
-        // Combine lists with contacts first, then CoT markers
-        val allMarkers = mutableListOf<MapItem>()
-        allMarkers.addAll(sortedContactMarkers)
-        allMarkers.addAll(sortedCotMarkers)
-        
-        Log.d(TAG, "Final list: ${sortedContactMarkers.size} contacts + ${sortedCotMarkers.size} CoT markers = ${allMarkers.size} total")
-        return allMarkers
-    }
-    
     private fun populateCoOptList() {
         val coOptRecyclerView = coOptView.findViewById<RecyclerView>(R.id.co_opt_recycler_view)
         coOptRecyclerView.layoutManager = LinearLayoutManager(pluginContext)
 
         // Get all available markers (this will be our master list)
-        val allAvailableMarkers = getAllAvailableMarkers()
-        
+        val allAvailableMarkers = mapView.getAllAvailableMarkers(allContacts)
+
         // Create adapter with initial full list
         val coOptAdapter = CoOptAdapter(pluginContext, allAvailableMarkers, templateItems, sharedPrefs) {
             createTemplateSpinnerAdapter()
@@ -2198,7 +1489,7 @@ class PluginDropDownReceiver(
         coOptRecyclerView.adapter = coOptAdapter
 
         // Sort markers to put checked ones at the top
-        sortMarkersWithCheckedFirst(coOptAdapter)
+        coOptAdapter.sortMarkersWithCheckedFirst()
 
         // Set up search functionality
         val searchEditText = coOptView.findViewById<EditText>(R.id.co_opt_search_edittext)
@@ -2263,7 +1554,7 @@ class PluginDropDownReceiver(
                     coOptedMarkers.remove(uid)
                 }
             }
-            
+
             markerAdapter?.notifyDataSetChanged()
 
             if (coOptedMarkers.isNotEmpty()) {
@@ -2274,25 +1565,6 @@ class PluginDropDownReceiver(
 
             showCoOptView(false)
         }
-    }
-
-    private fun sortMarkersWithCheckedFirst(adapter: CoOptAdapter) {
-        val currentMarkers = adapter.getCurrentMarkers()
-
-        // Sort markers: checked/enabled first, then by original order
-        val sortedMarkers = currentMarkers.sortedWith(compareBy<MapItem> { mapItem ->
-            // Get the checkbox state for this marker
-            val config = adapter.coOptConfigurations[mapItem.uid]
-            val isChecked = config?.isEnabled ?: false
-            
-            // Return 0 for checked (top), 1 for unchecked (bottom)
-            if (isChecked) 0 else 1
-        }.thenBy { mapItem ->
-            // Secondary sort: maintain original order within each group
-            currentMarkers.indexOf(mapItem)
-        })
-        
-        adapter.updateMarkers(sortedMarkers)
     }
 
     private fun createTemplateSpinnerAdapter(): ArrayAdapter<TemplateDataModel> {
@@ -2331,8 +1603,11 @@ class PluginDropDownReceiver(
         Log.d(TAG, "startTrackingLoop()")
 
         stopTrackingLoop()
-        runCoOptUpdate()
-
+        mapView.runCoOptUpdate(markersList, sharedPrefs,coOptedMarkers, updateAdapter = { index->
+            markerAdapter?.notifyItemChanged(index)
+        }, calculate = { lastUpdatedMarker->
+            calculate(lastUpdatedMarker)
+        })
         var timeEnabled = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshEnabled, true) ?: true
         var distanceEnabled = sharedPrefs?.get(Constant.PreferenceKey.sCoOptDistanceRefreshEnabled, false) ?: false
 
@@ -2345,7 +1620,7 @@ class PluginDropDownReceiver(
             for ((uid, _) in coOptedMarkers) {
                 val currentMarker = mapView.rootGroup.deepFindItem("uid", uid) as? PointMapItem
                 if (currentMarker != null) {
-                    lastKnownLocations[uid] = GeoPoint(currentMarker.point.latitude, currentMarker.point.longitude)
+                    calcManager.setLastKnownLocation(uid,currentMarker.point.latitude, currentMarker.point.longitude)
                     Log.d(TAG, "Initialized tracking for marker $uid at position: ${currentMarker.point.latitude}, ${currentMarker.point.longitude}")
                 }
             }
@@ -2370,7 +1645,11 @@ class PluginDropDownReceiver(
                     nextUpdateTextView.visibility = View.VISIBLE
                     nextUpdateTextView.text = "Refresh in ${countdown}s"
                     if (countdown <= 0) {
-                        runCoOptUpdate()
+                        mapView.runCoOptUpdate(markersList, sharedPrefs,coOptedMarkers, updateAdapter = { index->
+                            markerAdapter?.notifyItemChanged(index)
+                        }, calculate = { lastUpdatedMarker->
+                            calculate(lastUpdatedMarker)
+                        })
                         countdown = refreshIntervalSeconds
                         periodicUpdateJustHappened = true
                     } else {
@@ -2381,7 +1660,9 @@ class PluginDropDownReceiver(
                 }
 
                 if (distanceEnabled && !periodicUpdateJustHappened) {
-                    checkDistanceAndRecalculate()
+                    calcManager.checkDistanceAndRecalculate(coOptedMarkers,templateView, updateAdapter = { index->
+                        markerAdapter?.notifyItemChanged(index)
+                    })
                 }
 
                 // 1 second count
@@ -2389,113 +1670,6 @@ class PluginDropDownReceiver(
             }
         }
         trackingHandler.post(trackingRunnable as Runnable)
-    }
-
-    private fun runCoOptUpdate() {
-        Constant.sAccessToken = sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "") ?: ""
-        var lastUpdatedMarker: MarkerDataModel? = null
-
-        for ((uid, _) in coOptedMarkers) {
-            val markerInList = markersList.find { it.coopted_uid == uid }
-            val currentMarker = mapView.rootGroup.deepFindItem("uid", uid) as? PointMapItem
-
-            if (markerInList != null && currentMarker != null) {
-                markerInList.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5
-                markerInList.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5
-
-                val altitude = Math.round(currentMarker.point.altitude)
-                val DTM_FILTER = ElevationManager.QueryParameters()
-                DTM_FILTER.elevationModel = ElevationData.MODEL_TERRAIN
-                val terrain = ElevationManager.getElevation(currentMarker.point.latitude,currentMarker.point.longitude,DTM_FILTER)
-
-                Log.d(TAG, "runCoOptUpdate() AGL= "+terrain.toString())
-
-                // If Height AGL is > 120m / 400ft, this is probably flying so we switch units to meters AMSL and use GPS altitude
-                if(altitude-terrain > 120.0){
-                    markerInList.markerDetails.transmitter?.alt = altitude.toDouble()
-                    markerInList.markerDetails.receiver.alt = terrain+1
-                    markerInList.markerDetails.output.units = "m_amsl"
-                }else{
-                    markerInList.markerDetails.output.units = "m"
-                }
-
-                // NOTE: If an aircraft causes a switch to AMSL, all other markers will be AMSL
-                // Users can override altitude by clicking the marker to open the edit form.
-
-                val index = markersList.indexOf(markerInList)
-                if (index != -1) {
-                    markerAdapter?.notifyItemChanged(index)
-                    lastUpdatedMarker = markerInList
-                }
-            }
-
-        }
-        
-        if (lastUpdatedMarker != null) {
-            calculate(lastUpdatedMarker)
-        }
-    }
-
-    private fun checkDistanceAndRecalculate() {
-        var needsRecalculation = false
-        var lastUpdatedMarkerForRecalc: MarkerDataModel? = null
-        val refreshDistance = sharedPrefs?.get(Constant.PreferenceKey.sCoOptDistanceRefreshThreshold, 100.0) ?: 100.0
-
-        for ((uid, settings) in coOptedMarkers) {
-            val currentMarker = mapView.rootGroup.deepFindItem("uid", uid) as? PointMapItem ?: continue
-            val lastLocation = lastKnownLocations[uid]
-
-            if (lastLocation == null) {
-                // This should not happen if we initialized properly, but just in case
-                lastKnownLocations[uid] = GeoPoint(currentMarker.point.latitude, currentMarker.point.longitude)
-                Log.d(TAG, "Late initialization of tracking for marker $uid")
-            } else {
-                val distanceMoved = lastLocation.distanceTo(currentMarker.point)
-
-                
-                if (distanceMoved >= refreshDistance) {
-                    Log.d(TAG, "Marker $uid moved ${distanceMoved}m (threshold: ${refreshDistance}m)")
-                    val markerInList = markersList.find { it.coopted_uid == uid }
-                    if (markerInList != null) {
-                        markerInList.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5;
-                        markerInList.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5;
-
-                        val altitude = Math.round(currentMarker.point.altitude)
-                        val DTM_FILTER = ElevationManager.QueryParameters()
-                        DTM_FILTER.elevationModel = ElevationData.MODEL_TERRAIN
-                        val terrain = ElevationManager.getElevation(currentMarker.point.latitude,currentMarker.point.longitude,DTM_FILTER)
-
-                        Log.d(TAG, "checkDistanceAndRecalculate() AGL= "+terrain.toString())
-
-                        // If Height AGL is > 120m / 400ft, this is probably flying so we switch units to meters AMSL and use GPS altitude
-                        if(altitude-terrain > 120.0){
-                            markerInList.markerDetails.transmitter?.alt = altitude.toDouble()
-                            markerInList.markerDetails.receiver.alt = terrain+1
-                            markerInList.markerDetails.output.units = "m_amsl"
-                        }else{
-                            markerInList.markerDetails.output.units = "m"
-                        }
-
-                        // NOTE: If an aircraft causes a switch to AMSL, all other markers will be AMSL
-                        // Users can override altitude by clicking the marker to open the edit form.
-
-                        val index = markersList.indexOf(markerInList)
-                        if (index != -1) {
-                            markerAdapter?.notifyItemChanged(index)
-                        }
-                        needsRecalculation = true
-                        lastUpdatedMarkerForRecalc = markerInList
-                        Log.d(TAG, "Marker $uid triggered distance recalculation (moved ${distanceMoved}m)")
-                    }
-                    // Update the last known location to the current position
-                    lastKnownLocations[uid] = GeoPoint(currentMarker.point.latitude, currentMarker.point.longitude)
-                }
-            }
-        }
-
-        if (needsRecalculation && templateView.findViewById<ProgressBar>(R.id.progressBar).visibility == View.GONE) {
-            calculate(lastUpdatedMarkerForRecalc)
-        }
     }
 
     private fun stopTrackingLoop() {
@@ -2509,4 +1683,7 @@ class PluginDropDownReceiver(
         templateView.findViewById<ImageButton>(R.id.btnPlayBtn).setImageResource(android.R.drawable.ic_media_play)
     }
 
+    private fun calculate(item: MarkerDataModel?) {
+        calcManager.calculate(item)
+    }
 }

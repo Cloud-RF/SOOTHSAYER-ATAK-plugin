@@ -376,6 +376,7 @@ class PluginDropDownReceiver(
 
     private fun initTemplateMenuController(){
         templateMenuController = TemplateMenuController(
+            mapView,
             pluginContext,
             settingView,
             templatesMenuView,
@@ -607,6 +608,7 @@ class PluginDropDownReceiver(
         }
 
         etPassword = loginView.findViewById(R.id.etPassword)
+        etPassword?.setText(sharedPrefs?.get(Constant.PreferenceKey.etPassword, ""))
         val passwordToggleIcon: ImageView = loginView.findViewById(R.id.ivPasswordToggle)
         passwordToggleIcon.setOnClickListener {
             etPassword?.let {
@@ -1045,7 +1047,7 @@ class PluginDropDownReceiver(
                                             Constant.PreferenceKey.etUsername,
                                             etUsername?.text.toString()
                                     )
-
+                                    sharedPrefs?.set(Constant.PreferenceKey.etPassword, etPassword?.text.toString())
                                     setLoginViewVisibility(isMoveBack = false, isAfterLogin = true)
                                     Constant.sServerUrl = etServerUrl?.text.toString()
                                     downloadTemplatesFromApi()

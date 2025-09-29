@@ -15,19 +15,26 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.atakmap.android.maps.MapView
 import com.atakmap.android.preference.AtakPreferences
 import com.atakmap.android.soothsayer.TemplateRecyclerViewAdapter.Companion.MAX_ITEMS
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.soothsayer.util.createAndStoreDownloadedFile
+import com.atakmap.android.soothsayer.util.findFileInFolder
 import com.atakmap.android.soothsayer.util.getBitmap
+import com.atakmap.android.soothsayer.util.jsonFile
 import com.atakmap.android.soothsayer.util.saveSettingTemplateListToPref
+import com.atakmap.android.soothsayer.util.showAlert
 import com.atakmap.android.soothsayer.util.toDataUri
 import com.atakmap.android.soothsayer.util.toast
+import com.atakmap.android.soothsayer.util.zipTemplates
+import java.io.File
 import java.lang.ref.WeakReference
 
 
 class TemplateMenuController(
+    mapView: MapView,
     pluginContext: Context,
     settingView: View,
     templatesMenuView: View,
@@ -39,9 +46,10 @@ class TemplateMenuController(
     private val templateItems: MutableList<TemplateDataModel>,
     private val settingTemplateList: MutableList<MutableTuple<TemplateDataModel, Boolean, String?>>,
     private val sharedPrefs: AtakPreferences?,
-    private val onDeleteTemplate:()->Unit
+    private val onDeleteTemplate: () -> Unit
 ) {
 
+    private val mapViewRef = WeakReference(mapView)
     private val contextRef = WeakReference(pluginContext)
     private val settingViewRef = WeakReference(settingView)
     private val templatesMenuViewRef = WeakReference(templatesMenuView)
@@ -50,6 +58,7 @@ class TemplateMenuController(
     private val cbSelectAllTemplatesRef = WeakReference(cbSelectAllTemplates)
     private val templateRecyclerViewRef = WeakReference(templateRecyclerView)
 
+    private fun mapView(): MapView? = mapViewRef.get()
     private fun context(): Context? = contextRef.get()
     private fun settingsView(): View? = settingViewRef.get()
     private fun templatesMenuView(): View? = templatesMenuViewRef.get()
@@ -64,6 +73,7 @@ class TemplateMenuController(
         preImportTemplates.clear()
         preImportTemplates.addAll(templates)
     }
+
     // fields you already have
     private var pickingFileForTemplate = false
 
@@ -93,19 +103,21 @@ class TemplateMenuController(
         }
 
         // Pick file button
-        newTemplateMenuView()?.findViewById<Button>(R.id.btnNewTemplatePickFile)?.setOnClickListener {
-            pickingFileForTemplate = true
-            val intent = Intent(context(), FilePickerActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        newTemplateMenuView()?.findViewById<Button>(R.id.btnNewTemplatePickFile)
+            ?.setOnClickListener {
+                pickingFileForTemplate = true
+                val intent = Intent(context(), FilePickerActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context()?.startActivity(intent)
             }
-            context()?.startActivity(intent)
-        }
 
         // Pick icon button
-        newTemplateMenuView()?.findViewById<Button>(R.id.btnNewTemplatePickIcon)?.setOnClickListener {
-            newTemplateMenuView()?.visibility = View.GONE
-            pickIconMenuView()?.visibility = View.VISIBLE
-        }
+        newTemplateMenuView()?.findViewById<Button>(R.id.btnNewTemplatePickIcon)
+            ?.setOnClickListener {
+                newTemplateMenuView()?.visibility = View.GONE
+                pickIconMenuView()?.visibility = View.VISIBLE
+            }
 
         // Cancel new template
         newTemplateMenuView()?.findViewById<Button>(R.id.btnCancelNewTemplate)?.setOnClickListener {
@@ -113,9 +125,10 @@ class TemplateMenuController(
         }
 
         // Import new template
-        newTemplateMenuView()?.findViewById<Button>(R.id.btnConfirmNewTemplate)?.setOnClickListener {
-            handleImportTemplate()
-        }
+        newTemplateMenuView()?.findViewById<Button>(R.id.btnConfirmNewTemplate)
+            ?.setOnClickListener {
+                handleImportTemplate()
+            }
 
         // Select all templates
         cbSelectAllTemplates()?.setOnCheckedChangeListener { _, isChecked ->
@@ -123,18 +136,20 @@ class TemplateMenuController(
         }
 
         // Delete templates
-        templatesMenuView()?.findViewById<ImageButton>(R.id.btnDeleteTemplates)?.setOnClickListener {
-            onDeleteTemplate()
-            templateAdapter?.selectAll(false)
-            cbSelectAllTemplates()?.isChecked = false
-            setEmptySettingView(templateAdapter?.itemCount == 0)
-            sharedPrefs.saveSettingTemplateListToPref(settingTemplateList)
-        }
+        templatesMenuView()?.findViewById<ImageButton>(R.id.btnDeleteTemplates)
+            ?.setOnClickListener {
+                onDeleteTemplate()
+                templateAdapter?.selectAll(false)
+                cbSelectAllTemplates()?.isChecked = false
+                setEmptySettingView(templateAdapter?.itemCount == 0)
+                sharedPrefs.saveSettingTemplateListToPref(settingTemplateList)
+            }
 
         // Back from new template view
-        newTemplateMenuView()?.findViewById<ImageView>(R.id.newTemplateBackBtn)?.setOnClickListener {
-            setNewTemplateViews("", null)
-        }
+        newTemplateMenuView()?.findViewById<ImageView>(R.id.newTemplateBackBtn)
+            ?.setOnClickListener {
+                setNewTemplateViews("", null)
+            }
 
         // Setup icon RecyclerView
         val templateIconRecyclerView =
@@ -193,6 +208,11 @@ class TemplateMenuController(
             pickIconMenuView()?.visibility = View.GONE
             newTemplateMenuView()?.visibility = View.VISIBLE
         }
+
+        // share template button
+        templatesMenuView()?.findViewById<ImageButton>(R.id.btnShareTemplates)?.setOnClickListener {
+            shareFile()
+        }
     }
 
     private fun handleImportTemplate() {
@@ -214,7 +234,8 @@ class TemplateMenuController(
         }
 
         Thread {
-            val newItems: MutableList<MutableTuple<TemplateDataModel, Boolean, String?>> = mutableListOf()
+            val newItems: MutableList<MutableTuple<TemplateDataModel, Boolean, String?>> =
+                mutableListOf()
 
             templatesToImport.take(freeSlots).forEach { template ->
                 if (template.customIcon == null) template.customIcon = iconBase64
@@ -241,7 +262,8 @@ class TemplateMenuController(
 
     private fun setNewTemplateViews(fileName: String, bitmap: Bitmap?) {
         newTemplateMenuView()?.findViewById<TextView>(R.id.tvNewTemplateFileName)?.text = fileName
-        newTemplateMenuView()?.findViewById<ImageView>(R.id.ivNewTemplateIcon)?.setImageBitmap(bitmap)
+        newTemplateMenuView()?.findViewById<ImageView>(R.id.ivNewTemplateIcon)
+            ?.setImageBitmap(bitmap)
         preImportTemplates.clear()
         newTemplateMenuView()?.visibility = View.GONE
         templatesMenuView()?.visibility = View.VISIBLE
@@ -249,8 +271,8 @@ class TemplateMenuController(
 
     private fun setEmptySettingView(isEmpty: Boolean) {
         val emptyView = templatesMenuView()?.findViewById<TextView>(R.id.tvEmptyView)
-        templateRecyclerView()?.visibility = if(isEmpty) View.GONE else View.VISIBLE
-        emptyView?.visibility = if(isEmpty) View.VISIBLE else View.GONE
+        templateRecyclerView()?.visibility = if (isEmpty) View.GONE else View.VISIBLE
+        emptyView?.visibility = if (isEmpty) View.VISIBLE else View.GONE
     }
 
     private fun addSettingTemplate(template: TemplateDataModel, icon: String?) {
@@ -261,4 +283,33 @@ class TemplateMenuController(
         settingTemplateList.add(MutableTuple(template, false, icon))
         templateAdapter?.notifyItemInserted(settingTemplateList.size - 1)
     }
+
+    private fun shareFile() {
+        val toZipFromSelected: ArrayList<TemplateDataModel> = ArrayList()
+        settingTemplateList.forEach { item ->
+            if (item.second) {
+                toZipFromSelected.add(item.first)
+            }
+        }
+        if (toZipFromSelected.isEmpty) {
+            context()?.toast("Please select templates to share")
+            return
+        }
+        val file = if (toZipFromSelected.size == 1) {
+            val tempFile = "${toZipFromSelected.first().template.name}.json".findFileInFolder()
+            tempFile ?: toZipFromSelected.first().jsonFile()
+        } else {
+            toZipFromSelected.zipTemplates()
+        }
+        openShareDialog(file)
+    }
+
+    private fun openShareDialog(file: File) {
+        context()?.let { pluginContext ->
+            mapView()?.context?.showAlert(
+                pluginContext.getString(R.string.app_name),
+                pluginContext.getString(R.string.file_path_message, file.absolutePath),
+                pluginContext.getString(R.string.ok_txt))
+            }
+        }
 }

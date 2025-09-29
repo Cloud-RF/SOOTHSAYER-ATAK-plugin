@@ -8,10 +8,16 @@ import com.atakmap.android.soothsayer.models.request.TemplateDataModel
 import com.google.gson.Gson
 import com.google.gson.stream.JsonToken
 import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.FileWriter
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
 
 fun Context.getFileNameFromUri(uri: Uri): String {
     var res: String? = null
@@ -188,3 +194,51 @@ fun Context.getAllFilesFromAssets(): List<String>? {
     val assetManager = this.assets
     return assetManager.list("")?.filter { it.endsWith(Constant.TEMPLATE_FORMAT) }
 }
+
+fun TemplateDataModel.jsonFile(): File {
+    val folder = File(FOLDER_PATH, "shared_templates")
+    Log.e("ShareActivity", "folder: $folder")
+    if (!folder.exists()) {
+        folder.mkdirs()
+    }
+    val json = Gson().toJson(this)
+    val file = File(folder, "${this.template.name}.json")
+    FileWriter(file).use { writer ->
+        writer.write(json)
+    }
+    return file
+}
+
+fun ArrayList<TemplateDataModel>.zipTemplates(): File {
+    val folder = File(FOLDER_PATH, "shared_templates")
+    Log.d("ShareActivity", "folder: $folder")
+
+    // make sure the folder exists
+    if (!folder.exists()) {
+        folder.mkdirs()
+    }
+
+    val zipFile = File(folder, "templates_${System.currentTimeMillis()}.zip")
+    ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFile))).use { zos ->
+        val gson = Gson()
+        this.forEach { template ->
+            // create JSON from model and add to zip
+            val json = gson.toJson(template)
+            val entry = ZipEntry(template.template.name)
+            zos.putNextEntry(entry)
+            zos.write(json.toByteArray())
+            zos.closeEntry()
+        }
+    }
+    return zipFile
+}
+
+/**
+ * Search for a file by name inside a folder (non-recursive)
+ */
+fun String.findFileInFolder(): File? {
+    val folder = File(TEMPLATES_PATH)
+    if (!folder.exists() || !folder.isDirectory) return null
+    return folder.listFiles()?.firstOrNull { it.name.equals(this, ignoreCase = true) }
+}
+

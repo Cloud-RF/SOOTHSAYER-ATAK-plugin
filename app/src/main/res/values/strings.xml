@@ -127,4 +127,5 @@
     <string name="template_limit">"You can only add up to %1$s templates"</string>
     <string name="choose_file">"Please choose file and icon both to import."</string>
     <string name="all_txt">ALL</string>
+    <string name="file_path_message">"Your file has been saved in: \n \n%1$s\n \nYou can open this folder in a file manager to share the file."</string>
 </resources>

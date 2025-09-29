@@ -50,12 +50,12 @@
             android:background="@drawable/btn_gray"/>
 
         <ImageButton
-            android:id="@+id/btnExpectTemplates"
+            android:id="@+id/btnShareTemplates"
             android:layout_width="@dimen/dp_45"
             android:layout_height="@dimen/dp_45"
             android:layout_margin="@dimen/dp_2"
             android:padding="@dimen/dp_2"
-            android:src="@drawable/export_templates_btn"
+            android:src="@drawable/share_icon"
             android:background="@drawable/btn_gray"/>
 
         <ImageButton

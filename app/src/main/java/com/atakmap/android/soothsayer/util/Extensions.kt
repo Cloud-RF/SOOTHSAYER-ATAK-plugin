@@ -14,14 +14,11 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Environment
-import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.TextWatcher
 import android.text.style.AbsoluteSizeSpan
 import android.util.Base64
 import android.util.Log
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -408,23 +405,4 @@ fun megapixelCalculator(radius: Double, megapixels:Double): Double {
     }
 
     return res
-}
-
-fun EditText.enforceRange(optionsUnitSwitchActivated: Boolean) {
-    this.addTextChangedListener(object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        override fun afterTextChanged(e: Editable?) {
-            val str = e.toString()
-            if (str.isEmpty() || str == "-") return
-            var value = str.toInt()
-            val min = if (optionsUnitSwitchActivated) -140 else -20
-            val max = if (optionsUnitSwitchActivated) 0 else 90
-            value = if (value < min) min else if (value > max) max else return
-
-            removeTextChangedListener(this)
-            setText(value.toString())
-            addTextChangedListener(this)
-        }
-    })
 }

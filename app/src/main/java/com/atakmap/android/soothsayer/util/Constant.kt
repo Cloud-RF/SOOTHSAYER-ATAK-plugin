@@ -19,6 +19,7 @@ object Constant {
 
     object PreferenceKey{
         const val etUsername = ""
+        const val etPassword = "user password"
         const val sServerUrl = "Server url"
         const val sApiKey = "Api key"
         const val sMarkerList = "Marker list"

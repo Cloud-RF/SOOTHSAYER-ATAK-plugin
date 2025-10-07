@@ -91,3 +91,14 @@
 -dontwarn kotlin.collections.**
 -dontwarn android.content.res.XmlResourceParser
 -dontwarn androidx.**
+
+# Added in 2.3 for a color picker. Tedious doesn't come close
+-dontwarn groovy.**
+-dontwarn java.beans.**
+-dontwarn org.apache.commons.**
+-dontwarn org.codehaus.groovy.**
+-dontwarn org.gradle.api.**
+
+
+
+

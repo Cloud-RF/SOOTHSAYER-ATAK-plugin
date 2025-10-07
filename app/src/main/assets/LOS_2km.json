@@ -24,7 +24,7 @@
     "receiver": {
         "lat": 38.913,
         "lon": 1.45,
-        "alt": 1,
+        "alt": 3,
         "rxg": 2,
         "rxs": -90
     },
@@ -52,9 +52,11 @@
         "rel": 50
     },
     "environment": {
-        "clm": 0,
-        "cll": 0,
-        "clt": "Temperate.clt"
+        "elevation": 2,
+        "landcover": 1,
+        "buildings": 1,
+        "obstacles": 0,
+        "clt": "FOREST.clt"
     },
     "output": {
         "units": "m",
@@ -62,7 +64,7 @@
         "out": 2,
         "ber": 1,
         "mod": 0,
-        "nf": -124,
+        "nf": -100,
         "res": 5,
         "rad": 2
     }

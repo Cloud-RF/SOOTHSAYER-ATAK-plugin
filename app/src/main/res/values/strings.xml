@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER v1.4.1</string>
+    <string name="help_title">SOOTHSAYER v2.3</string>
     <!-- description -->
     <string name="app_desc">Interface to the CloudRF/SOOTHSAYER API</string>
     <string name="example_layer_description">This is an example layer.</string>
@@ -20,13 +20,13 @@
     <string name="option_a">Option TBC</string>
     <string name="api_key">API key</string>
     <string name="server">Server address</string>
-    <string name="marker_details">%1$s \nLocation: %2$s, %3$s</string>
-    <string name="location_details">Location: %1$s, %2$s</string>
+    <string name="location_details">Loc: %1$s, %2$s, %3$sm (%4$sW)</string>
+    <string name="location_details_amsl">Loc: %1$s, %2$s, %3$sm AMSL (%4$sW)</string>
     <string name="success_msg">Loading overlay...</string>
     <string name="loading_msg">Calculating coverage...</string>
     <string name="loading_link_msg">Finding Links…</string>
     <string name="error_msg">Something went wrong</string>
-    <string name="internet_error">Please check your internet connection</string>
+    <string name="internet_error">Network not found. Connect to a network</string>
     <string name="unauthorized_error">API key is invalid. Do you have an account? https://cloudrf.com/plans</string>
     <string name="host_not_resolved">Unable to resolve host</string>
     <string name="invalid_url_error">Please add a valid server url.</string>
@@ -35,21 +35,26 @@
     <string name="internal_server_error">Calc failed likely due to size. Check FAQ at https://cloudrf.com/atak</string>
     <string name="marker_error">Please login to the server first.</string>
     <string name="empty_api_key">Please enter your API key.</string>
-    <string name="api_mode">Coverage layer</string>
-    <string name="single">Single</string>
+    <string name="api_mode">Mode</string>
+    <string name="single">Single (CPU)</string>
     <string name="multiple">Multisite (GPU)</string>
     <string name="help">Help</string>
     <string name="ok_txt">OK</string>
-    <string name="help_msg">This plugin generates radio coverage and/or links for user defined radio systems.
+    <string name="help_msg">This plugin simulates radio coverage for any radio system or platform.
         \nIt requires a server with an account to function.
-        \nYou can use https://api.cloudrf.com or a private SOOTHSAYER server for a LAN eg. https://192.168..
-        \n\nTo create an account, visit cloudrf.com and order a plan to get you API key which you need to copy-paste into the settings.
-        \n\nTo use: Click the add button to add a radio to the map then drag it to calculate coverage. You can test a single marker/radio or many at once using multisite mode (GPU required).
-        \n\nRadio templates are downloaded from the API or can be added manually as .json files to the SD card atak/SOOTHSAYER folder.\nDocs, videos and templates are available at https://cloudrf.com/atak
+        \nYou can use the public API at https://api.cloudrf.com or a private server (SOOTHSAYER > 1.9) with an IP like https://192.168.0.123
+        \n\nTo use: Choose a template from the list then click the marker button to add a radio to the map. From there, either drag it or click the play button to calculate coverage. You can test a single radio or many with multisite mode (GPU required).
+        \n\nLinks:\nTo model SNR links, check the links box in the settings and add multiple radios. Drag the markers to move them around or click the play button. Colours and units are user defined within the links settings.
+        \n\nCoverage:\nTo model a heatmap of RF coverage, check the coverage box in the settings and add a radio. Drag the marker to model coverage or click the play button. Colours are set in the template.
+        \n\nBounds box:\nTo focus output on a user defined area, click the polygon button and draw a shape. Any coverage calculations will only test the polygon.
+        \n\nCo-opt feature:\nTo model live data taken from the map in ATAK, click the deputy badge and then assign templates to the callsigns in the list. Only data with altitude will be shown. Click start to automatically model the data after an interval or when it moves.
+        \n\nSatellite coverage:\nTo test satellite coverage, click the satellite button and search for a satellite by name. Select a time/day and then drag the satellite marker to trigger a satellite calculation.
+        \n\nRadio templates are downloaded automatically from your account or can be added as .json files to the SD card atak/SOOTHSAYER/templates folder.\nDocs, videos and templates are available at https://cloudrf.com/atak
+        \n\nFor more information visit https://cloudrf.com/documentation
         \n\nMAKE THIS BETTER: Report bugs and request features at support@cloudrf.com</string>
     <string name="soothsayer_layer">SOOTHSAYER Layer</string>
     <string name="layer">%1$s Layer</string>
-    <string name="multisite_layer">Multisite Layer</string>
+    <string name="coverage_layer">RF coverage layer</string>
 
     <!--Prompt Dialog strings-->
     <string name="civ_delete_layer">Delete layer</string>
@@ -73,16 +78,16 @@
     <!--below is the name of group for drawing link lines on map-->
     <string name="drawing_objects">Drawing Objects</string>
 
-    <string name="kmzlayer">Show coverage</string>
-    <string name="link_lines">Show links</string>
+    <string name="kmzlayer">Coverage</string>
+    <string name="link_lines">Links</string>
 
     <string name="radio_settings">Edit (%1$s)</string>
-    <string name="radio_height">Height (alt)</string>
-    <string name="radio_power">Power (txw)</string>
-    <string name="radio_frequency">Frequency (frq)</string>
-    <string name="radio_bandwidth">Bandwidth (bwi)</string>
-    <string name="radio_noise">Noise Floor (nf)</string>
-    <string name="antenna_azimuth">Antenna Azimuth (azi)</string>
+    <string name="radio_height">Height (m)</string>
+    <string name="radio_power">Power (w)</string>
+    <string name="radio_frequency">Frequency (MHz)</string>
+    <string name="radio_bandwidth">Bandwidth (MHz)</string>
+    <string name="radio_noise">Noise Floor (dBm)</string>
+    <string name="antenna_azimuth">Azimuth (deg)</string>
     <string name="radio_recalculate">Recalculate</string>
     <string name="alert_title">Are you sure?</string>
     <string name="yes">Yes</string>
@@ -97,4 +102,14 @@
     <string name="empty_password">Please enter password.</string>
     <string name="template_downloading">Synchronising templates..</string>
     <string name="login_loading">Attempting login..</string>
+
+    <string name="settings_layers_button">Layers</string>
+    <string name="settings_coopt_button">Co-Opt</string>
+    <string name="settings_options_button">Options</string>
+    <string name="settings_links_button">Links</string>
+    <string name="settings_layers_title">Settings - Layers</string>
+    <string name="settings_coopt_title">Settings - Co-Opt</string>
+    <string name="settings_options_title">Settings - Links</string>
+    <string name="settings_options_colours_unit">dB</string>
+    <string name="colour_picker_title">Pick Colour</string>
 </resources>

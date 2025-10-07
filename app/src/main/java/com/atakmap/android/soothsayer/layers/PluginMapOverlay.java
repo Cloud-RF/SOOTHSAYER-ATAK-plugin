@@ -121,7 +121,7 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
         return null;
     }
 
-    public Boolean hideAllKmzLayer(String layerType, Boolean isVisible) {
+    public Boolean hideAllLayer(String layerType, Boolean isVisible) {
         Boolean isNeedToRefresh = false;
         for (CloudRFLayer l : getLayers()) {
             if (Objects.equals(l.getMetaShape().getType(), layerType)) {

@@ -19,7 +19,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.atakmap.android.soothsayer.PluginDropDownReceiver
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
-import com.atakmap.android.soothsayer.plugin.R
 import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.File
@@ -29,12 +28,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.round
 
+
 val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/atak/SOOTHSAYER"
 private val TEMPLATES_PATH = "$FOLDER_PATH/templates"
-val KMZ_FOLDER = "$FOLDER_PATH/KMZ"
-const val SOOTHSAYER = "SOOTHSAYER_"
+const val SOOTHSAYER = "SOOTHSAYER"
 const val PNG_IMAGE = ".png"
-const val KMZ_FILE = ".kmz"
 
 /**
  * Note - this will become a API offering in 4.5.1 and beyond.
@@ -62,6 +60,7 @@ fun Context.getBitmap(drawableId: Int): Bitmap? {
     }
 }
 
+// Creates ./templates then loads all .json files from assets
 fun Context.createAndStoreFiles(fileList: List<String>?) {
     val folder = File(TEMPLATES_PATH)
     if (!folder.exists()) {
@@ -165,25 +164,7 @@ fun Context.isConnected(): Boolean {
 }
 
 fun String.getFileName():String{
-   return "${SimpleDateFormat("ddHHmmSS", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
-}
-
-fun Context.getLineColor(signalValue:Double): Int?{
-    Log.d(PluginDropDownReceiver.TAG, "getLineColor : $signalValue")
-    val colorId = when{
-        signalValue >= 40.0 -> R.color.blue
-        signalValue >= 30.0 -> R.color.green
-        signalValue >= 20.0 -> R.color.yellow
-        signalValue >= 10.0 -> R.color.red
-        else -> null // no link!
-    }
-    return if(colorId == null){
-        null
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        this.resources.getColor(colorId, this.theme)
-    } else {
-        this.resources.getColor(colorId)
-    }
+   return "${SimpleDateFormat("HHmm", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
 }
 
 fun String.setSpannableText():SpannableStringBuilder{

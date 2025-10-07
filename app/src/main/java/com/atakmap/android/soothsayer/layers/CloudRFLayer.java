@@ -5,7 +5,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.atakmap.android.drawing.mapItems.DrawingShape;
 import com.atakmap.android.menu.PluginMenuParser;
+import com.atakmap.android.soothsayer.CustomPolygonTool;
+import com.atakmap.android.soothsayer.GeoImageMasker;
 import com.atakmap.android.soothsayer.interfaces.CloudRFLayerListener;
 import com.atakmap.android.soothsayer.plugin.R;
 import com.atakmap.android.maps.MetaShape;
@@ -42,19 +45,24 @@ public class CloudRFLayer extends AbstractLayer {
 
     public CloudRFLayer(Context plugin, final String name, final String description, final String uri, final List<Double> bounds, final CloudRFLayerListener listener) {
         super(name);
-
         this.description = description;
         this.fileUri = uri;
         this.cloudRFLayerListener = listener;
-
         this.upperLeft = GeoPoint.createMutable();
         this.upperRight = GeoPoint.createMutable();
         this.lowerRight = GeoPoint.createMutable();
         this.lowerLeft = GeoPoint.createMutable();
 
-        bitmap = BitmapFactory.decodeFile(uri);
+        DrawingShape polygon = CustomPolygonTool.getMaskingPolygon();
 
-//        north, east, south, west
+        if(polygon != null) {
+            GeoImageMasker.Bounds newbounds = GeoImageMasker.getBounds(polygon.getPoints());
+            bitmap = GeoImageMasker.cropImage(BitmapFactory.decodeFile(uri),newbounds,polygon);
+        }else{
+            bitmap = BitmapFactory.decodeFile(uri);
+        }
+
+        //    north, east, south, west
         if(bounds.size() == 4) {
             upperLeft.set(bounds.get(0), bounds.get(3));  // north, west
             upperRight.set(bounds.get(0), bounds.get(1)); // north,east

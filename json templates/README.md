@@ -148,7 +148,7 @@ data class Output(
     val ber: Int,
     val col: String,
     val mod: Int,
-    val nf: Int,
+    val nf: String,
     val `out`: Int,
     val rad: Double,
     val res: Double,

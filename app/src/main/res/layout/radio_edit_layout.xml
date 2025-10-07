@@ -64,7 +64,7 @@
                 android:layout_marginTop="4dp"
                 android:background="@drawable/et_background"
                 android:imeOptions="actionNext"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:labelFor="@id/etRadioHeight"
                 android:padding="8dp"
                 android:textColor="@color/darker_gray"
@@ -243,7 +243,7 @@
                 android:textColor="@color/darker_gray"
                 android:textCursorDrawable="@null"
                 android:textSize="@dimen/sp_14"
-                tools:text="-124" />
+                tools:text="-100" />
         </LinearLayout>
 
     </LinearLayout>
@@ -258,6 +258,6 @@
         android:layout_marginTop="@dimen/dp_8"
         android:paddingHorizontal="16dp"
         android:paddingVertical="8dp"
-        android:text="@string/radio_recalculate" />
+        android:text="Save" />
 
 </LinearLayout>

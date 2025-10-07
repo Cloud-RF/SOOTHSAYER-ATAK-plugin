@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.os.Looper;
 import android.widget.TextView;
 
+import com.atakmap.android.drawing.mapItems.DrawingShape;
 import com.atakmap.android.soothsayer.plugin.R;
 import com.atakmap.coremap.log.Log;
 
@@ -29,6 +30,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
 
+// WARNING: THIS MIGHT GET CANNED DUE TO STARLINK DUMBING DOWN SATCOM
+
 public class SpotBeamCall {
 
     public static void callAPI(Satellite satellite, double areaLat, double areaLon, PluginDropDownReceiver receiver, String apiKey, String API_URL, String dateTime) {
@@ -46,6 +49,15 @@ public class SpotBeamCall {
         double south = areaLat - dLat;
         double east = areaLon + dLon;
         double west = areaLon - dLon;
+
+        DrawingShape polygon = CustomPolygonTool.getMaskingPolygon();
+        if(polygon != null) {
+            north = GeoImageMasker.getBounds(polygon.getPoints()).getNorth();
+            east = GeoImageMasker.getBounds(polygon.getPoints()).getEast();
+            south = GeoImageMasker.getBounds(polygon.getPoints()).getSouth();
+            west = GeoImageMasker.getBounds(polygon.getPoints()).getWest();
+        }
+
 
         Log.d("spotbeam", "dLat: " + dLat + ", dLon: " + dLon);
         Log.d("spotbeam", "NSEW: \n" + north + ", \n" + south + ", \n" + east + ", \n" + west);
@@ -114,7 +126,6 @@ public class SpotBeamCall {
                     for (int i = 0; i < 4; i++)
                         bounds.add(boundsArray.get(i).getAsDouble());
 
-                    downloadKMZ(kmz, satName);
                     downloadPNG(png, satName, receiver, bounds);
 
                     double satLat = object.get("satellites").getAsJsonObject().get(satName).getAsJsonObject().get("lat").getAsDouble();
@@ -156,21 +167,6 @@ public class SpotBeamCall {
         thread.start();
     }
 
-    /*
-    Warning: Assumes storage path starts /sdcard/
-     */
-    private static void downloadKMZ(String urlString, String satName) throws IOException {
-        URL url = new URL(urlString);
-        BufferedInputStream bis = new BufferedInputStream(url.openStream());
-
-        FileOutputStream fis = new FileOutputStream("/sdcard/atak/SOOTHSAYER/KMZ/" + satName + ".kmz");
-        byte[] buffer = new byte[1024];
-        int count;
-        while ((count = bis.read(buffer, 0, 1024)) != -1)
-            fis.write(buffer, 0, count);
-        fis.close();
-        bis.close();
-    }
 
     private static void downloadPNG(String urlString, String satName, PluginDropDownReceiver receiver, List<Double> bounds) throws IOException {
         URL url = new URL(urlString);
@@ -183,7 +179,7 @@ public class SpotBeamCall {
         fis.close();
         bis.close();
 
-        receiver.addSingleKMZLayer("SPOTBEAM", "/sdcard/atak/SOOTHSAYER/KMZ/" + satName + ".png", bounds);
+        receiver.addSingleLayer("SPOTBEAM", "/sdcard/atak/SOOTHSAYER/KMZ/" + satName + ".png", bounds);
     }
 
     private static double[] endpointFromPointBearingDistance(double latitude, double longitude, double bearingDegrees, double distanceMeters) {
@@ -209,7 +205,7 @@ public class SpotBeamCall {
         try {
 
             SSLContext ctx;
-            ctx = SSLContext.getInstance("SSL");
+            ctx = SSLContext.getInstance("TLSv1.2");
 
             ctx.init(null, new X509TrustManager[]{new X509TrustManager(){
                 public void checkClientTrusted(X509Certificate[] chain, String authType) {}
@@ -220,7 +216,7 @@ public class SpotBeamCall {
             }}, new SecureRandom());
 
             HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
-            HttpsURLConnection.setDefaultHostnameVerifier((s, sslSession) -> true);
+            //HttpsURLConnection.setDefaultHostnameVerifier((s, sslSession) -> true);
 
             String responseString = "";
             URL url = new URL(API_URL + "/satellite/area");

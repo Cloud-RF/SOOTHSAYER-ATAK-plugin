@@ -10,7 +10,7 @@
         "bom_value": 0
     },
     "site": "Site",
-    "network": "sigma415",
+    "network": "tsm415",
     "engine": 2,
     "coordinates": 1,
     "transmitter": {
@@ -47,18 +47,17 @@
         "pol": "v"
     },
     "model": {
-        "pm": 11,
+        "pm": 10,
         "pe": 2,
-        "ked": 2,
-        "rel": 90,
-        "rcs": 1
+        "ked": 4,
+        "rel": 60
     },
     "environment": {
         "elevation": 2,
         "landcover": 1,
         "buildings": 1,
         "obstacles": 0,
-        "clt": "Minimal.clt"
+        "clt": "Temperate.clt"
     },
     "output": {
         "units": "m",
@@ -67,7 +66,7 @@
         "ber": 1,
         "mod": 0,
         "nf": -113,
-        "res": 4,
+        "res": 5,
         "rad": 3
     }
 }

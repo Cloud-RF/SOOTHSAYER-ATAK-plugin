@@ -2,7 +2,7 @@
     "version": "CloudRF-API-v3.8.4",
     "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
     "template": {
-        "name": "VHF160_5W_analogue_mobile",
+        "name": "VHF160_5W_mobile",
         "service": "CloudRF https://api.cloudrf.com",
         "created_at": "2023-06-19T14:28:39+00:00",
         "owner": 1,
@@ -26,7 +26,7 @@
         "lon": 1.45,
         "alt": 1,
         "rxg": 1,
-        "rxs": -100
+        "rxs": -95
     },
     "feeder": {
         "flt": 1,
@@ -37,23 +37,25 @@
         "mode": "template",
         "txg": 2.15,
         "txl": 0,
-        "ant": 39,
-        "azi": 145,
+        "ant": 1,
+        "azi": 0,
         "tlt": 0,
         "hbw": 1,
         "vbw": 1,
-        "fbr": 18,
+        "fbr": 0,
         "pol": "v"
     },
     "model": {
-        "pm": 11,
+        "pm": 10,
         "pe": 2,
-        "ked": 1,
-        "rel": 80
+        "ked": 4,
+        "rel": 60
     },
     "environment": {
-        "clm": 1,
-        "cll": 1,
+        "elevation": 2,
+        "landcover": 1,
+        "buildings": 1,
+        "obstacles": 0,
         "clt": "Temperate.clt"
     },
     "output": {
@@ -62,7 +64,7 @@
         "out": 2,
         "ber": 1,
         "mod": 0,
-        "nf": -120,
+        "nf": -100,
         "res": 10,
         "rad": 5
     }

@@ -36,87 +36,144 @@
         android:background="@android:color/white" />
 
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp">
+        android:layout_margin="2dp"
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tvOption"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_toStartOf="@id/svMode"
-            android:text="@string/api_mode"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/sp_14" />
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/layers_icon" />
 
-        <Switch
-            android:id="@+id/svMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:textOff="@string/single"
-            android:textOn="@string/multiple"
-            android:textStyle="bold"
-            android:textSize="@dimen/sp_14"
-            android:thumbTextPadding="4dp" />
-    </RelativeLayout>
+        <Button
+            android:id="@+id/btnOpenLayersSettings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="?android:attr/colorPrimary"
+            android:text="@string/settings_layers_button"
+            android:textColor="#FFFFFF" />
 
-    <RelativeLayout
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginVertical="@dimen/dp_8">
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:orientation="horizontal">
 
-        <CheckBox
-            android:id="@+id/cbKmzLayer"
-            android:text="@string/kmzlayer"
-            android:checked="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/link_icon" />
 
-        <CheckBox
-            android:id="@+id/cbLinkLines"
-            android:text="@string/link_lines"
-            android:checked="true"
-            android:layout_below="@id/cbKmzLayer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/btnOpenLinksSettings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="?android:attr/colorPrimary"
+            android:text="@string/settings_links_button"
+            android:textColor="#FFFFFF" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_sheriff_badge" />
+
+        <Button
+            android:id="@+id/btnOpenCooptSettings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="?android:attr/colorPrimary"
+            android:text="@string/settings_coopt_button"
+            android:textColor="#FFFFFF" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_margin="2dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="?android:attr/actionModeCopyDrawable" />
+
+        <Button
+            android:id="@+id/btnOpenTemplateManager"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="?android:attr/colorPrimary"
+            android:text="Templates"
+            android:textColor="@color/light_gray" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/tvHelp"
             style="@style/darkButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_alignParentBottom="true"
+            android:layout_margin="5dp"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
+            android:paddingBottom="3dp"
             android:src="@android:drawable/ic_dialog_info" />
 
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            />
 
         <ImageButton
-            android:id="@+id/btnSave"
+            android:id="@+id/btnSpotBeam"
             style="@style/darkButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerInParent="true"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:src="@android:drawable/stat_notify_sync" />
+            android:layout_margin="5dp"
+            android:background="@drawable/btn_gray"
+            android:paddingHorizontal="3dp"
+            android:paddingVertical="3dp"
+            android:src="@drawable/spotbeam_marker_icon" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            />
 
         <ImageButton
             android:id="@+id/btnSettingLogin"
             style="@style/darkButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_centerInParent="true"
+            android:layout_margin="5dp"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
+            android:paddingBottom="0dp"
             android:src="@drawable/account" />
-    </RelativeLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

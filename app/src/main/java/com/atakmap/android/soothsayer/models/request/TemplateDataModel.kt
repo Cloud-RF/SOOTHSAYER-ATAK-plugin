@@ -8,12 +8,12 @@ import java.io.Serializable
 data class TemplateDataModel(
     val antenna: Antenna,
     val coordinates: Int,
-    val engine: Int,
+    var engine: Int,
     val environment: Environment,
     val feeder: Feeder,
     val model: Model,
     val network: String,
-    val output: Output,
+    var output: Output,
     var `receiver`: Receiver,
     val reference: String,
     val site: String,
@@ -21,6 +21,7 @@ data class TemplateDataModel(
     var transmitter: Transmitter?,
     val version: String,
     @SerializedName("custom_icon")
+    var bounds: Bounds?,
     val customIcon: String?=null,
 ): Serializable
 
@@ -38,13 +39,11 @@ data class Antenna(
 ): Serializable
 
 data class Environment(
-    val cll: Int,
-    val clm: Int,
     val clt: String,
-    val buildings: Int?,
-    val elevation: Int?,
-    val landcover: Int?,
-    val obstacles: Int?
+    val buildings: Int,
+    val elevation: Int,
+    val landcover: Int,
+    val obstacles: Int
 ): Serializable
 
 data class Feeder(
@@ -57,19 +56,25 @@ data class Model(
     val ked: Int,
     val pe: Int,
     val pm: Int, // can be 1,2...or "auto"
-    val rel: Int,
-    val cli: Int?,
-    val ter: Int?
+    val rel: Int
 ): Serializable
 
 data class Output(
-    val col: String,
-    val mod: Int,
-    var nf: Int, // noise floor
-    val `out`: Int,
-    val rad: Double,
-    val res: Double,
-    val units: String
+        val col: String,
+        val mod: Int,
+        var nf: String, // noise floor. Can be -100 or database
+        val `out`: Int,
+        var rad: Double,
+        var res: Double,
+        var units: String, // m or m_amsl
+        var bounds: Bounds?
+): Serializable
+
+data class Bounds (
+        @SerializedName("north") var north : Double,
+        @SerializedName("east") var east : Double,
+        @SerializedName("south") var south : Double,
+        @SerializedName("west") var west : Double
 ): Serializable
 
 data class Receiver(

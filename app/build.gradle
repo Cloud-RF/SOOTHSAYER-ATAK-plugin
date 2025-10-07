@@ -9,7 +9,7 @@
 buildscript {
 
     ext.PLUGIN_VERSION = "2.3"
-    ext.ATAK_VERSION = "5.2.0"
+    ext.ATAK_VERSION = "5.5.0"
 
     def takdevVersion = '2.+'
 
@@ -106,46 +106,19 @@ android {
 
     signingConfigs {
         debug {
-            def kf = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyFile')
-            def kfp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyFilePassword')
-            def ka = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyAlias')
-            def kp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyPassword')
-
-            if (kf == null) {
-                kf = "${rootDir}/debug.keystore"
-                kfp = 'android'
-                ka = 'androiddebugkey'
-                kp = 'android'
-            }
- 
-            storeFile file(kf)
-            if (kfp != null) storePassword kfp
-            if (ka != null) keyAlias ka
-            if (kp != null) keyPassword kp
+            storeFile file("${buildDir}/android_keystore")
+            storePassword "tnttnt"
+            keyAlias "wintec_mapping"
+            keyPassword "tnttnt"
         }
         release {
-//            def kf = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takReleaseKeyFile')
-//            def kfp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takReleaseKeyFilePassword')
-//            def ka = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takReleaseKeyAlias')
-//            def kp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takReleaseKeyPassword')
-            def kf = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyFile')
-            def kfp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyFilePassword')
-            def ka = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyAlias')
-            def kp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyPassword')
-
-            if (kf == null) {
-                kf = "${rootDir}/debug.keystore"
-                kfp = 'android'
-                ka = 'androiddebugkey'
-                kp = 'android'
-            }
-
-            storeFile file(kf)
-            if (kfp != null) storePassword kfp
-            if (ka != null) keyAlias ka
-            if (kp != null) keyPassword kp
+            storeFile file("${buildDir}/android_keystore")
+            storePassword "tnttnt"
+            keyAlias "wintec_mapping"
+            keyPassword "tnttnt"
         }
     }
+
 
     buildTypes {
         debug {

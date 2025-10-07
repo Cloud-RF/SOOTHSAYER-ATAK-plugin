@@ -8,17 +8,17 @@
     <Button
         android:id="@+id/btnLoadTemplate"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:background="@drawable/btn_gray"
+        android:layout_height="40dp"
         android:layout_weight="1"
-        android:textColor="#FFF"/>
+        android:background="@color/light_gray"
+        android:textColor="@color/darker_gray" />
 
     <ImageView
         android:id="@+id/ivTemplateIcon"
-        android:layout_width="@dimen/dp_30"
-        android:layout_height="match_parent"
-        android:background="@drawable/btn_gray"
-        android:layout_marginStart="@dimen/dp_5"/>
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="@dimen/dp_5"
+        android:background="@color/light_gray" />
 
     <CheckBox
         android:id="@+id/cbSelectTemplate"

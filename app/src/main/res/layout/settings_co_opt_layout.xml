@@ -56,7 +56,7 @@
             android:id="@+id/cbCoOptTimeRefresh"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true" />
+            android:checked="false" />
 
         <EditText
             android:id="@+id/etCoOptTimeInterval"
@@ -68,7 +68,7 @@
             android:inputType="number"
             android:numeric="integer"
             android:padding="4dp"
-            android:text="20"
+            android:text="30"
             android:textColor="@color/darker_gray"
             android:textSize="16sp" />
 
@@ -95,7 +95,8 @@
         <CheckBox
             android:id="@+id/cbCoOptDistanceRefresh"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:checked="true" />
 
         <EditText
             android:id="@+id/etCoOptDistanceThreshold"

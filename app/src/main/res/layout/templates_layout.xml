@@ -42,29 +42,30 @@
 
         <ImageButton
             android:id="@+id/btnNewTemplate"
-            android:layout_width="@dimen/dp_45"
-            android:layout_height="@dimen/dp_45"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_margin="@dimen/dp_2"
-            android:src="@drawable/new_template_btn"
-            android:padding="@dimen/dp_5"
-            android:background="@drawable/btn_gray"/>
+            android:background="@drawable/btn_gray"
+            android:padding="5dp"
+            android:src="@drawable/new_template_btn" />
 
         <ImageButton
             android:id="@+id/btnShareTemplates"
-            android:layout_width="@dimen/dp_45"
-            android:layout_height="@dimen/dp_45"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_margin="@dimen/dp_2"
-            android:padding="@dimen/dp_2"
-            android:src="@drawable/share_icon"
-            android:background="@drawable/btn_gray"/>
+            android:background="@drawable/btn_gray"
+            android:padding="5dp"
+            android:src="@drawable/share_icon" />
 
         <ImageButton
             android:id="@+id/btnDeleteTemplates"
-            android:layout_width="@dimen/dp_45"
-            android:layout_height="@dimen/dp_45"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_margin="@dimen/dp_2"
-            android:src="@drawable/delete_template_btn"
-            android:background="@drawable/btn_gray"/>
+            android:background="@drawable/btn_gray"
+            android:padding="5dp"
+            android:src="@drawable/delete_template_btn" />
 
         <View
             android:layout_width="0dp"

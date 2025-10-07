@@ -164,11 +164,9 @@ class TemplateMenuController(
                 context()?.getBitmap(R.drawable.drone_alt),
                 context()?.getBitmap(R.drawable.game_console_handheld),
                 context()?.getBitmap(R.drawable.helicopter),
-                context()?.getBitmap(R.drawable.horse),
                 context()?.getBitmap(R.drawable.male),
                 context()?.getBitmap(R.drawable.mobile_retro),
                 context()?.getBitmap(R.drawable.plane),
-                context()?.getBitmap(R.drawable.radio),
                 context()?.getBitmap(R.drawable.robot_astromech),
                 context()?.getBitmap(R.drawable.signal_stream),
                 context()?.getBitmap(R.drawable.tower_cell),
@@ -216,13 +214,9 @@ class TemplateMenuController(
     }
 
     private fun handleImportTemplate() {
-        val iconBase64 =
+        var iconBase64 =
             newTemplateMenuView()?.findViewById<ImageView>(R.id.ivNewTemplateIcon)?.toDataUri()
 //              val iconBitmap = newTemplateMenuView()?.findViewById<ImageView>(R.id.ivNewTemplateIcon)?.getBitmapFromImageView()
-        if (iconBase64 == null || preImportTemplates.isEmpty()) {
-            context()?.toast(context()?.getString(R.string.choose_file))
-            return
-        }
 
 //        val iconBase64 = iconBitmap.toBase64String()
 //        val iconBase64 = iconBitmap.toDataUri()
@@ -238,7 +232,8 @@ class TemplateMenuController(
                 mutableListOf()
 
             templatesToImport.take(freeSlots).forEach { template ->
-                if (template.customIcon == null) template.customIcon = iconBase64
+                if (template.customIcon == null && iconBase64 != null) template.customIcon = iconBase64
+                if (template.customIcon != null && iconBase64 == null) iconBase64 = template.customIcon
                 createAndStoreDownloadedFile(template)
                 newItems.add(MutableTuple(template, false, iconBase64))
             }

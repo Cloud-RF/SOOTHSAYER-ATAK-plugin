@@ -35,14 +35,12 @@
         "fcc": 0
     },
     "antenna": {
-        "mode": "custom",
+        "mode": "template",
         "txg": 2,
         "txl": 0,
-        "ant": 0,
+        "ant": 1,
         "azi": 0,
         "tlt": 0,
-        "hbw": 360,
-        "vbw": 90,
         "fbr": 0,
         "pol": "v"
     },
@@ -56,7 +54,7 @@
         "elevation": 2,
         "landcover": 1,
         "buildings": 1,
-        "obstacles": 1,
+        "obstacles": 0,
         "clt": "Temperate.clt"
     },
     "output": {

@@ -223,11 +223,11 @@ class PluginDropDownReceiver(
 
     private fun initViews() {
         //stopping to reload the template again and again from the asset folder.
-        val isLoadedFirstTime = sharedPrefs?.get(Constant.PreferenceKey.sTemplatesLoadedFromAssests, true)
-       if(isLoadedFirstTime?:true) {
+        //val isLoadedFirstTime = sharedPrefs?.get(Constant.PreferenceKey.sTemplatesLoadedFromAssests, true)
+       //if(isLoadedFirstTime?:true) {
            pluginContext.createAndStoreFiles(pluginContext.getAllFilesFromAssets())
-           sharedPrefs?.set(Constant.PreferenceKey.sTemplatesLoadedFromAssests, false)
-       }
+           //sharedPrefs?.set(Constant.PreferenceKey.sTemplatesLoadedFromAssests, false)
+       //}
         initSettings()
         initRadioSettingView()
         initTemplateSpinner()
@@ -778,7 +778,7 @@ class PluginDropDownReceiver(
                             pluginContext,
                             linkDataModel.linkRequest.transmitter,
                             linkDataModel.linkResponse,
-                            settingsLinksController?.getLinkUnits?:"dB",
+                            settingsLinksController?.linkUnits ?: "dB",
                             lineGroup,
                             linkDataModel.links,
                             markerLinkList,
@@ -913,12 +913,12 @@ class PluginDropDownReceiver(
     }
 
     private fun setDataFromPref() {
-        svMode.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
+        svMode.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, true) ?: true
         cbCoverageLayer.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sKmzVisibility, true) ?: true
         cbLinkLines.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sLinkLinesVisibility, true) ?: true
-        cbCoOptTimeRefresh.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshEnabled, true) ?: true
-        etCoOptTimeInterval.setText((sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshInterval, 60L) ?: 60L).toString())
-        cbCoOptDistanceRefresh.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCoOptDistanceRefreshEnabled, false) ?: false
+        cbCoOptTimeRefresh.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshEnabled, false) ?: false
+        etCoOptTimeInterval.setText((sharedPrefs?.get(Constant.PreferenceKey.sCoOptTimeRefreshInterval, 30L) ?: 30L).toString())
+        cbCoOptDistanceRefresh.isChecked = sharedPrefs?.get(Constant.PreferenceKey.sCoOptDistanceRefreshEnabled, true) ?: true
         etCoOptDistanceThreshold.setText((sharedPrefs?.get(Constant.PreferenceKey.sCoOptDistanceRefreshThreshold, 100.0) ?: 100.0).toString())
     }
 

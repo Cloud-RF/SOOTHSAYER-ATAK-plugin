@@ -16,7 +16,7 @@
     "transmitter": {
         "lat": 51.674609,
         "lon": -2.480428,
-        "alt": 2,
+        "alt": 1,
         "frq": 1250,
         "txw": 2,
         "bwi": 2,
@@ -25,9 +25,9 @@
     "receiver": {
         "lat": 51.538,
         "lon": -2.590,
-        "alt": 2,
+        "alt": 1,
         "rxg": 2,
-        "rxs": -105
+        "rxs": -100
     },
     "feeder": {
         "flt": 1,
@@ -36,7 +36,7 @@
     },
     "antenna": {
         "mode": "template",
-        "txg": 2.15,
+        "txg": 2,
         "txl": 0,
         "ant": 1,
         "azi": 0,
@@ -50,7 +50,7 @@
         "pm": 10,
         "pe": 2,
         "ked": 4,
-        "rel": 60
+        "rel": 70
     },
     "environment": {
         "elevation": 2,
@@ -63,10 +63,8 @@
         "units": "m",
         "col": "LTE.dBm",
         "out": 2,
-        "ber": 1,
-        "mod": 0,
         "nf": -100,
         "res": 5,
-        "rad": 3
+        "rad": 2
     }
 }

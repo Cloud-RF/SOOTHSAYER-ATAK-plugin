@@ -28,9 +28,7 @@ class SettingsLinksController(
     private fun colourView(): View? = colourViewRef.get()
 
     private var colourPickerCurId = 0
-    private var linkUnits = "dB"
-
-    val getLinkUnits: String = linkUnits
+    var linkUnits = "dB"
 
     private val optionsColour1 = ColourRef(0xFF00FF00.toInt())
     private val optionsColour2 = ColourRef(0xFFFFb600.toInt())

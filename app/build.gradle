@@ -8,8 +8,8 @@
 
 buildscript {
 
-    ext.PLUGIN_VERSION = "2.3"
-    ext.ATAK_VERSION = "5.5.0"
+    ext.PLUGIN_VERSION = "2.4"
+    ext.ATAK_VERSION = "5.4.0"
 
     def takdevVersion = '2.+'
 
@@ -60,7 +60,7 @@ buildscript {
     }
     dependencies {
 
-        classpath('com.android.tools.build:gradle:8.9.3') {
+        classpath('com.android.tools.build:gradle:8.9.0') {
             exclude group: "net.sf.proguard", module:
                     "proguard-gradle"
         }
@@ -186,7 +186,6 @@ android {
 
 ext {
     retrofitVersion = '2.9.0'
-    okHttpVersion = '4.9.1'
 }
 
 dependencies {
@@ -208,7 +207,6 @@ dependencies {
     // Http client
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
-    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
     implementation files('../atak-gradle-takdev.jar')
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'androidx.documentfile:documentfile:1.1.0'

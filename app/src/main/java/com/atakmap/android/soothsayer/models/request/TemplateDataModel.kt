@@ -22,7 +22,7 @@ data class TemplateDataModel(
     val version: String,
     @SerializedName("custom_icon")
     var bounds: Bounds?,
-    val customIcon: String?=null,
+    var customIcon: String?=null,
 ): Serializable
 
 data class Antenna(

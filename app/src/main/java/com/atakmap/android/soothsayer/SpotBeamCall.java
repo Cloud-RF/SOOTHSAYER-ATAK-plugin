@@ -1,14 +1,18 @@
 package com.atakmap.android.soothsayer;
 
 import android.annotation.SuppressLint;
-import android.os.Environment;
+import android.graphics.Typeface;
 import android.os.Looper;
 import android.widget.TextView;
 
 import com.atakmap.android.drawing.mapItems.DrawingShape;
+import com.atakmap.android.maps.Polyline;
 import com.atakmap.android.soothsayer.plugin.R;
+import com.atakmap.android.soothsayer.util.ExtensionsKt;
+import com.atakmap.android.soothsayer.util.OnMapUpdatedListener;
 import com.atakmap.coremap.log.Log;
 
+import com.atakmap.coremap.maps.coords.GeoPoint;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -25,6 +29,7 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -34,7 +39,7 @@ import javax.net.ssl.X509TrustManager;
 
 public class SpotBeamCall {
 
-    public static void callAPI(Satellite satellite, double areaLat, double areaLon, PluginDropDownReceiver receiver, String apiKey, String API_URL, String dateTime) {
+    public static void callAPI(Satellite satellite, double areaLat, double areaLon, PluginDropDownReceiver receiver, String apiKey, String API_URL, String dateTime, OnMapUpdatedListener callback) {
 
         // Compute study area relative to resolution with a 1MP target size
         // 2m res @ 1000m radius = 1MP
@@ -101,11 +106,11 @@ public class SpotBeamCall {
 
         Log.d("spotbeam", "Body: " + body);
 
-        makeCall(body, receiver, satellite.name, apiKey, areaLat, areaLon, API_URL);
+        makeCall(body, receiver, satellite.name, apiKey, areaLat, areaLon, API_URL, callback);
 
     }
 
-    private static void makeCall(String body, PluginDropDownReceiver receiver, String satName, String apiKey, double areaLat, double areaLon, String API_URL) {
+    private static void makeCall(String body, PluginDropDownReceiver receiver, String satName, String apiKey, double areaLat, double areaLon, String API_URL, OnMapUpdatedListener callback) {
         Thread thread = new Thread(() -> {
             try {
                 String str = getJsonString(body, apiKey, receiver, satName, API_URL);
@@ -140,7 +145,7 @@ public class SpotBeamCall {
                     Double[] secondPoint = { point[0], point[1] };
 
                     receiver.removeLines();
-                    receiver.drawLine(areaPoint, secondPoint, true, satAzi, satElev);
+                    drawLine(areaPoint, secondPoint, true, satAzi, satElev, callback);
 
                     Thread updateUIThread = new Thread() {
                         @SuppressLint("SetTextI18n")
@@ -262,7 +267,7 @@ public class SpotBeamCall {
                 String error = object.get("error").getAsString();
 
                 Looper.prepare();
-                receiver.toast("Error: " + error);
+                ExtensionsKt.toast(receiver.getPluginContext(), "Error: " + error);
 
                 Log.e("spotbeamcall", responseString);
             }
@@ -362,6 +367,42 @@ public class SpotBeamCall {
 
 
         return Math.toDegrees(Math.acos(v1X * v2X + v1Y * v2Y + v1Z * v2Z));
+    }
+
+    public static void drawLine(Double[] p1,
+                                Double[] p2,
+                                boolean label,
+                                double azi,
+                                double elev,
+                                OnMapUpdatedListener callback) {
+
+        // create a new Polyline with a unique id
+        Polyline line = new Polyline(UUID.randomUUID().toString());
+
+        // toggle labels
+        line.toggleMetaData("labels_on", label);
+
+        // set points
+        GeoPoint point1 = new GeoPoint(p1[0], p1[1]);
+        GeoPoint point2 = new GeoPoint(p2[0], p2[1]);
+        line.setPoints(new GeoPoint[]{point1, point2});
+
+        // set title and label
+        line.setTitle("AZIMUTH");
+
+        // format azimuth/elevation nicely
+        String labelText = "AZ: " + Math.round(azi * 10.0) / 10.0 + "° EL: " + Math.round(elev * 10.0) / 10.0 + "°";
+        line.setLineLabel(labelText);
+
+        // set label text size and font
+        line.setLabelTextSize(72, Typeface.DEFAULT);
+
+        // notify callback if provided
+        if (callback != null) {
+            // add to map
+//            mapView.getRootGroup().addItem(line);
+            callback.onMapViewAddItem(line);
+        }
     }
 
 }

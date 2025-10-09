@@ -36,8 +36,7 @@ import android.os.SystemClock
 class PluginRepository {
 
     private var lastRequestTime = 0L
-    private var requestInterval = 2000 // Linked to CloudRF plan. If you want to do links, a Bronze plan will do. Want Multisite coverage = Silver. Want both, at scale = Gold.
-    private val requestQueue = Executors.newSingleThreadExecutor()
+    private val requestQueue = Executors.newSingleThreadExecutor() // Executes sequentially with 1 thread
 
     companion object {
         private var INSTANCE: PluginRepository? = null
@@ -47,14 +46,18 @@ class PluginRepository {
         }
     }
 
+    // Fast request for async points updates etc
     private fun executeThrottled(task: () -> Unit) {
         requestQueue.execute {
-            val currentTime = SystemClock.elapsedRealtime()
-            val timeSinceLastRequest = currentTime - lastRequestTime
-            if (timeSinceLastRequest < requestInterval) {
-                SystemClock.sleep(requestInterval - timeSinceLastRequest)
-            }
-            lastRequestTime = SystemClock.elapsedRealtime()
+            Thread.sleep(200)
+            task()
+        }
+    }
+
+    // rate limited for multipoint APIs
+    private fun delayedRequest(task: () -> Unit) {
+        requestQueue.execute {
+            Thread.sleep(1000)
             task()
         }
     }
@@ -62,7 +65,7 @@ class PluginRepository {
     fun sendSingleSiteMarkerData(request: TemplateDataModel, callback: ApiCallBacks? = null) {
         callback?.onLoading()
 
-        executeThrottled {
+        delayedRequest {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
                 RetrofitClient.apiService()?.sendSingleSiteDataToServer(request = request)
                     ?.enqueue(object : Callback<ResponseModel> {
@@ -158,9 +161,8 @@ class PluginRepository {
 
     fun sendMultiSiteMarkerData(request: MultisiteRequest, callback: ApiCallBacks? = null) {
         callback?.onLoading()
-        requestInterval=2000
 
-        executeThrottled {
+        delayedRequest {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
                 Log.d(
                     PluginDropDownReceiver.TAG,
@@ -208,8 +210,6 @@ class PluginRepository {
     fun getLinks(request: LinkRequest, callback: ApiCallBacks? = null){
         callback?.onLoading()
 
-        requestInterval=200 // points API has bursting logic to support fast MANET links
-
         executeThrottled {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
                 Log.d(PluginDropDownReceiver.TAG, "sendLinks Request :${Gson().toJson(request)}")
@@ -221,7 +221,7 @@ class PluginRepository {
                             if (response.isSuccessful) {
                                 Log.d(
                                     PluginDropDownReceiver.TAG,
-                                    "sendLinks success :${response.raw()} \nbody: ${response.body()}"
+                                    "sendLinks success"
                                 )
                                 // below part is setting markerId in response object's transmitter so that we can use that id in link creation.
                                 response.body()?.transmitters?.let { transmitters ->

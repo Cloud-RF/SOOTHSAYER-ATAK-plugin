@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER v2.3</string>
+    <string name="help_title">SOOTHSAYER v2.4.1</string>
     <!-- description -->
     <string name="app_desc">Interface to the CloudRF/SOOTHSAYER API</string>
     <string name="example_layer_description">This is an example layer.</string>
@@ -112,4 +112,20 @@
     <string name="settings_options_title">Settings - Links</string>
     <string name="settings_options_colours_unit">dB</string>
     <string name="colour_picker_title">Pick Colour</string>
+
+    <string name="template_title">Template</string>
+    <string name="templates_title">SOOTHSAYER - Templates</string>
+    <string name="template_button">Templates</string>
+    <string name="new_template_title">New Template</string>
+    <string name="new_template_pick_file_btn">Pick File</string>
+    <string name="cancel_new_template">Cancel</string>
+    <string name="confirm_new_template">Import</string>
+    <string name="new_template_pick_icon_title">Template - Pick Icon</string>
+    <string name="new_template_pick_icon_btn">Pick Icon</string>
+    <string name="new_template_icon_pick_file_btn">Pick File</string>
+    <string name="no_template">Template list is empty. Click the add button to import.</string>
+    <string name="template_limit">"You can only add up to %1$s templates"</string>
+    <string name="choose_file">"Please choose file and icon both to import."</string>
+    <string name="all_txt">ALL</string>
+    <string name="file_path_message">"Your file has been saved in: \n \n%1$s\n \nYou can open this folder in a file manager to share the file."</string>
 </resources>

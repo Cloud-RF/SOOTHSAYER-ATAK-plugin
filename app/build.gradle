@@ -8,8 +8,8 @@
 
 buildscript {
 
-    ext.PLUGIN_VERSION = "2.3"
-    ext.ATAK_VERSION = "5.2.0"
+    ext.PLUGIN_VERSION = "2.4.1"
+    ext.ATAK_VERSION = "5.4.0"
 
     def takdevVersion = '2.+'
 
@@ -60,7 +60,7 @@ buildscript {
     }
     dependencies {
 
-        classpath('com.android.tools.build:gradle:8.9.3') {
+        classpath('com.android.tools.build:gradle:8.9.0') {
             exclude group: "net.sf.proguard", module:
                     "proguard-gradle"
         }
@@ -106,46 +106,19 @@ android {
 
     signingConfigs {
         debug {
-            def kf = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyFile')
-            def kfp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyFilePassword')
-            def ka = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyAlias')
-            def kp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyPassword')
-
-            if (kf == null) {
-                kf = "${rootDir}/debug.keystore"
-                kfp = 'android'
-                ka = 'androiddebugkey'
-                kp = 'android'
-            }
- 
-            storeFile file(kf)
-            if (kfp != null) storePassword kfp
-            if (ka != null) keyAlias ka
-            if (kp != null) keyPassword kp
+            storeFile file("${buildDir}/android_keystore")
+            storePassword "tnttnt"
+            keyAlias "wintec_mapping"
+            keyPassword "tnttnt"
         }
         release {
-//            def kf = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takReleaseKeyFile')
-//            def kfp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takReleaseKeyFilePassword')
-//            def ka = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takReleaseKeyAlias')
-//            def kp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takReleaseKeyPassword')
-            def kf = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyFile')
-            def kfp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyFilePassword')
-            def ka = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyAlias')
-            def kp = getValueFromPropertiesFile(project.rootProject.file('local.properties'), 'takDebugKeyPassword')
-
-            if (kf == null) {
-                kf = "${rootDir}/debug.keystore"
-                kfp = 'android'
-                ka = 'androiddebugkey'
-                kp = 'android'
-            }
-
-            storeFile file(kf)
-            if (kfp != null) storePassword kfp
-            if (ka != null) keyAlias ka
-            if (kp != null) keyPassword kp
+            storeFile file("${buildDir}/android_keystore")
+            storePassword "tnttnt"
+            keyAlias "wintec_mapping"
+            keyPassword "tnttnt"
         }
     }
+
 
     buildTypes {
         debug {
@@ -213,7 +186,6 @@ android {
 
 ext {
     retrofitVersion = '2.9.0'
-    okHttpVersion = '4.9.1'
 }
 
 dependencies {
@@ -235,7 +207,18 @@ dependencies {
     // Http client
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
-    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
     implementation files('../atak-gradle-takdev.jar')
     implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'androidx.documentfile:documentfile:1.1.0'
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'com.squareup.okhttp3') {
+            details.useVersion "4.11.0"
+        }
+    }
+}
+configurations.implementation {
+    exclude group: 'com.squareup.okhttp3', module: 'okhttp'
 }

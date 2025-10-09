@@ -7,6 +7,7 @@ object Constant {
     var sAccessToken = ""
     var sUsername = ""
     const val TEMPLATE_FORMAT = ".json"
+    const val PACKAGE_NAME = "com.atakmap.app.civ"
 
     object ApiErrorCodes{
         const val sUnAuthorized = 401
@@ -18,9 +19,12 @@ object Constant {
 
     object PreferenceKey{
         const val etUsername = ""
+        const val etPassword = "user password"
         const val sServerUrl = "Server url"
         const val sApiKey = "Api key"
         const val sMarkerList = "Marker list"
+        const val sSettingTemplateList = "Setting Template list"
+        const val sTemplatesLoadedFromAssests = "Templates loaded from Assests"
         const val sCalculationMode = "Calculation Mode"
         const val sKmzVisibility = "KMZ Visibility"
         const val sLinkLinesVisibility = "Link Lines Visibility"

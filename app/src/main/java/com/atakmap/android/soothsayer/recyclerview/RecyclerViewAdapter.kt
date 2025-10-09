@@ -67,7 +67,7 @@ class RecyclerViewAdapter(
             val drawable = if (item.customIcon == null) {
                 ContextCompat.getDrawable(holder.ivMarker.context, R.drawable.marker_icon_svg)
             } else {
-                item.customIcon.base64StringToBitmap()?.let { BitmapDrawable(resources, it) }
+                item.customIcon?.base64StringToBitmap()?.let { BitmapDrawable(resources, it) }
             }
             setImageDrawable(drawable ?: ContextCompat.getDrawable(holder.ivMarker.context, R.drawable.marker_icon_svg))
         }

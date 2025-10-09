@@ -32,19 +32,19 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_1"
-        android:layout_margin="3dp"
+        android:layout_margin="@dimen/dp_3"
         android:background="@android:color/white" />
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="2dp"
+        android:layout_margin="@dimen/dp_2"
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
             android:src="@drawable/layers_icon" />
 
         <Button
@@ -61,12 +61,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="2dp"
+        android:layout_margin="@dimen/dp_2"
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
             android:src="@drawable/link_icon" />
 
         <Button
@@ -83,12 +83,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="2dp"
+        android:layout_margin="@dimen/dp_2"
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
             android:src="@drawable/ic_sheriff_badge" />
 
         <Button
@@ -104,13 +104,13 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_margin="2dp"
+        android:layout_height="@dimen/dp_40"
+        android:layout_margin="@dimen/dp_2"
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
             android:src="?android:attr/actionModeCopyDrawable" />
 
         <Button
@@ -119,8 +119,25 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="?android:attr/colorPrimary"
-            android:text="Templates"
-            android:textColor="@color/light_gray" />
+            android:text="@string/template_button"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnTemplateMenu"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_weight="1"
+            android:textColor="#FFF"
+            android:background="@drawable/btn_gray"
+            android:text="@string/template_button" />
 
     </LinearLayout>
 
@@ -132,12 +149,12 @@
         <ImageButton
             android:id="@+id/tvHelp"
             style="@style/darkButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
             android:layout_margin="5dp"
-            android:paddingHorizontal="16dp"
+            android:paddingHorizontal="@dimen/dp_16"
             android:paddingVertical="8dp"
-            android:paddingBottom="3dp"
+            android:paddingBottom="@dimen/dp_3"
             android:src="@android:drawable/ic_dialog_info" />
 
         <View
@@ -149,12 +166,12 @@
         <ImageButton
             android:id="@+id/btnSpotBeam"
             style="@style/darkButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
             android:layout_margin="5dp"
             android:background="@drawable/btn_gray"
-            android:paddingHorizontal="3dp"
-            android:paddingVertical="3dp"
+            android:paddingHorizontal="@dimen/dp_3"
+            android:paddingVertical="@dimen/dp_3"
             android:src="@drawable/spotbeam_marker_icon" />
 
         <View
@@ -166,10 +183,10 @@
         <ImageButton
             android:id="@+id/btnSettingLogin"
             style="@style/darkButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
             android:layout_margin="5dp"
-            android:paddingHorizontal="16dp"
+            android:paddingHorizontal="@dimen/dp_16"
             android:paddingVertical="8dp"
             android:paddingBottom="0dp"
             android:src="@drawable/account" />

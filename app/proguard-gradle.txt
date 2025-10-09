@@ -1,21 +1,40 @@
-# This works with ATAK release 4.8.1
-# Don't ask why we're packing and obfuscating an open source plugin - it works
+
+# Do not strip any method/class that is annotated with @DontObfuscate
+-keep,allowobfuscation @interface gov.tak.api.annotation.DontObfuscate
+-keep @gov.tak.api.annotation.DontObfuscate class * {*;}
+-keepclassmembers class * {
+    @gov.tak.api.annotation.DontObfuscate *;
+}
+
+######################################################################
+## Skip down to the 'User Section'
+## Messing with any items in the 'System Section' will make you cool
+######################################################################
+
+
+######################################################################
+######################################################################
+## System Section
+######################################################################
+######################################################################
+
 
 -dontskipnonpubliclibraryclasses
 -dontshrink
 -dontoptimize
+-dontobfuscate # Open source duh
 
-# ACRA specifics
+
+############### ACRA specifics
+# we need line numbers in our stack traces otherwise they are pretty useless
 -renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable
 
 -applymapping <atak.proguard.mapping>
 
-# Change soothsayer to your plugin name
--repackageclasses atakplugin.soothsayer
-
 -keepattributes *Annotation*
 -keepattributes Signature, InnerClasses
+
 
 -keep class * implements android.os.Parcelable {
   public static final android.os.Parcelable$Creator *;
@@ -31,6 +50,8 @@
     public static ** valueOf(java.lang.String);
 }
 
+
+
 # Preserve all native method names and the names of their classes.
 -keepclasseswithmembernames class * {
     native <methods>;
@@ -40,20 +61,33 @@
     @org.simpleframework.xml.* *;
 }
 
+
 # For enumeration classes, see http://proguard.sourceforge.net/manual/examples.html#enumerations
 -keepclassmembers enum * {
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
 
-# this is going in 4.9 apparently?
--keep class * extends transapps.maps.plugin.tool.Tool {
+
+
+-keep class * implements gov.tak.api.plugin.IPlugin {
 }
--keep class * implements transapps.maps.plugin.lifecycle.Lifecycle {
+-keep class * extends com.atak.plugins.impl.AbstractPluginTool {
 }
 
 # overcome an existing bug in the gradle subsystem (3.5.x)
 -keep class module-info
+
+######################################################################
+## Messing with any settings above this line will also make you cool
+######################################################################
+
+
+-repackageclasses atakplugin.soothsayer
+
+-keep class kotlin.** {*;}
+-keep class kotlinx.** {*;}
+-keep class androidx.** {*;}
 
 # Change soothsayer to your plugin name
 -keepclassmembers class com.atakmap.android.soothsayer.interfaces.** { *; }
@@ -65,12 +99,14 @@
 -keepclassmembers class com.atakmap.android.soothsayer.plugin.** { *; }
 -keepclassmembers class com.atakmap.android.maps.** { *; }
 
+
 # this is from trying to sign for 4.8 / switching to ProGuard from R8
 -keep class kotlin.jvm.internal.** {*;}
 -keep class kotlin.coroutines.jvm.internal.** {*;}
 -keep class kotlin.jvm.functions.** {*;}
 -keep class kotlin.coroutines.** {*;}
 -keep class kotlin.collections.** {*;}
+-keep class com.squareup.** {*;}  # okhttp3 crashes at runtime
 -keep class * implements gov.tak.api.plugin.IPlugin {
 }
 
@@ -91,6 +127,9 @@
 -dontwarn kotlin.collections.**
 -dontwarn android.content.res.XmlResourceParser
 -dontwarn androidx.**
+-dontwarn kotlin.**
+-dontwarn kotlinx.**
+-dontwarn com.squareup.** # okhttp3 crashes at runtime
 
 # Added in 2.3 for a color picker. Tedious doesn't come close
 -dontwarn groovy.**

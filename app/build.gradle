@@ -8,7 +8,7 @@
 
 buildscript {
 
-    ext.PLUGIN_VERSION = "2.4"
+    ext.PLUGIN_VERSION = "2.4.1"
     ext.ATAK_VERSION = "5.4.0"
 
     def takdevVersion = '2.+'
@@ -210,4 +210,15 @@ dependencies {
     implementation files('../atak-gradle-takdev.jar')
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'androidx.documentfile:documentfile:1.1.0'
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'com.squareup.okhttp3') {
+            details.useVersion "4.11.0"
+        }
+    }
+}
+configurations.implementation {
+    exclude group: 'com.squareup.okhttp3', module: 'okhttp'
 }

@@ -2,8 +2,10 @@ package com.atakmap.android.soothsayer.network
 
 import com.atakmap.android.soothsayer.models.linksmodel.LinkRequest
 import com.atakmap.android.soothsayer.models.linksmodel.LinkResponse
+import com.atakmap.android.soothsayer.models.request.BestSiteRequestModel
 import com.atakmap.android.soothsayer.models.request.MultisiteRequest
 import com.atakmap.android.soothsayer.models.request.TemplateDataModel
+import com.atakmap.android.soothsayer.models.response.BestSiteResponse
 import com.atakmap.android.soothsayer.models.response.LoginResponse
 import com.atakmap.android.soothsayer.models.response.ResponseModel
 import com.atakmap.android.soothsayer.models.response.TemplatesResponse
@@ -45,4 +47,9 @@ interface ApiService {
 
     @GET("/template/{id}")
     fun getTemplateDetail(@Path("id") id :Int): Call<TemplateDataModel?>?
+
+    @POST("/bsa")
+    fun bestSiteAnalysis(
+        @Body request: BestSiteRequestModel? = null
+    ): Call<BestSiteResponse>
 }

@@ -43,7 +43,7 @@ public class CloudRFLayer extends AbstractLayer {
 
     public final CloudRFLayerListener cloudRFLayerListener;
 
-    public CloudRFLayer(Context plugin, final String name, final String description, final String uri, final List<Double> bounds, final CloudRFLayerListener listener) {
+    public CloudRFLayer(Context plugin, final String name, final String description, final String uri, final List<Double> bounds, final Boolean isBsaLayer, final CloudRFLayerListener listener) {
         super(name);
         this.description = description;
         this.fileUri = uri;
@@ -57,7 +57,7 @@ public class CloudRFLayer extends AbstractLayer {
 
         if(polygon != null) {
             GeoImageMasker.Bounds newbounds = GeoImageMasker.getBounds(polygon.getPoints());
-            bitmap = GeoImageMasker.cropImage(BitmapFactory.decodeFile(uri),newbounds,polygon);
+            bitmap = GeoImageMasker.cropImage(BitmapFactory.decodeFile(uri),newbounds,polygon, isBsaLayer);
         }else{
             bitmap = BitmapFactory.decodeFile(uri);
         }

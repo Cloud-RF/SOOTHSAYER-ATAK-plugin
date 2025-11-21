@@ -48,9 +48,11 @@ import com.atakmap.android.maps.MapGroup
 import com.atakmap.android.maps.MapView
 import com.atakmap.android.maps.Marker
 import com.atakmap.android.maps.PointMapItem
+import com.atakmap.android.maps.Shape
 import com.atakmap.android.preference.AtakPreferences
 import com.atakmap.android.soothsayer.TemplateRecyclerViewAdapter.Companion.MAX_ITEMS
 import com.atakmap.android.soothsayer.interfaces.CloudRFLayerListener
+import com.atakmap.android.soothsayer.interfaces.CustomPolygonInterface
 import com.atakmap.android.soothsayer.layers.CloudRFLayer
 import com.atakmap.android.soothsayer.layers.GLCloudRFLayer
 import com.atakmap.android.soothsayer.layers.PluginMapOverlay
@@ -69,6 +71,7 @@ import com.atakmap.android.soothsayer.network.repository.PluginRepository
 import com.atakmap.android.soothsayer.plugin.R
 import com.atakmap.android.soothsayer.recyclerview.CoOptAdapter
 import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
+import com.atakmap.android.soothsayer.util.BestSiteManager
 import com.atakmap.android.soothsayer.util.CalculationManager
 import com.atakmap.android.soothsayer.util.Constant
 import com.atakmap.android.soothsayer.util.FOLDER_PATH
@@ -173,6 +176,9 @@ class PluginDropDownReceiver(
     private var spinnerAdapter: ArrayAdapter<TemplateDataModel>?=null
     private val calcManager by lazy {
         CalculationManager(pluginContext, sharedPrefs, mapView, markersList, this)
+    }
+    private val bestSiteManager by lazy {
+        BestSiteManager(pluginContext, repository, this)
     }
     private var settingsLinksController: SettingsLinksController? = null
     private var templateMenuController: TemplateMenuController? = null
@@ -308,12 +314,20 @@ class PluginDropDownReceiver(
                 pluginContext.toast(pluginContext.getString(R.string.marker_error))
             }
         }
-
         val btnAddPolygon = templateView.findViewById<ImageButton>(R.id.btnAddPolygon)
+        val btnBestSiteAnalysis = templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis)
+        btnBestSiteAnalysis.setOnClickListener {
+            btnBestSiteAnalysis.visibility = View.GONE
+            bestSiteManager.performBestSiteAnalysis(selectedMarkerType)
+        }
         btnAddPolygon.setOnClickListener {
             if (Constant.sAccessToken != "") {
                 pluginContext.shortToast("Draw a polygon for the study area")
-                CustomPolygonTool.createPolygon()
+                CustomPolygonTool.createPolygon(object: CustomPolygonInterface{
+                    override fun onPolygonDrawn(polygon: Shape) {
+                        btnBestSiteAnalysis.visibility = View.VISIBLE
+                    }
+                })
             }
         }
 
@@ -958,7 +972,7 @@ class PluginDropDownReceiver(
                 layerName,
                 pluginContext.getString(R.string.layer, layerName),
                 file.absolutePath,
-                bounds, object : CloudRFLayerListener {
+                bounds, false,object : CloudRFLayerListener {
                     override fun delete(layer: CloudRFLayer) {
                         promptDelete(layer)
                     }
@@ -979,7 +993,7 @@ class PluginDropDownReceiver(
         }
     }
 
-    private fun addLayer(filePath: String, bounds: List<Double>) {
+    fun addLayer(filePath: String, bounds: List<Double>, isBsaLayer: Boolean?=false) {
         val file = File(filePath)
         synchronized(this@PluginDropDownReceiver) {
             if (cloudRFLayer != null) {
@@ -996,6 +1010,7 @@ class PluginDropDownReceiver(
                     layerName,
                     file.absolutePath,
                     bounds,
+                    isBsaLayer,
                     object : CloudRFLayerListener {
                         override fun delete(layer: CloudRFLayer) {
                             promptDelete(layer)

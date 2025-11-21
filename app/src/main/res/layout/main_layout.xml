@@ -52,6 +52,21 @@
                 android:src="@drawable/polygon" />
 
             <ImageButton
+                android:id="@+id/btnBestSiteAnalysis"
+                style="@style/darkButton"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="0dp"
+                android:padding="7dp"
+                android:layout_toRightOf="@id/btnAddPolygon"
+                android:src="@drawable/magic_wand" />
+
+            <ImageButton
                 android:id="@+id/coOptButton"
                 style="@style/darkButton"
                 android:layout_width="40dp"
@@ -62,7 +77,6 @@
                 android:layout_marginTop="3dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
-
                 android:contentDescription="Co-Opt a callsign"
                 android:padding="5dp"
                 android:src="@drawable/ic_sheriff_badge" />
@@ -100,9 +114,9 @@
                 android:id="@+id/btnPlayBtn"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_toRightOf="@id/btnBestSiteAnalysis"
                 android:layout_centerHorizontal="true"
                 android:layout_marginStart="10dp"
-                android:layout_marginLeft="200dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
@@ -115,6 +129,7 @@
                 style="?android:attr/progressBarStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/btnBestSiteAnalysis"
                 android:layout_centerHorizontal="true"
                 android:maxWidth="40dp"
                 android:maxHeight="40dp"

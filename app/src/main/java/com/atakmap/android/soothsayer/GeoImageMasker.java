@@ -3,6 +3,7 @@ package com.atakmap.android.soothsayer;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
@@ -13,7 +14,6 @@ import com.atakmap.android.drawing.mapItems.DrawingShape;
 import com.atakmap.coremap.maps.coords.GeoPoint;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class GeoImageMasker {
 
@@ -141,7 +141,7 @@ public class GeoImageMasker {
         return new Bounds(north, south, east, west);
     }
 
-    public static Bitmap cropImage(Bitmap bm, Bounds imageBounds, DrawingShape ds) {
+    public static Bitmap cropImage(Bitmap bm, Bounds imageBounds, DrawingShape ds, Boolean isBsaLayer) {
 
         if (ds == null || !ds.isClosed()) {
             throw new IllegalArgumentException("Invalid input: DrawingShape needs to be a valid closed polygon");
@@ -149,7 +149,7 @@ public class GeoImageMasker {
 
         GeoPoint[] points = ds.getPoints();
 
-        return cropImage(bm, imageBounds, points);
+        return cropImage(bm, imageBounds, points, isBsaLayer);
     }
 
     /**
@@ -167,7 +167,7 @@ public class GeoImageMasker {
      * @return a new Bitmap containing only the cropped area inside the polygon
      * @throws IllegalArgumentException if any of the inputs are invalid
      */
-    public static Bitmap cropImage(Bitmap bm, Bounds imageBounds, GeoPoint[] points) {
+    public static Bitmap cropImage(Bitmap bm, Bounds imageBounds, GeoPoint[] points, Boolean isBsaLayer) {
 
         if (bm == null || points == null || points.length == 0 || imageBounds == null) {
             throw new IllegalArgumentException("Invalid input: Bitmap, points, or bounds are not valid.");
@@ -225,8 +225,22 @@ public class GeoImageMasker {
         resultPaint.setXfermode(null);
 
 
+        // ✅ Draw dotted border ONLY if BSA is true
+        if (isBsaLayer) {
+            Paint borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            borderPaint.setStyle(Paint.Style.STROKE);
+            borderPaint.setColor(Color.WHITE);
+            borderPaint.setStrokeWidth(4f);
+
+            // dotted / dashed effect
+            borderPaint.setPathEffect(new DashPathEffect(
+                    new float[]{12f, 12f}, 0
+            ));
+
+            // Draw dotted border on final canvas
+            resultCanvas.drawPath(path, borderPaint);
+        }
+
         return result;
     }
-
-
 }

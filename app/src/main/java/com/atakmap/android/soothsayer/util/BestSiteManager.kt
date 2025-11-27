@@ -82,6 +82,8 @@ class BestSiteManager(
         val transmitter = template?.transmitter?.let { it ->
             Transmitter(it.alt,  it.bwi,it.frq,polyLat,polyLon, it.powerUnit, it.txw )
         }
+        // code commented and tried the 0.001 by multiplying with the value but it didn't worked as needed.
+//                val radius = (polygon.calculateRadius(polyLat, polyLon) * 0.001)
         val radius = polygon.calculateRadius(polyLat, polyLon)
         val output = template?.output?.let { it ->
             Output("BESTSITE.bsa", 7, "-120", 7, radius , it.res, "m", null)

@@ -18,7 +18,7 @@ data class MultiSiteTransmitter(
     val frq: Double,
     var lat: Double,
     var lon: Double,
-    val powerUnit: String,
+    val powerUnit: String?,
     val txw: Double,
     val antenna: Antenna,
     var remote: Boolean = false

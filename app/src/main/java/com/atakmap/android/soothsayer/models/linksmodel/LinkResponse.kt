@@ -16,7 +16,7 @@ data class LinkResponse(
     @SerializedName("Fraction of time")
     val fractionOfTime: Int,
     @SerializedName("Frequency MHz")
-    val frequencyMHz: Int,
+    val frequencyMHz: Double,
     @SerializedName("Propagation model")
     val propagationModel: String,
     @SerializedName("Radio climate")

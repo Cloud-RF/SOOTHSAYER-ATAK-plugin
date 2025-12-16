@@ -84,7 +84,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="#11FF00"
+                    android:background="#FF00"
                     android:foreground="#0000" />
 
                 <EditText
@@ -94,7 +94,7 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="numberSigned"
-                    android:text="20" />
+                    android:text="25" />
 
                 <TextView
                     android:id="@+id/optionsUnit1"
@@ -124,7 +124,7 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="numberSigned"
-                    android:text="10" />
+                    android:text="15" />
 
                 <TextView
                     android:id="@+id/optionsUnit2"
@@ -144,7 +144,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="#F00"
+                    android:background="#11FF00"
                     android:foreground="#0000" />
 
                 <EditText
@@ -154,7 +154,7 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="numberSigned"
-                    android:text="0" />
+                    android:text="5" />
 
                 <TextView
                     android:id="@+id/optionsUnit3"
@@ -184,7 +184,7 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="numberSigned"
-                    android:text="-10" />
+                    android:text="-5" />
 
                 <TextView
                     android:id="@+id/optionsUnit4"

@@ -27,7 +27,7 @@ data class LinkResponse(
     val transmitters: List<Transmitter>,
     @SerializedName("calculation_adjusted")
     val calculationAdjusted: List<Any>,
-    val elapsed: Int,
+    val elapsed: Double,
     val json: String,
     val kmz: String
 )

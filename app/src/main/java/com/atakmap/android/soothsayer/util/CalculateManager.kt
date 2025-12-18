@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer.util
+package com.cloudrf.android.soothsayer.util
 
 import android.content.Context
 import android.util.Log
@@ -8,16 +8,16 @@ import com.atakmap.android.drawing.mapItems.DrawingShape
 import com.atakmap.android.maps.MapView
 import com.atakmap.android.maps.PointMapItem
 import com.atakmap.android.preference.AtakPreferences
-import com.atakmap.android.soothsayer.CustomPolygonTool
-import com.atakmap.android.soothsayer.GeoImageMasker
-import com.atakmap.android.soothsayer.PluginDropDownReceiver
-import com.atakmap.android.soothsayer.PluginDropDownReceiver.Companion.TAG
-import com.atakmap.android.soothsayer.models.common.CoOptedMarkerSettings
-import com.atakmap.android.soothsayer.models.common.MarkerDataModel
-import com.atakmap.android.soothsayer.models.request.Bounds
-import com.atakmap.android.soothsayer.models.request.MultiSiteTransmitter
-import com.atakmap.android.soothsayer.models.request.MultisiteRequest
-import com.atakmap.android.soothsayer.plugin.R
+import com.cloudrf.android.soothsayer.CustomPolygonTool
+import com.cloudrf.android.soothsayer.GeoImageMasker
+import com.cloudrf.android.soothsayer.PluginDropDownReceiver
+import com.cloudrf.android.soothsayer.PluginDropDownReceiver.Companion.TAG
+import com.cloudrf.android.soothsayer.models.common.CoOptedMarkerSettings
+import com.cloudrf.android.soothsayer.models.common.MarkerDataModel
+import com.cloudrf.android.soothsayer.models.request.Bounds
+import com.cloudrf.android.soothsayer.models.request.MultiSiteTransmitter
+import com.cloudrf.android.soothsayer.models.request.MultisiteRequest
+import com.cloudrf.android.soothsayer.plugin.R
 import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.map.elevation.ElevationData
 import com.atakmap.map.elevation.ElevationManager

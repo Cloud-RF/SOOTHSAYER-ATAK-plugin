@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer.models.request
+package com.cloudrf.android.soothsayer.models.request
 
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable

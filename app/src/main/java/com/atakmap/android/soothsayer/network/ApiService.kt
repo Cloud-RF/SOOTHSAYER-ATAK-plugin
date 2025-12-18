@@ -1,12 +1,12 @@
-package com.atakmap.android.soothsayer.network
+package com.cloudrf.android.soothsayer.network
 
-import com.atakmap.android.soothsayer.models.linksmodel.LinkRequest
-import com.atakmap.android.soothsayer.models.linksmodel.LinkResponse
-import com.atakmap.android.soothsayer.models.request.MultisiteRequest
-import com.atakmap.android.soothsayer.models.request.TemplateDataModel
-import com.atakmap.android.soothsayer.models.response.LoginResponse
-import com.atakmap.android.soothsayer.models.response.ResponseModel
-import com.atakmap.android.soothsayer.models.response.TemplatesResponse
+import com.cloudrf.android.soothsayer.models.linksmodel.LinkRequest
+import com.cloudrf.android.soothsayer.models.linksmodel.LinkResponse
+import com.cloudrf.android.soothsayer.models.request.MultisiteRequest
+import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
+import com.cloudrf.android.soothsayer.models.response.LoginResponse
+import com.cloudrf.android.soothsayer.models.response.ResponseModel
+import com.cloudrf.android.soothsayer.models.response.TemplatesResponse
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*

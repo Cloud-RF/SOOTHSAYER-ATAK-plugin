@@ -1,5 +1,5 @@
 
-package com.atakmap.android.soothsayer.layers;
+package com.cloudrf.android.soothsayer.layers;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -7,10 +7,10 @@ import android.graphics.BitmapFactory;
 
 import com.atakmap.android.drawing.mapItems.DrawingShape;
 import com.atakmap.android.menu.PluginMenuParser;
-import com.atakmap.android.soothsayer.CustomPolygonTool;
-import com.atakmap.android.soothsayer.GeoImageMasker;
-import com.atakmap.android.soothsayer.interfaces.CloudRFLayerListener;
-import com.atakmap.android.soothsayer.plugin.R;
+import com.cloudrf.android.soothsayer.CustomPolygonTool;
+import com.cloudrf.android.soothsayer.GeoImageMasker;
+import com.cloudrf.android.soothsayer.interfaces.CloudRFLayerListener;
+import com.cloudrf.android.soothsayer.plugin.R;
 import com.atakmap.android.maps.MetaShape;
 import com.atakmap.coremap.log.Log;
 import com.atakmap.coremap.maps.coords.GeoBounds;

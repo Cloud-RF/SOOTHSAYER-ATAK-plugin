@@ -1,5 +1,5 @@
 
-package com.atakmap.android.soothsayer.recyclerview;
+package com.cloudrf.android.soothsayer.recyclerview;
 
 import android.content.Context;
 import android.util.AttributeSet;

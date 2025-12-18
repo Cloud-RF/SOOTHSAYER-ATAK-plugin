@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer;
+package com.cloudrf.android.soothsayer;
 
 import com.atakmap.coremap.log.Log;
 import com.google.gson.JsonArray;

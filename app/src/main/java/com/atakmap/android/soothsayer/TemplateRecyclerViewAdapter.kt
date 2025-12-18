@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer
+package com.cloudrf.android.soothsayer
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,10 +7,10 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
-import com.atakmap.android.soothsayer.models.common.MarkerDataModel
-import com.atakmap.android.soothsayer.models.request.TemplateDataModel
-import com.atakmap.android.soothsayer.plugin.R
-import com.atakmap.android.soothsayer.util.base64StringToBitmap
+import com.cloudrf.android.soothsayer.models.common.MarkerDataModel
+import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
+import com.cloudrf.android.soothsayer.plugin.R
+import com.cloudrf.android.soothsayer.util.base64StringToBitmap
 
 data class MutableTuple<A, B, C>(
     var first: A,

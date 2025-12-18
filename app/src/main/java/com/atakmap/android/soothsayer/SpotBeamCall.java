@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer;
+package com.cloudrf.android.soothsayer;
 
 import android.annotation.SuppressLint;
 import android.graphics.Typeface;
@@ -7,9 +7,9 @@ import android.widget.TextView;
 
 import com.atakmap.android.drawing.mapItems.DrawingShape;
 import com.atakmap.android.maps.Polyline;
-import com.atakmap.android.soothsayer.plugin.R;
-import com.atakmap.android.soothsayer.util.ExtensionsKt;
-import com.atakmap.android.soothsayer.util.OnMapUpdatedListener;
+import com.cloudrf.android.soothsayer.plugin.R;
+import com.cloudrf.android.soothsayer.util.ExtensionsKt;
+import com.cloudrf.android.soothsayer.util.OnMapUpdatedListener;
 import com.atakmap.coremap.log.Log;
 
 import com.atakmap.coremap.maps.coords.GeoPoint;

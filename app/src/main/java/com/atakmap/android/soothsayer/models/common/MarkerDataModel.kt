@@ -1,6 +1,6 @@
-package com.atakmap.android.soothsayer.models.common
+package com.cloudrf.android.soothsayer.models.common
 
-import com.atakmap.android.soothsayer.models.request.TemplateDataModel
+import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
 import java.io.Serializable
 
 data class MarkerDataModel(

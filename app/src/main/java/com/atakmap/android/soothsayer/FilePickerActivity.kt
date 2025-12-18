@@ -1,17 +1,17 @@
-package com.atakmap.android.soothsayer
+package com.cloudrf.android.soothsayer
 
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import com.atakmap.android.soothsayer.models.request.TemplateDataModel
-import com.atakmap.android.soothsayer.util.Constant
-import com.atakmap.android.soothsayer.util.getFileNameFromUri
-import com.atakmap.android.soothsayer.util.getJsonTemplatesFromZip
-import com.atakmap.android.soothsayer.util.isJson
-import com.atakmap.android.soothsayer.util.isZip
-import com.atakmap.android.soothsayer.util.parseTemplatesFromStream
-import com.atakmap.android.soothsayer.util.toast
+import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
+import com.cloudrf.android.soothsayer.util.Constant
+import com.cloudrf.android.soothsayer.util.getFileNameFromUri
+import com.cloudrf.android.soothsayer.util.getJsonTemplatesFromZip
+import com.cloudrf.android.soothsayer.util.isJson
+import com.cloudrf.android.soothsayer.util.isZip
+import com.cloudrf.android.soothsayer.util.parseTemplatesFromStream
+import com.cloudrf.android.soothsayer.util.toast
 
 class FilePickerActivity : Activity() {
 

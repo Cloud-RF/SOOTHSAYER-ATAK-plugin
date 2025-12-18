@@ -1,6 +1,6 @@
-package com.atakmap.android.soothsayer.interfaces
+package com.cloudrf.android.soothsayer.interfaces
 
-import com.atakmap.android.soothsayer.layers.CloudRFLayer
+import com.cloudrf.android.soothsayer.layers.CloudRFLayer
 
 interface CloudRFLayerListener {
 

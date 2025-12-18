@@ -8,7 +8,7 @@
 
 buildscript {
 
-    ext.PLUGIN_VERSION = "2.5"
+    ext.PLUGIN_VERSION = "2.5.1"
     ext.ATAK_VERSION = "5.4.0"
 
     def takdevVersion = '2.+'
@@ -90,11 +90,18 @@ apply plugin: 'atak-takdev-plugin'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 34
+    compileSdkVersion 36
     buildToolsVersion "30.0.3"
 
     dexOptions {
         jumboMode = true
+    }
+
+    // https://android-developers.googleblog.com/2022/03/freeing-up-60-of-storage-for-apps.html
+    bundle {
+        storeArchive {
+            enable = false
+        }
     }
 
     lintOptions {
@@ -179,7 +186,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    namespace 'com.atakmap.android.soothsayer.plugin'
+    namespace 'com.cloudrf.android.soothsayer.plugin'
 
 }
 

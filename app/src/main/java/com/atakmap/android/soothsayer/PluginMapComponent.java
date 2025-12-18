@@ -1,12 +1,12 @@
-package com.atakmap.android.soothsayer;
+package com.cloudrf.android.soothsayer;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.atakmap.android.maps.MapItem;
-import com.atakmap.android.soothsayer.layers.PluginMapOverlay;
-import com.atakmap.android.soothsayer.plugin.R;
+import com.cloudrf.android.soothsayer.layers.PluginMapOverlay;
+import com.cloudrf.android.soothsayer.plugin.R;
 import com.atakmap.android.dropdown.DropDownMapComponent;
 import com.atakmap.android.ipc.AtakBroadcast.DocumentedIntentFilter;
 import com.atakmap.android.maps.MapView;

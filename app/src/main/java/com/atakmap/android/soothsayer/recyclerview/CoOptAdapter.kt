@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer.recyclerview
+package com.cloudrf.android.soothsayer.recyclerview
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -13,8 +13,8 @@ import com.atakmap.android.maps.Marker
 import com.atakmap.android.maps.PointMapItem
 import com.atakmap.android.maps.MapView
 import com.atakmap.android.hierarchy.items.MapItemHierarchyListItem
-import com.atakmap.android.soothsayer.models.request.TemplateDataModel
-import com.atakmap.android.soothsayer.plugin.R
+import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
+import com.cloudrf.android.soothsayer.plugin.R
 import android.graphics.drawable.GradientDrawable
 import com.atakmap.android.preference.AtakPreferences
 import com.google.gson.Gson

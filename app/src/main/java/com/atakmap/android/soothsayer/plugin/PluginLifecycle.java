@@ -1,10 +1,10 @@
 
-package com.atakmap.android.soothsayer.plugin;
+package com.cloudrf.android.soothsayer.plugin;
 
 
 import com.atak.plugins.impl.AbstractPlugin;
 import com.atak.plugins.impl.PluginContextProvider;
-import com.atakmap.android.soothsayer.PluginMapComponent;
+import com.cloudrf.android.soothsayer.PluginMapComponent;
 import gov.tak.api.plugin.IServiceController;
 
 

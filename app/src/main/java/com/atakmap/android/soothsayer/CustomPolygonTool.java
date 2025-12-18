@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer;
+package com.cloudrf.android.soothsayer;
 
 import android.graphics.Color;
 import com.atakmap.android.drawing.mapItems.DrawingShape;

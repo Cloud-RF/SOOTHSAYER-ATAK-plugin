@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer.models.linksmodel
+package com.cloudrf.android.soothsayer.models.linksmodel
 
 import com.google.gson.annotations.SerializedName
 

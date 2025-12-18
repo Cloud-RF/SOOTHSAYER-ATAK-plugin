@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer
+package com.cloudrf.android.soothsayer
 
 import android.graphics.Bitmap
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.atakmap.android.soothsayer.plugin.R
+import com.cloudrf.android.soothsayer.plugin.R
 
 class TemplateIconsRecyclerViewAdapter(private val items: MutableList<Bitmap?>, private val iconView: ImageView?, private val iconPickerLayout: LinearLayout?, private val newTemplateLayout: LinearLayout?) :
     RecyclerView.Adapter<TemplateIconsRecyclerViewAdapter.ViewHolder>() {

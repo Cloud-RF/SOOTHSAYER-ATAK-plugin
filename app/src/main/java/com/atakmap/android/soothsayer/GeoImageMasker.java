@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer;
+package com.cloudrf.android.soothsayer;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

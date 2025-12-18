@@ -1,8 +1,8 @@
 
-package com.atakmap.android.soothsayer.plugin;
+package com.cloudrf.android.soothsayer.plugin;
 
 import com.atak.plugins.impl.AbstractPluginTool;
-import com.atakmap.android.soothsayer.PluginDropDownReceiver;
+import com.cloudrf.android.soothsayer.PluginDropDownReceiver;
 import gov.tak.api.util.Disposable;
 
 import android.content.Context;

@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer
+package com.cloudrf.android.soothsayer
 
 import android.content.Context
 import android.graphics.Color
@@ -11,7 +11,7 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.Switch
 import android.widget.TextView
-import com.atakmap.android.soothsayer.plugin.R
+import com.cloudrf.android.soothsayer.plugin.R
 import java.lang.ref.WeakReference
 
 class SettingsLinksController(

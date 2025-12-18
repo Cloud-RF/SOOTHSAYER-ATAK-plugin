@@ -1,10 +1,10 @@
-package com.atakmap.android.soothsayer.util
+package com.cloudrf.android.soothsayer.util
 
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
-import com.atakmap.android.soothsayer.models.request.TemplateDataModel
+import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
 import com.google.gson.Gson
 import com.google.gson.stream.JsonToken
 import java.io.BufferedInputStream

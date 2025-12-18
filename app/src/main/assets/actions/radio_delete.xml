@@ -10,7 +10,7 @@
     </broadcast>
     
     <broadcast>
-        <action>com.atakmap.android.soothsayer.RADIO_DELETE</action>
+        <action>com.cloudrf.android.soothsayer.RADIO_DELETE</action>
         <extras>
             <string key='uid'>${uid}</string>
         </extras>

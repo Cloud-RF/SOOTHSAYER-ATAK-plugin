@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer.util
+package com.cloudrf.android.soothsayer.util
 
 import com.atakmap.android.maps.Polyline
 

@@ -1,5 +1,5 @@
 
-package com.atakmap.android.soothsayer.layers;
+package com.cloudrf.android.soothsayer.layers;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +13,7 @@ import android.widget.CompoundButton;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.atakmap.android.soothsayer.plugin.R;
+import com.cloudrf.android.soothsayer.plugin.R;
 import com.atakmap.android.hierarchy.HierarchyListAdapter;
 import com.atakmap.android.hierarchy.HierarchyListFilter;
 import com.atakmap.android.hierarchy.HierarchyListItem;

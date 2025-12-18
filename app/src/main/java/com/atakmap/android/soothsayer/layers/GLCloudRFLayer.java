@@ -1,5 +1,5 @@
 
-package com.atakmap.android.soothsayer.layers;
+package com.cloudrf.android.soothsayer.layers;
 
 import android.graphics.Bitmap;
 import android.util.Pair;

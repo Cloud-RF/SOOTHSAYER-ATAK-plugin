@@ -4,16 +4,16 @@
 
 <!--    <extension-->
 <!--        type="transapps.maps.plugin.lifecycle.Lifecycle"-->
-<!--        impl="com.atakmap.android.soothsayer.plugin.PluginLifecycle"-->
+<!--        impl="com.cloudrf.android.soothsayer.plugin.PluginLifecycle"-->
 <!--        singleton="true" />-->
     <extension
         type="gov.tak.api.plugin.IPlugin"
-        impl="com.atakmap.android.soothsayer.plugin.PluginLifecycle"
+        impl="com.cloudrf.android.soothsayer.plugin.PluginLifecycle"
         singleton="true" />
 
     <extension
         type="transapps.maps.plugin.tool.ToolDescriptor"
-        impl="com.atakmap.android.soothsayer.plugin.PluginToolDescriptor"
+        impl="com.cloudrf.android.soothsayer.plugin.PluginToolDescriptor"
         singleton="true" />
 
 </plugin>

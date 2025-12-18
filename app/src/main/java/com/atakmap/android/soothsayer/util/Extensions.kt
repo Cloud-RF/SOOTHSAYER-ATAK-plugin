@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer.util
+package com.cloudrf.android.soothsayer.util
 
 import android.app.AlertDialog
 import android.content.Context
@@ -23,8 +23,8 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
-import com.atakmap.android.soothsayer.PluginDropDownReceiver
-import com.atakmap.android.soothsayer.models.request.TemplateDataModel
+import com.cloudrf.android.soothsayer.PluginDropDownReceiver
+import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
 import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream

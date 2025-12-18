@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer
+package com.cloudrf.android.soothsayer
 
 import android.content.Context
 import android.content.Intent
@@ -17,18 +17,18 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atakmap.android.maps.MapView
 import com.atakmap.android.preference.AtakPreferences
-import com.atakmap.android.soothsayer.TemplateRecyclerViewAdapter.Companion.MAX_ITEMS
-import com.atakmap.android.soothsayer.models.request.TemplateDataModel
-import com.atakmap.android.soothsayer.plugin.R
-import com.atakmap.android.soothsayer.util.createAndStoreDownloadedFile
-import com.atakmap.android.soothsayer.util.findFileInFolder
-import com.atakmap.android.soothsayer.util.getBitmap
-import com.atakmap.android.soothsayer.util.jsonFile
-import com.atakmap.android.soothsayer.util.saveSettingTemplateListToPref
-import com.atakmap.android.soothsayer.util.showAlert
-import com.atakmap.android.soothsayer.util.toDataUri
-import com.atakmap.android.soothsayer.util.toast
-import com.atakmap.android.soothsayer.util.zipTemplates
+import com.cloudrf.android.soothsayer.TemplateRecyclerViewAdapter.Companion.MAX_ITEMS
+import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
+import com.cloudrf.android.soothsayer.plugin.R
+import com.cloudrf.android.soothsayer.util.createAndStoreDownloadedFile
+import com.cloudrf.android.soothsayer.util.findFileInFolder
+import com.cloudrf.android.soothsayer.util.getBitmap
+import com.cloudrf.android.soothsayer.util.jsonFile
+import com.cloudrf.android.soothsayer.util.saveSettingTemplateListToPref
+import com.cloudrf.android.soothsayer.util.showAlert
+import com.cloudrf.android.soothsayer.util.toDataUri
+import com.cloudrf.android.soothsayer.util.toast
+import com.cloudrf.android.soothsayer.util.zipTemplates
 import java.io.File
 import java.lang.ref.WeakReference
 

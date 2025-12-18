@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer
+package com.cloudrf.android.soothsayer
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -49,58 +49,58 @@ import com.atakmap.android.maps.MapView
 import com.atakmap.android.maps.Marker
 import com.atakmap.android.maps.PointMapItem
 import com.atakmap.android.preference.AtakPreferences
-import com.atakmap.android.soothsayer.TemplateRecyclerViewAdapter.Companion.MAX_ITEMS
-import com.atakmap.android.soothsayer.interfaces.CloudRFLayerListener
-import com.atakmap.android.soothsayer.layers.CloudRFLayer
-import com.atakmap.android.soothsayer.layers.GLCloudRFLayer
-import com.atakmap.android.soothsayer.layers.PluginMapOverlay
-import com.atakmap.android.soothsayer.models.common.CoOptedMarkerSettings
-import com.atakmap.android.soothsayer.models.common.MarkerDataModel
-import com.atakmap.android.soothsayer.models.linksmodel.LinkDataModel
-import com.atakmap.android.soothsayer.models.linksmodel.LinkResponse
-import com.atakmap.android.soothsayer.models.request.MultisiteRequest
-import com.atakmap.android.soothsayer.models.request.TemplateDataModel
-import com.atakmap.android.soothsayer.models.response.LoginResponse
-import com.atakmap.android.soothsayer.models.response.ResponseModel
-import com.atakmap.android.soothsayer.models.response.TemplatesResponse
-import com.atakmap.android.soothsayer.models.response.TemplatesResponseItem
-import com.atakmap.android.soothsayer.network.remote.RetrofitClient
-import com.atakmap.android.soothsayer.network.repository.PluginRepository
-import com.atakmap.android.soothsayer.plugin.R
-import com.atakmap.android.soothsayer.recyclerview.CoOptAdapter
-import com.atakmap.android.soothsayer.recyclerview.RecyclerViewAdapter
-import com.atakmap.android.soothsayer.util.CalculationManager
-import com.atakmap.android.soothsayer.util.Constant
-import com.atakmap.android.soothsayer.util.FOLDER_PATH
-import com.atakmap.android.soothsayer.util.PNG_IMAGE
-import com.atakmap.android.soothsayer.util.addCustomMarker
-import com.atakmap.android.soothsayer.util.createAndStoreDownloadedFile
-import com.atakmap.android.soothsayer.util.createAndStoreFiles
-import com.atakmap.android.soothsayer.util.delete
-import com.atakmap.android.soothsayer.util.deleteFilesMatchingTemplates
-import com.atakmap.android.soothsayer.util.drawLinksForResponse
-import com.atakmap.android.soothsayer.util.getAllAvailableMarkers
-import com.atakmap.android.soothsayer.util.getAllFilesFromAssets
-import com.atakmap.android.soothsayer.util.getBitmap
-import com.atakmap.android.soothsayer.util.getFileName
-import com.atakmap.android.soothsayer.util.getModifiedMarker
-import com.atakmap.android.soothsayer.util.getModifiedReceiver
-import com.atakmap.android.soothsayer.util.getSettingTemplateListFromPref
-import com.atakmap.android.soothsayer.util.getTemplatesFromFolder
-import com.atakmap.android.soothsayer.util.handleShowPlugin
-import com.atakmap.android.soothsayer.util.isConnected
-import com.atakmap.android.soothsayer.util.removeLinkLinesFromMap
-import com.atakmap.android.soothsayer.util.removeMarkerFromMap
-import com.atakmap.android.soothsayer.util.runCoOptUpdate
-import com.atakmap.android.soothsayer.util.saveMarkerListToPref
-import com.atakmap.android.soothsayer.util.saveSettingTemplateListToPref
-import com.atakmap.android.soothsayer.util.setSpannableText
-import com.atakmap.android.soothsayer.util.shortToast
-import com.atakmap.android.soothsayer.util.showAlert
-import com.atakmap.android.soothsayer.util.sortMarkersWithCheckedFirst
-import com.atakmap.android.soothsayer.util.toBase64String
-import com.atakmap.android.soothsayer.util.toLinkDataModel
-import com.atakmap.android.soothsayer.util.toast
+import com.cloudrf.android.soothsayer.TemplateRecyclerViewAdapter.Companion.MAX_ITEMS
+import com.cloudrf.android.soothsayer.interfaces.CloudRFLayerListener
+import com.cloudrf.android.soothsayer.layers.CloudRFLayer
+import com.cloudrf.android.soothsayer.layers.GLCloudRFLayer
+import com.cloudrf.android.soothsayer.layers.PluginMapOverlay
+import com.cloudrf.android.soothsayer.models.common.CoOptedMarkerSettings
+import com.cloudrf.android.soothsayer.models.common.MarkerDataModel
+import com.cloudrf.android.soothsayer.models.linksmodel.LinkDataModel
+import com.cloudrf.android.soothsayer.models.linksmodel.LinkResponse
+import com.cloudrf.android.soothsayer.models.request.MultisiteRequest
+import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
+import com.cloudrf.android.soothsayer.models.response.LoginResponse
+import com.cloudrf.android.soothsayer.models.response.ResponseModel
+import com.cloudrf.android.soothsayer.models.response.TemplatesResponse
+import com.cloudrf.android.soothsayer.models.response.TemplatesResponseItem
+import com.cloudrf.android.soothsayer.network.remote.RetrofitClient
+import com.cloudrf.android.soothsayer.network.repository.PluginRepository
+import com.cloudrf.android.soothsayer.plugin.R
+import com.cloudrf.android.soothsayer.recyclerview.CoOptAdapter
+import com.cloudrf.android.soothsayer.recyclerview.RecyclerViewAdapter
+import com.cloudrf.android.soothsayer.util.CalculationManager
+import com.cloudrf.android.soothsayer.util.Constant
+import com.cloudrf.android.soothsayer.util.FOLDER_PATH
+import com.cloudrf.android.soothsayer.util.PNG_IMAGE
+import com.cloudrf.android.soothsayer.util.addCustomMarker
+import com.cloudrf.android.soothsayer.util.createAndStoreDownloadedFile
+import com.cloudrf.android.soothsayer.util.createAndStoreFiles
+import com.cloudrf.android.soothsayer.util.delete
+import com.cloudrf.android.soothsayer.util.deleteFilesMatchingTemplates
+import com.cloudrf.android.soothsayer.util.drawLinksForResponse
+import com.cloudrf.android.soothsayer.util.getAllAvailableMarkers
+import com.cloudrf.android.soothsayer.util.getAllFilesFromAssets
+import com.cloudrf.android.soothsayer.util.getBitmap
+import com.cloudrf.android.soothsayer.util.getFileName
+import com.cloudrf.android.soothsayer.util.getModifiedMarker
+import com.cloudrf.android.soothsayer.util.getModifiedReceiver
+import com.cloudrf.android.soothsayer.util.getSettingTemplateListFromPref
+import com.cloudrf.android.soothsayer.util.getTemplatesFromFolder
+import com.cloudrf.android.soothsayer.util.handleShowPlugin
+import com.cloudrf.android.soothsayer.util.isConnected
+import com.cloudrf.android.soothsayer.util.removeLinkLinesFromMap
+import com.cloudrf.android.soothsayer.util.removeMarkerFromMap
+import com.cloudrf.android.soothsayer.util.runCoOptUpdate
+import com.cloudrf.android.soothsayer.util.saveMarkerListToPref
+import com.cloudrf.android.soothsayer.util.saveSettingTemplateListToPref
+import com.cloudrf.android.soothsayer.util.setSpannableText
+import com.cloudrf.android.soothsayer.util.shortToast
+import com.cloudrf.android.soothsayer.util.showAlert
+import com.cloudrf.android.soothsayer.util.sortMarkersWithCheckedFirst
+import com.cloudrf.android.soothsayer.util.toBase64String
+import com.cloudrf.android.soothsayer.util.toLinkDataModel
+import com.cloudrf.android.soothsayer.util.toast
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.map.layer.opengl.GLLayerFactory
@@ -1330,16 +1330,16 @@ class PluginDropDownReceiver(
 
     companion object {
         const val TAG = "SOOTHSAYER"
-        const val SHOW_PLUGIN = "com.atakmap.android.soothsayer.SHOW_PLUGIN"
-        const val LAYER_VISIBILITY = "com.atakmap.android.soothsayer.LAYER_VISIBILITY"
-        const val LAYER_DELETE = "com.atakmap.android.soothsayer.LAYER_DELETE"
+        const val SHOW_PLUGIN = "com.cloudrf.android.soothsayer.SHOW_PLUGIN"
+        const val LAYER_VISIBILITY = "com.cloudrf.android.soothsayer.LAYER_VISIBILITY"
+        const val LAYER_DELETE = "com.cloudrf.android.soothsayer.LAYER_DELETE"
         const val GRG_DELETE = "com.atakmap.android.grg.DELETE"
         const val GRG_TOGGLE_VISIBILITY = "com.atakmap.android.grg.TOGGLE_VISIBILITY"
         const val GRG_BRIGHTNESS = "com.atakmap.android.grg.BRIGHTNESS"
         const val GRG_COLOR = "com.atakmap.android.grg.COLOR"
         const val GRG_TRANSPARENCY = "com.atakmap.android.grg.TRANSPARENCY"
         const val RADIO_EDIT = "com.atakmap.android.maps.EDIT_DETAILS"
-        const val RADIO_DELETE = "com.atakmap.android.soothsayer.RADIO_DELETE"
+        const val RADIO_DELETE = "com.cloudrf.android.soothsayer.RADIO_DELETE"
     }
 
     var names = arrayOf("")

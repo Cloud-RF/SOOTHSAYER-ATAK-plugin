@@ -16,6 +16,8 @@ buildscript {
 
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+
+        classpath("com.android.tools.build:bundletool:1.16.0")
     }
 
 

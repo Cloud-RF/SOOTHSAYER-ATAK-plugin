@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer.models.response
+package com.cloudrf.android.soothsayer.models.response
 
 class TemplatesResponse : ArrayList<TemplatesResponseItem>()
 

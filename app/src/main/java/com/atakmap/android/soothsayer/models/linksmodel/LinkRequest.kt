@@ -1,8 +1,8 @@
-package com.atakmap.android.soothsayer.models.linksmodel
+package com.cloudrf.android.soothsayer.models.linksmodel
 
-import com.atakmap.android.soothsayer.models.request.*
-import com.atakmap.android.soothsayer.models.request.Receiver
-import com.atakmap.android.soothsayer.models.request.Transmitter
+import com.cloudrf.android.soothsayer.models.request.*
+import com.cloudrf.android.soothsayer.models.request.Receiver
+import com.cloudrf.android.soothsayer.models.request.Transmitter
 
 data class LinkRequest(
     val antenna: Antenna?,

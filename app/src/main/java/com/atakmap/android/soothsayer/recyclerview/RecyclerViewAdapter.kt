@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer.recyclerview
+package com.cloudrf.android.soothsayer.recyclerview
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -10,11 +10,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.atakmap.android.soothsayer.models.common.MarkerDataModel
-import com.atakmap.android.soothsayer.plugin.R
+import com.cloudrf.android.soothsayer.models.common.MarkerDataModel
+import com.cloudrf.android.soothsayer.plugin.R
 import com.atakmap.android.maps.MapView
-import com.atakmap.android.soothsayer.PluginDropDownReceiver
-import com.atakmap.android.soothsayer.util.base64StringToBitmap
+import com.cloudrf.android.soothsayer.PluginDropDownReceiver
+import com.cloudrf.android.soothsayer.util.base64StringToBitmap
 import com.atakmap.coremap.log.Log
 
 /**

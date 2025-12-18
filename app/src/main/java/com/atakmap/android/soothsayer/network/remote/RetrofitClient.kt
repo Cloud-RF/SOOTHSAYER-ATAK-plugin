@@ -1,7 +1,7 @@
-package com.atakmap.android.soothsayer.network.remote
+package com.cloudrf.android.soothsayer.network.remote
 
-import com.atakmap.android.soothsayer.network.ApiService
-import com.atakmap.android.soothsayer.util.Constant
+import com.cloudrf.android.soothsayer.network.ApiService
+import com.cloudrf.android.soothsayer.util.Constant
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response

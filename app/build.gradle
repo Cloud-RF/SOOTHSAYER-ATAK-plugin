@@ -92,8 +92,6 @@ apply plugin: 'kotlin-android'
 android {
     compileSdkVersion 35
     buildToolsVersion "30.0.3"
-    versionCode 2
-    versionName "2.5.3"
 
     dexOptions {
         jumboMode = true
@@ -179,7 +177,8 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        //noinspection EditedTargetSdkVersion
+        versionCode 2
+        versionName "2.5.3"
         targetSdkVersion 35
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86"

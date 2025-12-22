@@ -79,7 +79,6 @@
 ## Messing with any settings above this line will also make you cool
 ######################################################################
 
-
 -repackageclasses atakplugin.soothsayer
 
 -keep class kotlin.** {*;}

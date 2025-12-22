@@ -8,7 +8,7 @@
 
 buildscript {
 
-    ext.PLUGIN_VERSION = "2.5.2"
+    ext.PLUGIN_VERSION = "2.5.3"
     ext.ATAK_VERSION = "5.4.0"
 
     def takdevVersion = '2.+'
@@ -92,6 +92,8 @@ apply plugin: 'kotlin-android'
 android {
     compileSdkVersion 35
     buildToolsVersion "30.0.3"
+    versionCode 2
+    versionName "2.5.3"
 
     dexOptions {
         jumboMode = true

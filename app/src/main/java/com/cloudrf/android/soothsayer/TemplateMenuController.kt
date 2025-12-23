@@ -286,7 +286,7 @@ class TemplateMenuController(
                 toZipFromSelected.add(item.first)
             }
         }
-        if (toZipFromSelected.isEmpty) {
+        if (toZipFromSelected.isEmpty()) {
             context()?.toast("Please select templates to share")
             return
         }

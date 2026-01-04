@@ -2,13 +2,15 @@
 
 This plugin is a client to the CloudRF / SOOTHSAYER [radio planning API](https://cloudrf.com/documentation/developer/). 
 
-Users can task the `Area`, `Multisite`, `Points` and `Satellite` APIs to plan future communications deployments as well as **visualise live coverage** for callsigns.
+Users can task the `Area`, `Multisite`, `Points` and `Satellite` APIs to plan future communications deployments as well as **visualise live coverage** for moving callsigns.
 
 ![SOOTHSAYER ATAK plugin](help/main.png "SOOTHSAYER ATAK plugin")
 
 # Latest release
 
-The **latest signed release is 2.3** (24th August 2025) and is available to download [here](https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin/releases).
+The **latest signed release is 2.5.3** (23rd December 2025), built for ATAK 5.6, is available to download [here](https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin/releases).
+
+![https://play.google.com/store/apps/details?id=com.cloudrf.android.soothsayer.plugin](help/googleplay.png "Get it on Google Play")
 
 ## Points of Contact
 

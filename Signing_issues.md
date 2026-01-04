@@ -131,13 +131,13 @@ Remove the "android.enableR8=false" line entirely! Trust me.
     -keep class module-info
 
     # Change soothsayer to your plugin name
-    -keepclassmembers class com.atakmap.android.soothsayer.interfaces.** { *; }
-    -keepclassmembers class com.atakmap.android.soothsayer.layers.** { *; }
-    -keepclassmembers class com.atakmap.android.soothsayer.models.** { *; }
-    -keepclassmembers class com.atakmap.android.soothsayer.network.** { *; }
-    -keepclassmembers class com.atakmap.android.soothsayer.recyclerview.** { *; }
-    -keepclassmembers class com.atakmap.android.soothsayer.util.** { *; }
-    -keepclassmembers class com.atakmap.android.soothsayer.plugin.** { *; }
+    -keepclassmembers class com.cloudrf.android.soothsayer.interfaces.** { *; }
+    -keepclassmembers class com.cloudrf.android.soothsayer.layers.** { *; }
+    -keepclassmembers class com.cloudrf.android.soothsayer.models.** { *; }
+    -keepclassmembers class com.cloudrf.android.soothsayer.network.** { *; }
+    -keepclassmembers class com.cloudrf.android.soothsayer.recyclerview.** { *; }
+    -keepclassmembers class com.cloudrf.android.soothsayer.util.** { *; }
+    -keepclassmembers class com.cloudrf.android.soothsayer.plugin.** { *; }
     -keepclassmembers class com.atakmap.android.maps.** { *; }
 
     # this is from trying to sign for 4.8 / switching to ProGuard from R8

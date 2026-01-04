@@ -155,7 +155,7 @@
                 android:background="@drawable/et_background"
                 android:prompt="@string/template_option_prompt" />
 
-            <com.atakmap.android.soothsayer.recyclerview.RecyclerView
+            <com.cloudrf.android.soothsayer.recyclerview.RecyclerView
                 android:id="@+id/rvTemplates"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

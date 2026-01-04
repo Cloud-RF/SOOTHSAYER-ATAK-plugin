@@ -116,6 +116,6 @@
         android:id="@+id/textView5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Use with care. Setting these too low can generate a lot of API calls and network traffic. Recommended settings are a 20s refresh for a dynamic map OR a 100m distance trigger for less frequent requests" />
+        android:text="Recommended settings are a 30s refresh for a dynamic map OR a 100m distance trigger for less frequent requests" />
 
 </LinearLayout>

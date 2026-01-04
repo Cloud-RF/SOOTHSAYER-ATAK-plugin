@@ -172,7 +172,8 @@
             android:background="@drawable/btn_gray"
             android:paddingHorizontal="@dimen/dp_3"
             android:paddingVertical="@dimen/dp_3"
-            android:src="@drawable/spotbeam_marker_icon" />
+            android:src="@drawable/spotbeam_marker_icon"
+            android:visibility="invisible" />
 
         <View
             android:layout_width="0dp"

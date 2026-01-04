@@ -75,13 +75,9 @@
 -keep class * extends com.atak.plugins.impl.AbstractPluginTool {
 }
 
-# overcome an existing bug in the gradle subsystem (3.5.x)
--keep class module-info
-
 ######################################################################
 ## Messing with any settings above this line will also make you cool
 ######################################################################
-
 
 -repackageclasses atakplugin.soothsayer
 
@@ -90,13 +86,13 @@
 -keep class androidx.** {*;}
 
 # Change soothsayer to your plugin name
--keepclassmembers class com.atakmap.android.soothsayer.interfaces.** { *; }
--keepclassmembers class com.atakmap.android.soothsayer.layers.** { *; }
--keepclassmembers class com.atakmap.android.soothsayer.models.** { *; }
--keepclassmembers class com.atakmap.android.soothsayer.network.** { *; }
--keepclassmembers class com.atakmap.android.soothsayer.recyclerview.** { *; }
--keepclassmembers class com.atakmap.android.soothsayer.util.** { *; }
--keepclassmembers class com.atakmap.android.soothsayer.plugin.** { *; }
+-keepclassmembers class com.cloudrf.android.soothsayer.interfaces.** { *; }
+-keepclassmembers class com.cloudrf.android.soothsayer.layers.** { *; }
+-keepclassmembers class com.cloudrf.android.soothsayer.models.** { *; }
+-keepclassmembers class com.cloudrf.android.soothsayer.network.** { *; }
+-keepclassmembers class com.cloudrf.android.soothsayer.recyclerview.** { *; }
+-keepclassmembers class com.cloudrf.android.soothsayer.util.** { *; }
+-keepclassmembers class com.cloudrf.android.soothsayer.plugin.** { *; }
 -keepclassmembers class com.atakmap.android.maps.** { *; }
 
 
@@ -107,11 +103,12 @@
 -keep class kotlin.coroutines.** {*;}
 -keep class kotlin.collections.** {*;}
 -keep class com.squareup.** {*;}  # okhttp3 crashes at runtime
+-keep class retrofit2.** { *; }
+-keep class com.google.gson.** { *; }
 -keep class * implements gov.tak.api.plugin.IPlugin {
 }
 
 # suppress warnings
--dontwarn module-info
 -dontwarn java.awt.**
 -dontwarn org.xmlpull.**
 -dontwarn org.xml.sax.ContentHandler
@@ -138,6 +135,10 @@
 -dontwarn org.codehaus.groovy.**
 -dontwarn org.gradle.api.**
 
+# Regression in 2.5 for login form despite this being old
+-dontwarn okio.**
+-dontwarn okhttp3.**
+-dontwarn retrofit2.**
 
-
-
+# Following retrofit and okhttp upgrade
+-dontwarn javax.lang.model.**

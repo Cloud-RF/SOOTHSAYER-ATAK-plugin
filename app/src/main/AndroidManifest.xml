@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.atakmap.android.soothsayer.plugin"
     tools:ignore="GoogleAppIndexingWarning">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -12,7 +11,6 @@
         android:label="@string/app_name"
         android:largeHeap="true"
         android:description="@string/app_desc"
-        android:extractNativeLibs="true"
         android:theme="@style/AppTheme" >
         <meta-data android:name="plugin-api" android:value="${atakApiVersion}"/>
         <meta-data android:name="app_desc" android:value="@string/app_desc"/>
@@ -29,7 +27,7 @@
            </intent-filter>
        </activity>
 
-        <activity android:name="com.atakmap.android.soothsayer.FilePickerActivity"
+        <activity android:name="com.cloudrf.android.soothsayer.FilePickerActivity"
             android:exported="true"
             android:process=":atak"
             android:excludeFromRecents="true"/>

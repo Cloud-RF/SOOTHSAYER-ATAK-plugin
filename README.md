@@ -10,7 +10,7 @@ Users can task the `Area`, `Multisite`, `Points` and `Satellite` APIs to plan fu
 
 The **latest signed release is 2.5.3** (23rd December 2025), built for ATAK 5.6, is available to download [here](https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin/releases).
 
-![https://play.google.com/store/apps/details?id=com.cloudrf.android.soothsayer.plugin](help/googleplay.png "Get it on Google Play")
+[![Get it on Google Play](help/googleplay.png)](https://play.google.com/store/apps/details?id=com.cloudrf.android.soothsayer.plugin)
 
 ## Points of Contact
 

@@ -31,8 +31,8 @@ import javax.net.ssl.X509TrustManager
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import android.os.SystemClock
-import com.atakmap.android.soothsayer.models.request.BestSiteRequestModel
-import com.atakmap.android.soothsayer.models.response.BestSiteResponse
+import com.cloudrf.android.soothsayer.models.request.BestSiteRequestModel
+import com.cloudrf.android.soothsayer.models.response.BestSiteResponse
 
 
 class PluginRepository {

@@ -5,7 +5,7 @@ import com.atakmap.android.drawing.mapItems.DrawingShape;
 import com.atakmap.android.maps.MapView;
 import com.atakmap.android.maps.Shape;
 import com.atakmap.android.routes.routearound.ShapeToolUtils;
-import com.atakmap.android.soothsayer.interfaces.CustomPolygonInterface;
+import com.cloudrf.android.soothsayer.interfaces.CustomPolygonInterface;
 
 public class CustomPolygonTool {
     public static final String FLAG = "RF box";

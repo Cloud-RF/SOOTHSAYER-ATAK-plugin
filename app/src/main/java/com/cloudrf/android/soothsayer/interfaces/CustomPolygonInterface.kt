@@ -1,4 +1,4 @@
-package com.atakmap.android.soothsayer.interfaces
+package com.cloudrf.android.soothsayer.interfaces
 
 import com.atakmap.android.maps.Shape
 

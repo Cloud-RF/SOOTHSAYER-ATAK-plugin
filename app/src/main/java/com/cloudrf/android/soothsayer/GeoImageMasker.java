@@ -24,10 +24,10 @@ public class GeoImageMasker {
      * A helper class that encapsulates the geographic bounds of a set of points.
      */
     public static class Bounds {
-        private double north;
-        private double south;
-        private double east;
-        private double west;
+        public double north;
+        public double south;
+        public double east;
+        public double west;
 
         /**
          * Constructs a new Bounds object.
@@ -141,7 +141,7 @@ public class GeoImageMasker {
         return new Bounds(north, south, east, west);
     }
 
-    public static Bitmap cropImage(Bitmap bm, Bounds imageBounds, DrawingShape ds, Boolean isBsaLayer) {
+    public static Bitmap cropImage(Bitmap bm, Bounds imageBounds, DrawingShape ds, Boolean bsa) {
 
         if (ds == null || !ds.isClosed()) {
             throw new IllegalArgumentException("Invalid input: DrawingShape needs to be a valid closed polygon");
@@ -149,7 +149,7 @@ public class GeoImageMasker {
 
         GeoPoint[] points = ds.getPoints();
 
-        return cropImage(bm, imageBounds, points, isBsaLayer);
+        return cropImage(bm, imageBounds, points, bsa);
     }
 
     /**
@@ -167,7 +167,7 @@ public class GeoImageMasker {
      * @return a new Bitmap containing only the cropped area inside the polygon
      * @throws IllegalArgumentException if any of the inputs are invalid
      */
-    public static Bitmap cropImage(Bitmap bm, Bounds imageBounds, GeoPoint[] points, Boolean isBsaLayer) {
+    public static Bitmap cropImage(Bitmap bm, Bounds imageBounds, GeoPoint[] points, Boolean bsa) {
 
         if (bm == null || points == null || points.length == 0 || imageBounds == null) {
             throw new IllegalArgumentException("Invalid input: Bitmap, points, or bounds are not valid.");
@@ -217,29 +217,54 @@ public class GeoImageMasker {
         Bitmap result = Bitmap.createBitmap(imgWidth, imgHeight, Bitmap.Config.ARGB_8888);
         Canvas resultCanvas = new Canvas(result);
         Paint resultPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        resultCanvas.drawBitmap(bm, 0, 0, resultPaint);
+
+        Bitmap myBitmap = bm.copy( Bitmap.Config.ARGB_8888 , true);
+
+        // restyle greyscale BSA to ice schema
+        if(bsa){
+            for (int x=0; x<myBitmap.getWidth(); x++)
+                for (int y=0; y<myBitmap.getHeight(); y++) {
+
+                    // sample red channel for intensity where white is best signal, black is worst
+                    int px = (myBitmap.getPixel(x, y) >> 16) & 0xff; // Red
+
+                    /*
+                    90% = 229
+                    75% = 191
+                    60% = 153
+                    45% = 115
+                    30% = 76
+                     */
+
+                    // Transparent
+                    int Colour = Color.argb(0, 255, 255, 255);
+
+                    if(px > 76) {
+                        Colour = Color.argb(127, 194, 26, 255);
+                    }
+                    if(px > 115) {
+                        Colour = Color.argb(127, 208, 83, 191);
+                    }
+                    if(px > 153) {
+                        Colour = Color.argb(147, 223, 141, 128);
+                    }
+                    if(px > 191) {
+                        Colour = Color.argb(167, 237, 198, 64);
+                    }
+                    if(px > 229) {
+                        Colour = Color.argb(187, 251, 255, 0);
+                    }
+                    myBitmap.setPixel(x, y, Colour);
+                }
+        }
+
+        resultCanvas.drawBitmap(myBitmap, 0, 0, resultPaint);
 
         // Apply the mask using DST_IN mode so only the area inside the polygon is retained.
         resultPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
         resultCanvas.drawBitmap(mask, 0, 0, resultPaint);
         resultPaint.setXfermode(null);
 
-
-        // ✅ Draw dotted border ONLY if BSA is true
-        if (isBsaLayer) {
-            Paint borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            borderPaint.setStyle(Paint.Style.STROKE);
-            borderPaint.setColor(Color.WHITE);
-            borderPaint.setStrokeWidth(4f);
-
-            // dotted / dashed effect
-            borderPaint.setPathEffect(new DashPathEffect(
-                    new float[]{12f, 12f}, 0
-            ));
-
-            // Draw dotted border on final canvas
-            resultCanvas.drawPath(path, borderPaint);
-        }
 
         return result;
     }

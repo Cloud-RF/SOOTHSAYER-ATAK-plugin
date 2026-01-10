@@ -43,7 +43,7 @@ public class CloudRFLayer extends AbstractLayer {
 
     public final CloudRFLayerListener cloudRFLayerListener;
 
-    public CloudRFLayer(Context plugin, final String name, final String description, final String uri, final List<Double> bounds, final Boolean isBsaLayer, final CloudRFLayerListener listener) {
+    public CloudRFLayer(Context plugin, final String name, final String description, final String uri, final List<Double> bounds, final CloudRFLayerListener listener, boolean bsa) {
         super(name);
         this.description = description;
         this.fileUri = uri;
@@ -53,16 +53,26 @@ public class CloudRFLayer extends AbstractLayer {
         this.lowerRight = GeoPoint.createMutable();
         this.lowerLeft = GeoPoint.createMutable();
 
+        // Polygon vertices
         DrawingShape polygon = CustomPolygonTool.getMaskingPolygon();
 
         if(polygon != null) {
             GeoImageMasker.Bounds newbounds = GeoImageMasker.getBounds(polygon.getPoints());
-            bitmap = GeoImageMasker.cropImage(BitmapFactory.decodeFile(uri),newbounds,polygon, isBsaLayer);
+
+            // Replace polygon bounds with response bounds as BSA dimensions != Area dimensions
+            if(bsa) {
+                newbounds.north = bounds.get(0);
+                newbounds.east = bounds.get(1);
+                newbounds.south = bounds.get(2);
+                newbounds.west = bounds.get(3);
+            }
+
+            bitmap = GeoImageMasker.cropImage(BitmapFactory.decodeFile(uri),newbounds,polygon,bsa);
         }else{
             bitmap = BitmapFactory.decodeFile(uri);
         }
 
-        //    north, east, south, west
+        //   From API response: north, east, south, west
         if(bounds.size() == 4) {
             upperLeft.set(bounds.get(0), bounds.get(3));  // north, west
             upperRight.set(bounds.get(0), bounds.get(1)); // north,east

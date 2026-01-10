@@ -2,8 +2,10 @@ package com.cloudrf.android.soothsayer.network
 
 import com.cloudrf.android.soothsayer.models.linksmodel.LinkRequest
 import com.cloudrf.android.soothsayer.models.linksmodel.LinkResponse
+import com.cloudrf.android.soothsayer.models.request.BestSiteRequestModel
 import com.cloudrf.android.soothsayer.models.request.MultisiteRequest
 import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
+import com.cloudrf.android.soothsayer.models.response.BestSiteResponse
 import com.cloudrf.android.soothsayer.models.response.LoginResponse
 import com.cloudrf.android.soothsayer.models.response.ResponseModel
 import com.cloudrf.android.soothsayer.models.response.TemplatesResponse

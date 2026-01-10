@@ -28,8 +28,8 @@
                 android:layout_marginTop="3dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
-                android:background="@drawable/btn_gray"
-                android:padding="5dp"
+                android:background="@drawable/new_dark_button_bg"
+                android:padding="6dp"
                 android:src="@drawable/marker_icon_svg" />
 
             <!--
@@ -48,23 +48,23 @@
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
                 android:layout_toRightOf="@id/coOptButton"
-                android:padding="7dp"
+                android:padding="6dp"
                 android:src="@drawable/polygon" />
 
             <ImageButton
                 android:id="@+id/btnBestSiteAnalysis"
                 style="@style/darkButton"
-                android:visibility="gone"
-                tools:visibility="visible"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
-                android:padding="7dp"
                 android:layout_toRightOf="@id/btnAddPolygon"
-                android:src="@drawable/magic_wand" />
+                android:padding="6dp"
+                android:src="@drawable/analysis"
+                android:visibility="visible"
+                tools:visibility="visible" />
 
             <ImageButton
                 android:id="@+id/coOptButton"
@@ -78,7 +78,7 @@
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
                 android:contentDescription="Co-Opt a callsign"
-                android:padding="5dp"
+                android:padding="6dp"
                 android:src="@drawable/ic_sheriff_badge" />
 
             <ImageButton
@@ -107,19 +107,20 @@
                 android:layout_marginBottom="0dp"
                 android:background="@drawable/btn_gray"
                 android:contentDescription="@string/app_name"
-                android:padding="5dp"
+                android:padding="7dp"
                 android:src="@drawable/ic_settings" />
 
             <ImageButton
                 android:id="@+id/btnPlayBtn"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_toRightOf="@id/btnBestSiteAnalysis"
                 android:layout_centerHorizontal="true"
                 android:layout_marginStart="10dp"
+                android:layout_marginLeft="30dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
+                android:layout_toRightOf="@id/btnBestSiteAnalysis"
                 android:background="@drawable/new_dark_button_selected"
                 android:padding="2dp"
                 android:src="@android:drawable/ic_media_play" />
@@ -151,7 +152,7 @@
                 android:id="@+id/spTemplate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp_8"
+                android:layout_marginTop="5dp"
                 android:background="@drawable/et_background"
                 android:prompt="@string/template_option_prompt" />
 
@@ -159,7 +160,7 @@
                 android:id="@+id/rvTemplates"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp_16"
+                android:layout_marginTop="5dp"
                 android:fadeScrollbars="false"
                 android:paddingBottom="@dimen/dp_8" />
         </LinearLayout>

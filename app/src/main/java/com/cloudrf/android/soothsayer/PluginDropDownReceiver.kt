@@ -102,6 +102,8 @@ import com.cloudrf.android.soothsayer.util.sortMarkersWithCheckedFirst
 import com.cloudrf.android.soothsayer.util.toBase64String
 import com.cloudrf.android.soothsayer.util.toLinkDataModel
 import com.cloudrf.android.soothsayer.util.toast
+import com.cloudrf.android.soothsayer.util.BestSiteManager
+import com.cloudrf.android.soothsayer.interfaces.CustomPolygonInterface
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.map.layer.opengl.GLLayerFactory
@@ -315,7 +317,6 @@ class PluginDropDownReceiver(
         val btnAddPolygon = templateView.findViewById<ImageButton>(R.id.btnAddPolygon)
         val btnBestSiteAnalysis = templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis)
         btnBestSiteAnalysis.setOnClickListener {
-            btnBestSiteAnalysis.visibility = View.GONE
             bestSiteManager.performBestSiteAnalysis(selectedMarkerType)
         }
         btnAddPolygon.setOnClickListener {
@@ -323,7 +324,6 @@ class PluginDropDownReceiver(
                 pluginContext.shortToast("Draw a polygon for the study area")
                 CustomPolygonTool.createPolygon(object: CustomPolygonInterface{
                     override fun onPolygonDrawn(polygon: Shape) {
-                        btnBestSiteAnalysis.visibility = View.VISIBLE
                     }
                 })
             }
@@ -825,9 +825,11 @@ class PluginDropDownReceiver(
         if(templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility == View.VISIBLE){
             templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility = View.GONE;
             templateView.findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE;
+            templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis).visibility = View.GONE;
         }else{
             templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility = View.VISIBLE;
             templateView.findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE;
+            templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis).visibility = View.VISIBLE;
         }
 
     }
@@ -854,7 +856,7 @@ class PluginDropDownReceiver(
                                     PNG_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            addLayer(filePath, response.bounds)
+                                            addLayer(filePath, response.bounds, false)
                                             /*addSingleLayer(
                                                 markerData.template.name,
                                                 filePath,
@@ -896,7 +898,7 @@ class PluginDropDownReceiver(
                                     PNG_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            addLayer(filePath, response.bounds)
+                                            addLayer(filePath, response.bounds, false)
                                         }
                                     })
                             }
@@ -970,11 +972,12 @@ class PluginDropDownReceiver(
                 layerName,
                 pluginContext.getString(R.string.layer, layerName),
                 file.absolutePath,
-                bounds, false,object : CloudRFLayerListener {
+                bounds,object : CloudRFLayerListener {
                     override fun delete(layer: CloudRFLayer) {
                         promptDelete(layer)
                     }
-                }
+                },
+                false
             )
         }
 
@@ -991,7 +994,7 @@ class PluginDropDownReceiver(
         }
     }
 
-    fun addLayer(filePath: String, bounds: List<Double>, isBsaLayer: Boolean?=false) {
+    fun addLayer(filePath: String, bounds: List<Double>, bsa: Boolean) {
         val file = File(filePath)
         synchronized(this@PluginDropDownReceiver) {
             if (cloudRFLayer != null) {
@@ -1008,12 +1011,13 @@ class PluginDropDownReceiver(
                     layerName,
                     file.absolutePath,
                     bounds,
-                    isBsaLayer,
                     object : CloudRFLayerListener {
                         override fun delete(layer: CloudRFLayer) {
                             promptDelete(layer)
                         }
-                    })
+                    },
+                    bsa
+                )
         }
 
         cloudRFLayer?.let {

@@ -3,7 +3,7 @@ package com.cloudrf.android.soothsayer.util
 import android.content.Context
 import android.location.Location
 import android.util.Log
-import com.cloudrf.android.drawing.mapItems.DrawingShape
+import com.atakmap.android.drawing.mapItems.DrawingShape
 import com.cloudrf.android.soothsayer.CustomPolygonTool
 import com.cloudrf.android.soothsayer.PluginDropDownReceiver
 import com.cloudrf.android.soothsayer.models.request.Antenna
@@ -17,6 +17,8 @@ import com.cloudrf.android.soothsayer.models.response.BestSiteResponse
 import com.cloudrf.android.soothsayer.network.repository.PluginRepository
 import com.cloudrf.android.soothsayer.plugin.R
 import com.google.gson.Gson
+import kotlin.math.ceil
+import kotlin.math.floor
 
 class BestSiteManager(
     private val pluginContext: Context,
@@ -26,27 +28,30 @@ class BestSiteManager(
 
     fun performBestSiteAnalysis(selectedMarkerType: TemplateDataModel?){
         val polygon = CustomPolygonTool.getMaskingPolygon()
+
         if(polygon == null){
-            pluginContext.shortToast("You need to add the polygon first.")
+            pluginContext.shortToast("Draw a polygon to define the area of interest")
             return
         }
         pluginDropDownReceiver.showHidePlayBtn()
         val request = getBestSiteRequest(selectedMarkerType, polygon)
         repository.performBestSiteAnalysis(request, object : PluginRepository.ApiCallBacks {
             override fun onLoading() {
-                pluginContext.shortToast("Downloading grey scale image.......")
+                pluginContext.shortToast("Calculating radio intervisibility...")
             }
 
             override fun onSuccess(response: Any?) {
                 pluginDropDownReceiver.showHidePlayBtn()
                 if (response is BestSiteResponse) {
                     val greyScaleImage = response.pngWGS84
+                    Log.d("SOOTHSAYER", "response.pngWGS84: ${response.pngWGS84} ")
+
                     // Fetch the PNG image from the JSON response and create a layer using the bounds metadata
                     repository.downloadFile(greyScaleImage,
                         FOLDER_PATH,
                         PNG_IMAGE.getFileName(),
                         listener = { isDownloaded, filePath ->
-                            Log.d("PluginDropDownReceiver", "isDownloaded: $isDownloaded filePath: $filePath")
+                            Log.d("SOOTHSAYER", "isDownloaded: $isDownloaded filePath: $filePath")
                             if (isDownloaded) {
                                 pluginDropDownReceiver.addLayer(filePath, response.bounds, true)
                             }
@@ -69,7 +74,8 @@ class BestSiteManager(
             Antenna(it.ant, "0", 2.0, 1, null, "v", 0, it.txg, 0.0, 1)
         }
         val engine = "1"
-        val environment =  com.cloudrf.android.soothsayer.models.request.Environment("Minimal.clt", 1, 2, 1, 0)
+        // LiDAR mode (DSM=1, Clutter=0)
+        val environment =  com.cloudrf.android.soothsayer.models.request.Environment("Minimal.clt", 0, 1, 0, 0)
         val model=  Model(0, 2, 7, 50)
         val network =  "BSA"
         val `receiver` = template?.receiver?.let { it ->
@@ -82,16 +88,17 @@ class BestSiteManager(
         val transmitter = template?.transmitter?.let { it ->
             Transmitter(it.alt,  it.bwi,it.frq,polyLat,polyLon, it.powerUnit, it.txw )
         }
-        // code commented and tried the 0.001 by multiplying with the value but it didn't worked as needed.
-//                val radius = (polygon.calculateRadius(polyLat, polyLon) * 0.001)
-        val radius = polygon.calculateRadius(polyLat, polyLon)
+
+        // BSA radius is in km and must cover the AOI and be < 100km
+        val radius = (polygon.calculateRadius(polyLat, polyLon)) / 1000; // km
+        val resolution = ceil(radius); // 0.5 = 1m, 3km = 3m, 20km = 20m, 40km = 40m
         val output = template?.output?.let { it ->
-            Output("BESTSITE.bsa", 7, "-120", 7, radius , it.res, "m", null)
+            Output("BESTSITE.bsa", 7, "-120", 7, radius , resolution, "m", null)
         }
         val ui = 3
 
         val request = BestSiteRequestModel(antenna, engine, environment, model, network, output, receiver, site, transmitter, ui )
-        Log.d("PluginDropDownReceiver", "getBestSiteRequest: ${Gson().toJson(request)} ")
+        Log.d("SOOTHSAYER", "getBestSiteRequest: ${Gson().toJson(request)} ")
         return request
     }
 

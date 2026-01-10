@@ -172,3 +172,8 @@ Remove the "android.enableR8=false" line entirely! Trust me.
     distributionUrl=https\://services.gradle.org/distributions/gradle-7.3.3-all.zip
     zipStoreBase=GRADLE_USER_HOME
     zipStorePath=wrapper/dists
+
+# Google Play signing
+Run it through the Third Party Pipeline on tak.gov first then sign the .aab with your Google Play keystore and jartool:
+
+	jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -storepass xxxxxxxxxxx -keystore soothsayer_release.keystore ATAK-Plugin-SOOTHSAYER-xxxxxxxxxxx-civ-release.aab soothsayer

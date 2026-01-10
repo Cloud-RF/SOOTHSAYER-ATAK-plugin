@@ -5,6 +5,7 @@ import com.atakmap.android.drawing.mapItems.DrawingShape;
 import com.atakmap.android.maps.MapView;
 import com.atakmap.android.maps.Shape;
 import com.atakmap.android.routes.routearound.ShapeToolUtils;
+import com.cloudrf.android.soothsayer.interfaces.CustomPolygonInterface;
 
 public class CustomPolygonTool {
     public static final String FLAG = "RF box";
@@ -12,7 +13,7 @@ public class CustomPolygonTool {
     /**
      * Success handler - enriching the created polygon with metadata + setting any custom attributes.
      */
-    private static ShapeToolUtils.Callback<? extends Shape, Object> shapeHandler() {
+    private static ShapeToolUtils.Callback<? extends Shape, Object> shapeHandler(CustomPolygonInterface listener) {
         return new ShapeToolUtils.Callback<Shape, Object>() {
             @Override
             public Object apply(Shape polygon) {
@@ -24,6 +25,7 @@ public class CustomPolygonTool {
 
                 // Only this is mandatory
                 polygon.setMetaString(FLAG, "1");
+                listener.onPolygonDrawn(polygon);
                 return polygon;
             }
         };
@@ -50,10 +52,10 @@ public class CustomPolygonTool {
     /**
      * Initiates the polygon creation process on the map using the defined callbacks.
      */
-    public static void createPolygon() {
+    public static void createPolygon(CustomPolygonInterface listener) {
         ShapeToolUtils shapeUtil = new ShapeToolUtils(MapView.getMapView());
         shapeUtil.runPolygonCreationTool(
-                (ShapeToolUtils.Callback<Shape, Object>) shapeHandler(),
+                (ShapeToolUtils.Callback<Shape, Object>) shapeHandler(listener),
                 errorHandler());
     }
 }

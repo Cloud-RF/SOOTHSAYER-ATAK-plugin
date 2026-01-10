@@ -2,11 +2,14 @@ package com.cloudrf.android.soothsayer.network
 
 import com.cloudrf.android.soothsayer.models.linksmodel.LinkRequest
 import com.cloudrf.android.soothsayer.models.linksmodel.LinkResponse
+import com.cloudrf.android.soothsayer.models.request.BestSiteRequestModel
 import com.cloudrf.android.soothsayer.models.request.MultisiteRequest
 import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
+import com.cloudrf.android.soothsayer.models.response.BestSiteResponse
 import com.cloudrf.android.soothsayer.models.response.LoginResponse
 import com.cloudrf.android.soothsayer.models.response.ResponseModel
 import com.cloudrf.android.soothsayer.models.response.TemplatesResponse
+
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -45,4 +48,9 @@ interface ApiService {
 
     @GET("/template/{id}")
     fun getTemplateDetail(@Path("id") id :Int): Call<TemplateDataModel?>?
+
+    @POST("/bsa")
+    fun bestSiteAnalysis(
+        @Body request: BestSiteRequestModel? = null
+    ): Call<BestSiteResponse>
 }

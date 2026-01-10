@@ -31,6 +31,8 @@ import javax.net.ssl.X509TrustManager
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import android.os.SystemClock
+import com.cloudrf.android.soothsayer.models.request.BestSiteRequestModel
+import com.cloudrf.android.soothsayer.models.response.BestSiteResponse
 
 
 class PluginRepository {
@@ -39,6 +41,7 @@ class PluginRepository {
     private val requestQueue = Executors.newSingleThreadExecutor() // Executes sequentially with 1 thread
 
     companion object {
+        const val TAG = "PluginRepository"
         private var INSTANCE: PluginRepository? = null
 
         fun getInstance() = INSTANCE ?: synchronized(PluginRepository::class.java) {
@@ -144,7 +147,7 @@ class PluginRepository {
                     // folder doesn't exists.
                     val folder = File(downloadFolder)
                     if (!folder.exists()) {
-                        Log.d(PluginDropDownReceiver.TAG, "downloadFile creating  new folder....")
+                        Log.d(TAG, "downloadFile creating  new folder....")
                         folder.mkdirs()
                     }
                     val file = File(downloadFolder, fileName)
@@ -152,7 +155,7 @@ class PluginRepository {
                     inputStream?.copyTo(outputStream)
                     outputStream.close()
                     inputStream?.close()
-                    Log.d(PluginDropDownReceiver.TAG, "downloadFile: close file: path:${file.path}")
+                    Log.d(TAG, "downloadFile: close file: path:${file.path}")
                     listener(file.exists(), file.path)
                 }
             })
@@ -415,6 +418,60 @@ class PluginRepository {
                                 Log.d(
                                     PluginDropDownReceiver.TAG,
                                     "downloadTemplateDetail override fun onFailure called Request ${call.request()}  \n Error: ${t.localizedMessage}"
+                                )
+                                callback?.onFailed(t.message)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                callback?.onFailed(e.printStackTrace().toString())
+                            }
+                        }
+                    })
+            } else {
+                callback?.onFailed("", Constant.ApiErrorCodes.sForbidden)
+            }
+        }
+    }
+
+    fun performBestSiteAnalysis(request: BestSiteRequestModel, callback: ApiCallBacks? = null) {
+        callback?.onLoading()
+        executeThrottled {
+            if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
+                RetrofitClient.apiService()?.bestSiteAnalysis(request)
+                    ?.enqueue(object : Callback<BestSiteResponse?> {
+                        override fun onResponse(
+                            call: Call<BestSiteResponse?>, response: Response<BestSiteResponse?>
+                        ) {
+                            if (response.isSuccessful) {
+                                Log.d(
+                                    TAG,
+                                    "performBestSiteAnalysis success :${response.raw()}\n ${Gson().toJson(response.body())}"
+                                )
+                                callback?.onSuccess(response.body())
+                            } else {
+                                Log.d(
+                                    TAG,
+                                    "performBestSiteAnalysis onFailed called ${response.code()} ${response.raw()} error: ${response.body()} "
+                                )
+                                try {
+                                    val errorObject = JSONObject(response.errorBody()!!.string())
+                                    val errorMessage = errorObject.getString("error")
+                                    Log.d(
+                                        TAG,
+                                        "performBestSiteAnalysis onFailed called error: $errorMessage"
+                                    )
+                                    callback?.onFailed(errorMessage, response.code())
+                                } catch (e: java.lang.Exception) {
+                                    e.printStackTrace()
+                                    callback?.onFailed(response.message(), response.code())
+                                }
+                            }
+                        }
+
+                        override fun onFailure(call: Call<BestSiteResponse?>, t: Throwable) {
+                            try {
+                                Log.d(
+                                    TAG,
+                                    "performBestSiteAnalysis override fun onFailure called Request ${call.request()}  \n Error: ${t.localizedMessage}"
                                 )
                                 callback?.onFailed(t.message)
                             } catch (e: Exception) {

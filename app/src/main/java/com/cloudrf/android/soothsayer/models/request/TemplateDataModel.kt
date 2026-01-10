@@ -30,7 +30,7 @@ data class Antenna(
     var azi: String, // azimuth can be 0 or "0,90,180,270"
     val fbr: Double,
     val hbw: Int,
-    val mode: String,
+    val mode: String?,
     val pol: String,
     val tlt: Int,
     val txg: Double,
@@ -99,6 +99,6 @@ data class Transmitter(
     var frq: Double, // frequency
     var lat: Double,
     var lon: Double,
-    val powerUnit: String,
+    val powerUnit: String?,
     var txw: Double // power
 ): Serializable

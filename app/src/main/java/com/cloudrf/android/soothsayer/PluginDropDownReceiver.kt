@@ -48,6 +48,7 @@ import com.atakmap.android.maps.MapGroup
 import com.atakmap.android.maps.MapView
 import com.atakmap.android.maps.Marker
 import com.atakmap.android.maps.PointMapItem
+import com.atakmap.android.maps.Shape
 import com.atakmap.android.preference.AtakPreferences
 import com.cloudrf.android.soothsayer.TemplateRecyclerViewAdapter.Companion.MAX_ITEMS
 import com.cloudrf.android.soothsayer.interfaces.CloudRFLayerListener
@@ -101,6 +102,8 @@ import com.cloudrf.android.soothsayer.util.sortMarkersWithCheckedFirst
 import com.cloudrf.android.soothsayer.util.toBase64String
 import com.cloudrf.android.soothsayer.util.toLinkDataModel
 import com.cloudrf.android.soothsayer.util.toast
+import com.cloudrf.android.soothsayer.util.BestSiteManager
+import com.cloudrf.android.soothsayer.interfaces.CustomPolygonInterface
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.map.layer.opengl.GLLayerFactory
@@ -173,6 +176,9 @@ class PluginDropDownReceiver(
     private var spinnerAdapter: ArrayAdapter<TemplateDataModel>?=null
     private val calcManager by lazy {
         CalculationManager(pluginContext, sharedPrefs, mapView, markersList, this)
+    }
+    private val bestSiteManager by lazy {
+        BestSiteManager(pluginContext, repository, this)
     }
     private var settingsLinksController: SettingsLinksController? = null
     private var templateMenuController: TemplateMenuController? = null
@@ -308,12 +314,18 @@ class PluginDropDownReceiver(
                 pluginContext.toast(pluginContext.getString(R.string.marker_error))
             }
         }
-
         val btnAddPolygon = templateView.findViewById<ImageButton>(R.id.btnAddPolygon)
+        val btnBestSiteAnalysis = templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis)
+        btnBestSiteAnalysis.setOnClickListener {
+            bestSiteManager.performBestSiteAnalysis(selectedMarkerType)
+        }
         btnAddPolygon.setOnClickListener {
             if (Constant.sAccessToken != "") {
                 pluginContext.shortToast("Draw a polygon for the study area")
-                CustomPolygonTool.createPolygon()
+                CustomPolygonTool.createPolygon(object: CustomPolygonInterface{
+                    override fun onPolygonDrawn(polygon: Shape) {
+                    }
+                })
             }
         }
 
@@ -813,9 +825,11 @@ class PluginDropDownReceiver(
         if(templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility == View.VISIBLE){
             templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility = View.GONE;
             templateView.findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE;
+            templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis).visibility = View.GONE;
         }else{
             templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility = View.VISIBLE;
             templateView.findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE;
+            templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis).visibility = View.VISIBLE;
         }
 
     }
@@ -842,7 +856,7 @@ class PluginDropDownReceiver(
                                     PNG_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            addLayer(filePath, response.bounds)
+                                            addLayer(filePath, response.bounds, false)
                                             /*addSingleLayer(
                                                 markerData.template.name,
                                                 filePath,
@@ -884,7 +898,7 @@ class PluginDropDownReceiver(
                                     PNG_IMAGE.getFileName(),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            addLayer(filePath, response.bounds)
+                                            addLayer(filePath, response.bounds, false)
                                         }
                                     })
                             }
@@ -958,11 +972,12 @@ class PluginDropDownReceiver(
                 layerName,
                 pluginContext.getString(R.string.layer, layerName),
                 file.absolutePath,
-                bounds, object : CloudRFLayerListener {
+                bounds,object : CloudRFLayerListener {
                     override fun delete(layer: CloudRFLayer) {
                         promptDelete(layer)
                     }
-                }
+                },
+                false
             )
         }
 
@@ -979,7 +994,7 @@ class PluginDropDownReceiver(
         }
     }
 
-    private fun addLayer(filePath: String, bounds: List<Double>) {
+    fun addLayer(filePath: String, bounds: List<Double>, bsa: Boolean) {
         val file = File(filePath)
         synchronized(this@PluginDropDownReceiver) {
             if (cloudRFLayer != null) {
@@ -1000,7 +1015,9 @@ class PluginDropDownReceiver(
                         override fun delete(layer: CloudRFLayer) {
                             promptDelete(layer)
                         }
-                    })
+                    },
+                    bsa
+                )
         }
 
         cloudRFLayer?.let {

@@ -240,19 +240,19 @@ public class GeoImageMasker {
                     int Colour = Color.argb(0, 255, 255, 255);
 
                     if(px > 76) {
-                        Colour = Color.argb(127, 194, 26, 255);
+                        Colour = Color.argb(150, 194, 26, 255);
                     }
                     if(px > 115) {
-                        Colour = Color.argb(127, 208, 83, 191);
+                        Colour = Color.argb(160, 208, 83, 191);
                     }
                     if(px > 153) {
-                        Colour = Color.argb(147, 223, 141, 128);
+                        Colour = Color.argb(170, 223, 141, 128);
                     }
                     if(px > 191) {
-                        Colour = Color.argb(167, 237, 198, 64);
+                        Colour = Color.argb(180, 237, 198, 64);
                     }
                     if(px > 229) {
-                        Colour = Color.argb(187, 251, 255, 0);
+                        Colour = Color.argb(180, 251, 255, 0);
                     }
                     myBitmap.setPixel(x, y, Colour);
                 }

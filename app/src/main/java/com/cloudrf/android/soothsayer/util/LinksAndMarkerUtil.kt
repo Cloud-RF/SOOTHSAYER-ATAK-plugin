@@ -479,6 +479,8 @@ fun MarkerDataModel.toLinkDataModel(markersList: List<MarkerDataModel>): LinkDat
     )
 
     val linkRequest = LinkRequest(
+        5,
+        1,
         markerDetails.antenna,
         markerDetails.environment,
         markerDetails.model,

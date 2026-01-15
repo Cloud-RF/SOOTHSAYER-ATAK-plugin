@@ -5,6 +5,8 @@ import com.cloudrf.android.soothsayer.models.request.Receiver
 import com.cloudrf.android.soothsayer.models.request.Transmitter
 
 data class LinkRequest(
+    val ui: Int = 5,
+    val fast: Int = 1,
     val antenna: Antenna?,
     val environment: Environment?,
     val model: Model?,

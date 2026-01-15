@@ -80,7 +80,7 @@ class CalculationManager(
     private fun readConfig(): CalcConfig = CalcConfig(
         showLinks = sharedPrefs?.get(Constant.PreferenceKey.sLinkLinesVisibility, true) ?: true,
         showCoverage = sharedPrefs?.get(Constant.PreferenceKey.sKmzVisibility, true) ?: true,
-        multisiteMode = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, false) ?: false
+        multisiteMode = sharedPrefs?.get(Constant.PreferenceKey.sCalculationMode, true) ?: true
     )
 
     private fun validatePreconditions(cfg: CalcConfig): Boolean {

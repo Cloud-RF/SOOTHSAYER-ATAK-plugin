@@ -2,9 +2,9 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER ATAK plugin v2.6.1</string>
+    <string name="help_title">SOOTHSAYER ATAK plugin v2.6.2</string>
     <!-- description -->
-    <string name="app_desc">Interface to the CloudRF/SOOTHSAYER API</string>
+    <string name="app_desc">Interface to the SOOTHSAYER radio planning API</string>
     <string name="example_layer_description">This is an example layer.</string>
     <string name="route_exporter_name">Route Exporter</string>
     <string name="option_prompt" translatable="false">Choose option</string>
@@ -12,8 +12,6 @@
     <string name="open_settings_txt">Open Settings</string>
     <string name="template">System</string>
     <string name="add_marker">+</string>
-    <string name="example_header">Header Example</string>
-    <string name="example_footer">Footer Example</string>
     <string name="settings">SOOTHSAYER settings</string>
     <string name="template_option_prompt" translatable="false">System templates</string>
     <string name="save">Save</string>

@@ -282,11 +282,14 @@ fun MapView.removeLinkLinesFromMap(pluginContext:Context,marker: MarkerDataModel
     val data = this.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
 
     for (it in data.items){
-        if(it.title.contains(" dB")){
-            Log.d(TAG,"Removing "+it.toString())
-            data.removeItem(it)
-        }
 
+        // There could be objects with null titles
+        if(it.title?.isNotEmpty() == true){
+            if(it.title.contains(" dB")){
+                Log.d(TAG,"Removing "+it.toString())
+                data.removeItem(it)
+            }
+        }
     }
 }
 

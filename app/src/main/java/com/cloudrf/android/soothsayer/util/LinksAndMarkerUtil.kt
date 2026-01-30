@@ -191,8 +191,14 @@ fun MapView.getAllAvailableMarkers(allContacts: MutableList<Contact>): List<MapI
         for (item in group.items) {
             if (item is Marker && !item.getMetaBoolean("CLOUDRF", false)) {
                 // Skip markers that are already in our list and skip our plugin's markers
-                if (!callsignMarkers.any { it.uid == item.uid } && item.height > 0) {
-                    markers.add(item)
+
+                // We used to filter for CoT with height but were missing lots
+                if (!callsignMarkers.any { it.uid == item.uid }) { // && item.height > 0
+                    if(item.title?.isNotEmpty() == true) {
+                        if (item.title.length > 0 && item.title.length < 32) {
+                            markers.add(item)
+                        }
+                    }
                 }else{
                     Log.d(TAG, item.toString());
                 }

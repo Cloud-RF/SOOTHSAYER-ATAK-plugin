@@ -22,11 +22,21 @@
 
         <TextView
             android:id="@+id/tvRadioTitle"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="10px"
             android:text="@string/radio_settings"
             android:textColor="@android:color/white"
             android:textSize="@dimen/sp_18" />
+
+        <EditText
+            android:id="@+id/etRadioTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="text"
+            android:text="Name" />
     </LinearLayout>
 
     <View
@@ -36,9 +46,9 @@
         android:background="@android:color/white" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:baselineAligned="false"
+        android:weightSum="3"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -53,20 +63,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/radio_height"
+                android:text="Tx Height (m)"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/sp_14" />
 
             <EditText
                 android:id="@+id/etRadioHeight"
-                android:layout_width="match_parent"
+                android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:background="@drawable/et_background"
                 android:imeOptions="actionNext"
                 android:inputType="numberDecimal"
                 android:labelFor="@id/etRadioHeight"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:textColor="@color/darker_gray"
                 android:textCursorDrawable="@null"
                 android:textSize="@dimen/sp_14"
@@ -74,42 +84,75 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="1dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dp_2"
             android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tvRadioPower"
+                android:id="@+id/tvAntennaGain"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/radio_power"
+                android:text="Ant Gain (dBi)"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/sp_14" />
 
             <EditText
-                android:id="@+id/etRadioPower"
-                android:layout_width="match_parent"
+                android:id="@+id/etAntGain"
+                android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:background="@drawable/et_background"
                 android:imeOptions="actionNext"
-                android:inputType="numberDecimal"
+                android:inputType="number"
                 android:labelFor="@id/etRadioPower"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:textColor="@color/darker_gray"
                 android:textCursorDrawable="@null"
                 android:textSize="@dimen/sp_14"
-                tools:text="3.0" />
+                tools:text="0" />
         </LinearLayout>
+
+             <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dp_2"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+                 <TextView
+                     android:id="@+id/tvAntennaAzimuth"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:layout_marginTop="8dp"
+                     android:text="@string/antenna_azimuth"
+                     android:textColor="@android:color/white"
+                     android:textSize="@dimen/sp_14" />
+
+                 <EditText
+                     android:id="@+id/etAntennaAzimuth"
+                     android:layout_width="50dp"
+                     android:layout_height="wrap_content"
+                     android:layout_marginTop="4dp"
+                     android:background="@drawable/et_background"
+                     android:imeOptions="actionNext"
+                     android:inputType="number"
+                     android:labelFor="@id/etRadioPower"
+                     android:padding="4dp"
+                     android:textColor="@color/darker_gray"
+                     android:textCursorDrawable="@null"
+                     android:textSize="@dimen/sp_14"
+                     tools:text="0" />
+             </LinearLayout>
+
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+      <LinearLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:baselineAligned="false"
+        android:weightSum="3"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -118,6 +161,7 @@
             android:layout_marginEnd="@dimen/dp_2"
             android:layout_weight="1"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/tvFrequency"
                 android:layout_width="match_parent"
@@ -129,14 +173,14 @@
 
             <EditText
                 android:id="@+id/etFrequency"
-                android:layout_width="match_parent"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:background="@drawable/et_background"
                 android:imeOptions="actionNext"
                 android:inputType="numberDecimal"
                 android:labelFor="@id/etFrequency"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:textColor="@color/darker_gray"
                 android:textCursorDrawable="@null"
                 android:textSize="@dimen/sp_14"
@@ -149,43 +193,37 @@
             android:layout_marginStart="@dimen/dp_2"
             android:layout_weight="1"
             android:orientation="vertical">
+
             <TextView
-                android:id="@+id/tvAntennaAzimuth"
+                android:id="@+id/tvRadioPower1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/antenna_azimuth"
+                android:text="@string/radio_power"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/sp_14" />
 
             <EditText
-                android:id="@+id/etAntennaAzimuth"
-                android:layout_width="match_parent"
+                android:id="@+id/etRadioPower"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:background="@drawable/et_background"
                 android:imeOptions="actionNext"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:labelFor="@id/etRadioPower"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:textColor="@color/darker_gray"
                 android:textCursorDrawable="@null"
                 android:textSize="@dimen/sp_14"
-                tools:text="145" />
+                tools:text="3.0" />
 
         </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:baselineAligned="false"
-        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/dp_2"
+            android:layout_marginStart="@dimen/dp_2"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -200,20 +238,95 @@
 
             <EditText
                 android:id="@+id/etBandWidth"
-                android:layout_width="match_parent"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:background="@drawable/et_background"
                 android:imeOptions="actionNext"
                 android:inputType="numberDecimal"
                 android:labelFor="@id/etBandWidth"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:textColor="@color/darker_gray"
                 android:textCursorDrawable="@null"
                 android:textSize="@dimen/sp_14"
                 tools:text="0.1" />
+
+        </LinearLayout>
+</LinearLayout>
+
+      <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="3"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dp_2"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvReceiverHeight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Rx Height (m)"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/sp_14" />
+
+            <EditText
+                android:id="@+id/etReceiverHeight"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/et_background"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal"
+                android:labelFor="@id/etRadioHeight"
+                android:padding="4dp"
+                android:textColor="@color/darker_gray"
+                android:textCursorDrawable="@null"
+                android:textSize="@dimen/sp_14"
+                tools:text="2" />
+
         </LinearLayout>
 
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dp_2"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvRadius"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Radius (km)"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/sp_14" />
+
+            <EditText
+                android:id="@+id/etRadius"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/et_background"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal"
+                android:labelFor="@id/etRadioPower"
+                android:padding="4dp"
+                android:textColor="@color/darker_gray"
+                android:textCursorDrawable="@null"
+                android:textSize="@dimen/sp_14"
+                tools:text="10" />
+
+        </LinearLayout>
+        
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -232,14 +345,14 @@
 
             <EditText
                 android:id="@+id/etOutputNoiseFloor"
-                android:layout_width="match_parent"
+                android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:background="@drawable/et_background"
                 android:imeOptions="actionDone"
                 android:inputType="numberSigned"
                 android:labelFor="@id/etOutputNoiseFloor"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:textColor="@color/darker_gray"
                 android:textCursorDrawable="@null"
                 android:textSize="@dimen/sp_14"

@@ -84,7 +84,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="#FF00"
+                    android:background="#80FF00"
                     android:foreground="#0000" />
 
                 <EditText
@@ -144,7 +144,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="#11FF00"
+                    android:background="#FF0000"
                     android:foreground="#0000" />
 
                 <EditText
@@ -174,7 +174,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="#222"
+                    android:background="#2A2A2A"
                     android:foreground="#0000" />
 
                 <EditText
@@ -184,7 +184,7 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="numberSigned"
-                    android:text="-5" />
+                    android:text="0" />
 
                 <TextView
                     android:id="@+id/optionsUnit4"

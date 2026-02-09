@@ -178,7 +178,7 @@ android {
     defaultConfig {
         minSdkVersion 26
         versionCode 6
-        versionName "2.7.0"
+        versionName "2.7.1"
         //noinspection OldTargetApi
         targetSdkVersion 35
         ndk {

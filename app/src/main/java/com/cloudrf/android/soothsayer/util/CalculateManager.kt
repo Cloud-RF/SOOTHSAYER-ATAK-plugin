@@ -214,8 +214,14 @@ class CalculationManager(
         marker.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5
         marker.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5
 
-        val altitude = Math.round(currentMarker.point.altitude)
-        val dtmFilter = ElevationManager.QueryParameters().apply {
+       /*
+       Commented out as getting accurate elevation is a mess in ATAK.
+       The ElevationData class was removed in 5.6 yet as of February 2026 no documentation has been published.
+       It's a small loss as it was referencing low res (1km) DTED0.
+       This may be restored if the new elevationchunk method is ever documented.
+
+       val altitude = Math.round(currentMarker.point.altitude)
+       val dtmFilter = ElevationManager.QueryParameters().apply {
             elevationModel = ElevationData.MODEL_TERRAIN
         }
         val terrain = ElevationManager.getElevation(currentMarker.point.latitude, currentMarker.point.longitude, dtmFilter)
@@ -229,6 +235,8 @@ class CalculationManager(
         }else{
             marker.markerDetails.transmitter?.alt = altitude.toDouble();
         }
+
+        */
 
     }
 

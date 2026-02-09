@@ -30,9 +30,9 @@ class SettingsLinksController(
     private var colourPickerCurId = 0
     var linkUnits = "dB"
 
-    private val optionsColour3 = ColourRef(0xFF00FF00.toInt())
+    private val optionsColour1 = ColourRef(0xFF00FF00.toInt())
     private val optionsColour2 = ColourRef(0xFFFFb600.toInt())
-    private val optionsColour1 = ColourRef(0xFFFF0000.toInt())
+    private val optionsColour3 = ColourRef(0xFFFF0000.toInt())
     private val optionsColour4 = ColourRef(0xFF222222.toInt())
 
     private val curColourView: View = colourPickerView.findViewById(R.id.colourPickerCurColour)
@@ -126,7 +126,7 @@ class SettingsLinksController(
         optionsUnitSwitch.setOnCheckedChangeListener { _, checked ->
             linkUnits = if (checked) "dBm" else "dB"
             optionsUnitViews.forEach { it.text = linkUnits }
-            val defaults = if (checked) listOf("-80","-90","-100","-110") else listOf("25","15","5","-5")
+            val defaults = if (checked) listOf("-80","-90","-100","-105") else listOf("25","15","5","0")
             dbEdits.forEachIndexed { i, e -> e.setText(defaults[i]) }
         }
     }
@@ -134,9 +134,9 @@ class SettingsLinksController(
     private fun setupPresetButtons() {
         settingsView()?.findViewById<Button>(R.id.btnManetColours)?.setOnClickListener {
             presetColours(
-                listOf(0xFFFF0000.toInt(),0xFFFFb600.toInt(),0xFF00FF00.toInt(),0xFF222222.toInt()),
+                listOf(0xFF00FF00.toInt(),0xFFFFb600.toInt(),0xFFFF0000.toInt(),0xFF222222.toInt()),
                 false,
-                listOf("25","15","5","-5")
+                listOf("25","15","5","0")
             )
         }
         settingsView()?.findViewById<Button>(R.id.btnLpwanColours)?.setOnClickListener {

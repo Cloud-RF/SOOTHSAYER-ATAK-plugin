@@ -33,7 +33,7 @@ data class Antenna(
     val mode: String?,
     val pol: String,
     val tlt: Int,
-    val txg: Double,
+    var txg: Double,
     val txl: Double,
     val vbw: Int
 ): Serializable
@@ -88,7 +88,7 @@ data class Receiver(
 data class Template(
     val bom_value: Int,
     val created_at: String,
-    val name: String,
+    var name: String,
     val owner: Int,
     val service: String
 ): Serializable

@@ -18,7 +18,7 @@ object RetrofitClient {
     private const val mContentType = "Content-type"
     private const val mContentTypeJson = "application/json"
     private const val mAuthorizationKey = "key"
-    const val DEFAULT_URL = "https://api.cloudrf.com"
+
     var BASE_URL = "https://api.cloudrf.com"
 
     private val OK_HTTP_CLIENT by lazy {

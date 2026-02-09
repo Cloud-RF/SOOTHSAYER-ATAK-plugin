@@ -1,9 +1,9 @@
 package com.cloudrf.android.soothsayer.util
 
-import com.cloudrf.android.soothsayer.network.remote.RetrofitClient.DEFAULT_URL
+import com.cloudrf.android.soothsayer.network.remote.RetrofitClient.BASE_URL
 
 object Constant {
-    var sServerUrl = DEFAULT_URL
+    var sServerUrl = BASE_URL
     var sAccessToken = ""
     var sUsername = ""
     const val TEMPLATE_FORMAT = ".json"

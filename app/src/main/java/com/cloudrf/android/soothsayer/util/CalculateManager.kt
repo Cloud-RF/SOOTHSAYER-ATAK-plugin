@@ -55,20 +55,23 @@ class CalculationManager(
 
         configureMarker(item, config)
 
+        applyPolygonBounds(item)
+
+        // A Multisite API call simulates many towers at once and uses a GPU
+        if(config.showCoverage) {
+            if (config.multisiteMode) {
+                doMultisiteCall(item)
+            } else {
+                doSingleSiteCall(item)
+            }
+        }
+
         if (config.showLinks && markersList.size > 1) {
             pluginDropDownReceiver.updateLinkLines(item)
         } else {
             mapView?.removeLinkLinesFromMap(pluginContext, item)
         }
 
-        applyPolygonBounds(item)
-
-        // A Multisite API call simulates many towers at once and uses a GPU
-        if (config.multisiteMode) {
-            doMultisiteCall(item, config.showCoverage)
-        } else {
-            doSingleSiteCall(item, config.showCoverage)
-        }
     }
 
     private data class CalcConfig(
@@ -137,7 +140,7 @@ class CalculationManager(
         return Bounds(b.north, b.east, b.south, b.west)
     }
 
-    private fun doMultisiteCall(item: MarkerDataModel?, showCoverage: Boolean) {
+    private fun doMultisiteCall(item: MarkerDataModel?) {
         item?.markerDetails?.let { template ->
             // in a multisite call, each transmitter can have its own location, frequency, altitude and antenna
             val txlist = markersList.mapNotNull { marker ->
@@ -153,15 +156,15 @@ class CalculationManager(
                 template.receiver, template.model,
                 template.environment, template.output
             )
-            if (showCoverage) {
+
                 pluginDropDownReceiver.showHidePlayBtn()
                 pluginDropDownReceiver.sendMultiSiteDataToServer(request)
-            }
+
         }
     }
 
-    private fun doSingleSiteCall(item: MarkerDataModel?, showCoverage: Boolean) {
-        if (item != null && showCoverage) {
+    private fun doSingleSiteCall(item: MarkerDataModel?) {
+        if (item != null) {
             pluginDropDownReceiver.showHidePlayBtn()
             pluginDropDownReceiver.sendSingleSiteDataToServer(item.markerDetails)
         }
@@ -190,8 +193,6 @@ class CalculationManager(
                 val markerInList = markersList.find { it.coopted_uid == uid } ?: continue
                 updateMarkerLocationAndAltitude(markerInList, currentMarker)
 
-                // NOTE: If an aircraft causes a switch to AMSL, all other markers will be AMSL
-                // Users can override altitude by clicking the marker to open the edit form.
                 val index = markersList.indexOf(markerInList)
                 if (index != -1){
                     updateAdapter(index)
@@ -213,20 +214,30 @@ class CalculationManager(
         marker.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5
         marker.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5
 
-        val altitude = Math.round(currentMarker.point.altitude)
-        val dtmFilter = ElevationManager.QueryParameters().apply {
+       /*
+       Commented out as getting accurate elevation is a mess in ATAK.
+       The ElevationData class was removed in 5.6 yet as of February 2026 no documentation has been published.
+       It's a small loss as it was referencing low res (1km) DTED0.
+       This may be restored if the new elevationchunk method is ever documented.
+
+       val altitude = Math.round(currentMarker.point.altitude)
+       val dtmFilter = ElevationManager.QueryParameters().apply {
             elevationModel = ElevationData.MODEL_TERRAIN
         }
         val terrain = ElevationManager.getElevation(currentMarker.point.latitude, currentMarker.point.longitude, dtmFilter)
 
-        // If Height AGL is > 120m / 400ft, this is probably flying so we switch units to meters AMSL and use GPS altitude
-        if (altitude - terrain > 120.0) {
-            marker.markerDetails.transmitter?.alt = altitude.toDouble()
-            marker.markerDetails.receiver.alt = terrain + 1
-            marker.markerDetails.output.units = "m_amsl"
-        } else {
+        // If Height AGL is > 30m / 90ft, this is probably flying.
+        // Using AMSL altitudes gets very messy for A2G ground comms so we stick with AGL
+
+        if (altitude - terrain > 30.0) {
+            marker.markerDetails.transmitter?.alt = altitude - terrain; //altitude.toDouble()
             marker.markerDetails.output.units = "m"
+        }else{
+            marker.markerDetails.transmitter?.alt = altitude.toDouble();
         }
+
+        */
+
     }
 
     // used to adjust radius for polygons far away

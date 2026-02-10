@@ -8,7 +8,7 @@ Users can task the `Area`, `Multisite`, `Points` and `Satellite` APIs to plan fu
 
 # Latest release
 
-The **latest signed release is 2.5.3** (23rd December 2025), built for ATAK 5.6, is available to download [here](https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin/releases).
+The **latest signed release is 2.7** built for ATAK 5.6, is available to download [here](https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin/releases).
 
 [![Get it on Google Play](help/googleplay.png)](https://play.google.com/store/apps/details?id=com.cloudrf.android.soothsayer.plugin)
 
@@ -63,14 +63,6 @@ The radio map will refresh on a fixed interval or when it moves a certain distan
 You can focus effort efficiently onto a distant objective using the polygon tool. Not only will this speed up calculations significantly, it will sharpen the resolution, save device memory and avoid cluttering up the display. Used selectively, this can make CPU calculations as fast as a standard GPU "circle".
 
 ![SOOTHSAYER ATAK Polygon feature](help/polygon.png "SOOTHSAYER ATAK Polygon feature")
-
-### Satellite coverage
-
-Added in 1.4, this feature uses the [Satellite API](https://cloudrf.com/documentation/developer/#/Satellite/satellite%2Farea) to test a wide area for satellite visibility. 
-
-To use it, **ensure you have coverage enabled** in the plugin options and then enter the name of a satellite eg. OPTUS C1. Select a date/time and then drag the satellite marker to place it upon the earth. An area of 1 million points will be tested against the API. The radius is relative to the resolution so at 2m = 1km, 10m = 5km, 20m = 10km.
-
-![SOOTHSAYER satellite coverage NYC](help/satellite_coverage_nyc.jpg "SOOTHSAYER satellite coverage NYC")
 
 ### Premium API features
 

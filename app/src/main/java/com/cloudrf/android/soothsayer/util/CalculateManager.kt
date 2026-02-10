@@ -210,7 +210,7 @@ class CalculationManager(
         }
     }
 
-    private fun updateMarkerLocationAndAltitude(marker: MarkerDataModel, currentMarker: PointMapItem) {
+    fun updateMarkerLocationAndAltitude(marker: MarkerDataModel, currentMarker: PointMapItem) {
         marker.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5
         marker.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5
 

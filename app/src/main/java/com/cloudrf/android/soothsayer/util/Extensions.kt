@@ -396,13 +396,13 @@ fun megapixelCalculator(radius: Double, megapixels:Double): Double {
     val diameter_m = (radius * 2) * 1e3 //eg. 4000m
     var res = diameter_m / sqrt(megapixels*1e6)  //eg. 4000 / 1000 = 4
 
-    if(res < 1){
-        res = 1.0
+    if(res < 2){
+        res = 2.0
     }
 
     if(res > 180){
         res = 180.0
     }
 
-    return res
+    return round(res)
 }

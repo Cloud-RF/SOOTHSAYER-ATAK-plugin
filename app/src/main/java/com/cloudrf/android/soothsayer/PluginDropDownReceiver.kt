@@ -565,7 +565,7 @@ class PluginDropDownReceiver(
 
     private fun initMegapixelSpinner(){
         val mpSpinner = settingsLayersView.findViewById<Spinner>(R.id.megapixelSpinner)
-        val items = arrayOf("Low res (0.25MP)", "Mid res (1.0MP)", "High res (4.0MP)")
+        val items = arrayOf("Low res (0.5MP)", "Mid res (1.0MP)", "High res (4.0MP)")
         val adapter = ArrayAdapter(pluginContext,
                 android.R.layout.simple_spinner_dropdown_item, items)
         mpSpinner.adapter = adapter
@@ -577,7 +577,7 @@ class PluginDropDownReceiver(
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 // Kotlin has a when statement which is painful.
                 if(position==0){
-                    calcManager.setMegaPixel(0.25)
+                    calcManager.setMegaPixel(0.5)
                 }
                 if(position==1){
                     calcManager.setMegaPixel(1.0)
@@ -649,13 +649,18 @@ class PluginDropDownReceiver(
 
     private fun initRadioSettingView() {
         radioSettingView.apply {
+            val radioName: EditText = findViewById(R.id.etRadioTitle)
             val radioBack: ImageView = findViewById(R.id.ivRadioBack)
             val etRadioHeight: EditText = findViewById(R.id.etRadioHeight)
+            val etReceiverHeight: EditText = findViewById(R.id.etReceiverHeight)
             val etRadioPower: EditText = findViewById(R.id.etRadioPower)
             val etAntennaAzimuth: EditText = findViewById(R.id.etAntennaAzimuth)
             val etFrequency: EditText = findViewById(R.id.etFrequency)
             val etBandWidth: EditText = findViewById(R.id.etBandWidth)
             val etOutputNoiseFloor: EditText = findViewById(R.id.etOutputNoiseFloor)
+            val etRadius: EditText = findViewById(R.id.etRadius)
+            val etAntennaGain: EditText = findViewById(R.id.etAntGain)
+
             radioBack.setOnClickListener {
                 setEditViewVisibility(false)
             }
@@ -665,20 +670,41 @@ class PluginDropDownReceiver(
                     val marker = markerDataModel.markerDetails
                     Log.d(TAG, "initRadioSettingView : marker : $marker \nbefore update ${markersList[itemPositionForEdit]}")
                     val isEdit =
-                        (marker.transmitter?.alt.toString() != etRadioHeight.text.toString() && etRadioHeight.text.isNotEmpty()) ||
+                                (marker.template.name != radioName.text.toString() && radioName.text.isNotEmpty()) ||
+                                (marker.antenna.txg.toString() != etAntennaGain.text.toString() && etAntennaGain.text.isNotEmpty()) ||
+                                (marker.transmitter?.alt.toString() != etRadioHeight.text.toString() && etRadioHeight.text.isNotEmpty()) ||
+                                (marker.receiver?.alt.toString() != etReceiverHeight.text.toString() && etReceiverHeight.text.isNotEmpty()) ||
                                 (marker.transmitter?.txw.toString() != etRadioPower.text.toString() && etRadioPower.text.isNotEmpty()) ||
                                 (marker.transmitter?.frq.toString() != etFrequency.text.toString() && etFrequency.text.isNotEmpty()) ||
                                 (marker.transmitter?.bwi.toString() != etBandWidth.text.toString() && etBandWidth.text.isNotEmpty()) ||
                                 (marker.output.nf.toString() != etOutputNoiseFloor.text.toString() && etOutputNoiseFloor.text.isNotEmpty()) ||
+                                (marker.output.rad.toString() != etRadius.text.toString() && etRadius.text.isNotEmpty()) ||
                                 (marker.antenna.azi != etAntennaAzimuth.text.toString() && etAntennaAzimuth.text.isNotEmpty())
 
                     if (isEdit) {
+                        // Rename the marker in our list
+                        radioName.text.toString().let {marker.template.name = it}
+
+                        // Rename the map marker also
+                        for (mapMarker in mapView.rootGroup.items)
+                            if(mapMarker.uid == markerDataModel.markerID){
+                                mapMarker.title = radioName.text.toString()
+                            }
+
+                        // Set variables by section
                         marker.transmitter?.let { transmitter ->
                             etRadioHeight.text.toString().toDoubleOrNull()?.let { transmitter.alt = it }
                             etRadioPower.text.toString().toDoubleOrNull()?.let { transmitter.txw = it }
                             etFrequency.text.toString().toDoubleOrNull()?.let { transmitter.frq = it }
                             etBandWidth.text.toString().toDoubleOrNull()?.let { transmitter.bwi = it }
                         }
+
+                        marker.receiver.let{ receiver ->
+                            etReceiverHeight.text.toString().toDoubleOrNull()?.let { receiver.alt = it }
+                        }
+
+                        etAntennaGain.text.toString().toDoubleOrNull()?.let { marker.antenna.txg = it }
+                        etRadius.text.toString().toDoubleOrNull()?.let { marker.output.rad = it }
                         etOutputNoiseFloor.text.toString().let { marker.output.nf = it }
 
                         etAntennaAzimuth.text.toString().let { marker.antenna.azi = it }
@@ -711,20 +737,24 @@ class PluginDropDownReceiver(
     }
 
     private fun setEditViewData(item: MarkerDataModel) {
-        val title = pluginContext.getString(R.string.radio_settings, item.markerDetails.template.name).setSpannableText()
+        //val title = pluginContext.getString(R.string.radio_settings, item.markerDetails.template.name).setSpannableText()
 
         val radioSettingView = radioSettingView
         val transmitter = item.markerDetails.transmitter
+        val receiver = item.markerDetails.receiver
         val antenna = item.markerDetails.antenna
 
         with(radioSettingView) {
-            findViewById<TextView>(R.id.tvRadioTitle).text = title
+            findViewById<TextView>(R.id.etRadioTitle).text = item.markerDetails.template.name
             findViewById<EditText>(R.id.etRadioHeight).setText("${transmitter?.alt ?: ""}")
+            findViewById<EditText>(R.id.etReceiverHeight).setText("${receiver?.alt ?: ""}")
             findViewById<EditText>(R.id.etRadioPower).setText("${transmitter?.txw ?: ""}")
             findViewById<EditText>(R.id.etAntennaAzimuth).setText(antenna.azi) // string: 0 OR 0,90,180,270
+            findViewById<EditText>(R.id.etAntGain).setText(antenna.txg.toString())
             findViewById<EditText>(R.id.etFrequency).setText("${transmitter?.frq ?: ""}")
             findViewById<EditText>(R.id.etBandWidth).setText("${transmitter?.bwi ?: ""}")
             findViewById<EditText>(R.id.etOutputNoiseFloor).setText(item.markerDetails.output.nf) // string: database OR -100
+            findViewById<EditText>(R.id.etRadius).setText(item.markerDetails.output.rad.toString()) // radius in km
         }
     }
 

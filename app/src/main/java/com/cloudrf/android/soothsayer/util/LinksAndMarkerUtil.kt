@@ -44,8 +44,6 @@ import com.cloudrf.android.soothsayer.plugin.R
 import com.cloudrf.android.soothsayer.recyclerview.CoOptAdapter
 import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.coremap.maps.coords.GeoPoint
-import com.atakmap.map.elevation.ElevationData
-import com.atakmap.map.elevation.ElevationManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.ByteArrayOutputStream
@@ -119,25 +117,6 @@ fun MapView.runCoOptUpdate(markersList: ArrayList<MarkerDataModel> ,
             markerInList.markerDetails.transmitter?.lat = Math.round(currentMarker.point.latitude * 1e5).toDouble() / 1e5
             markerInList.markerDetails.transmitter?.lon = Math.round(currentMarker.point.longitude * 1e5).toDouble() / 1e5
 
-            val altitude = Math.round(currentMarker.point.altitude)
-            val DTM_FILTER = ElevationManager.QueryParameters()
-            DTM_FILTER.elevationModel = ElevationData.MODEL_TERRAIN
-            val terrain = ElevationManager.getElevation(currentMarker.point.latitude,currentMarker.point.longitude,DTM_FILTER)
-
-            Log.d(TAG, "runCoOptUpdate() AGL= "+terrain.toString())
-
-            // If Height AGL is > 120m / 400ft, this is probably flying so we switch units to meters AMSL and use GPS altitude
-            if(altitude-terrain > 120.0){
-                markerInList.markerDetails.transmitter?.alt = altitude.toDouble()
-                markerInList.markerDetails.receiver.alt = terrain+1
-                markerInList.markerDetails.output.units = "m_amsl"
-            }else{
-                markerInList.markerDetails.output.units = "m"
-            }
-
-            // NOTE: If an aircraft causes a switch to AMSL, all other markers will be AMSL
-            // Users can override altitude by clicking the marker to open the edit form.
-
             val index = markersList.indexOf(markerInList)
             if (index != -1) {
                 updateAdapter(index)
@@ -191,8 +170,14 @@ fun MapView.getAllAvailableMarkers(allContacts: MutableList<Contact>): List<MapI
         for (item in group.items) {
             if (item is Marker && !item.getMetaBoolean("CLOUDRF", false)) {
                 // Skip markers that are already in our list and skip our plugin's markers
-                if (!callsignMarkers.any { it.uid == item.uid } && item.height > 0) {
-                    markers.add(item)
+
+                // We used to filter for CoT with height but were missing lots
+                if (!callsignMarkers.any { it.uid == item.uid }) { // && item.height > 0
+                    if(item.title?.isNotEmpty() == true) {
+                        if (item.title.length > 0 && item.title.length < 32) {
+                            markers.add(item)
+                        }
+                    }
                 }else{
                     Log.d(TAG, item.toString());
                 }

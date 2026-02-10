@@ -49,18 +49,10 @@ class PluginRepository {
         }
     }
 
-    // Fast request for async points updates etc
-    private fun executeThrottled(task: () -> Unit) {
-        requestQueue.execute {
-            Thread.sleep(200)
-            task()
-        }
-    }
-
-    // rate limited for multipoint APIs
+    // respect rate limiting and radio bandwidth
     private fun delayedRequest(task: () -> Unit) {
         requestQueue.execute {
-            Thread.sleep(1000)
+            Thread.sleep(250)
             task()
         }
     }
@@ -129,7 +121,7 @@ class PluginRepository {
         return this
     }
     fun downloadFile(url:String, downloadFolder :String,fileName :String, listener: (Boolean, String) -> Unit){
-        executeThrottled {
+        delayedRequest {
             val client = RetrofitClient.getUnsafeOkHttpClient().build()
             val request = Request.Builder()
                     .url(url)
@@ -213,7 +205,7 @@ class PluginRepository {
     fun getLinks(request: LinkRequest, callback: ApiCallBacks? = null){
         callback?.onLoading()
 
-        executeThrottled {
+        delayedRequest {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
                 Log.d(PluginDropDownReceiver.TAG, "sendLinks Request :${Gson().toJson(request)}")
                 RetrofitClient.apiService()?.getLinks(request = request)
@@ -271,7 +263,7 @@ class PluginRepository {
 
     fun loginUser(username: String, password :String, callback: ApiCallBacks? = null) {
         callback?.onLoading()
-        executeThrottled {
+        delayedRequest {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
                 RetrofitClient.apiService()?.loginUser(username, password)
                     ?.enqueue(object : Callback<LoginResponse?> {
@@ -325,7 +317,7 @@ class PluginRepository {
 
     fun downloadTemplates(callback: ApiCallBacks? = null) {
         callback?.onLoading()
-        executeThrottled {
+        delayedRequest {
             Log.d("PluginDropDownReceiver", " BASE_URL: ${RetrofitClient.BASE_URL}")
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
                 RetrofitClient.apiService()?.getUserTemplates()
@@ -380,7 +372,7 @@ class PluginRepository {
 
     fun downloadTemplateDetail(id:Int, callback: ApiCallBacks? = null) {
         callback?.onLoading()
-        executeThrottled {
+        delayedRequest {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
                 RetrofitClient.apiService()?.getTemplateDetail(id)
                     ?.enqueue(object : Callback<TemplateDataModel?> {
@@ -434,7 +426,7 @@ class PluginRepository {
 
     fun performBestSiteAnalysis(request: BestSiteRequestModel, callback: ApiCallBacks? = null) {
         callback?.onLoading()
-        executeThrottled {
+        delayedRequest {
             if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
                 RetrofitClient.apiService()?.bestSiteAnalysis(request)
                     ?.enqueue(object : Callback<BestSiteResponse?> {

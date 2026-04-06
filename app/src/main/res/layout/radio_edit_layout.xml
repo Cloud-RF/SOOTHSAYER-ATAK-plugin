@@ -25,6 +25,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10px"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="1sp"
             android:text="@string/radio_settings"
             android:textColor="@android:color/white"
             android:textSize="@dimen/sp_18" />
@@ -46,6 +51,82 @@
         android:background="@android:color/white" />
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="2"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dp_2"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="14sp"
+                android:autoSizeStepGranularity="1sp"
+                android:text="Latitude"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/sp_14" />
+
+            <EditText
+                android:id="@+id/etLatitude"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/et_background"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal|numberSigned"
+                android:padding="4dp"
+                android:textColor="@color/darker_gray"
+                android:textCursorDrawable="@null"
+                android:textSize="@dimen/sp_14" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_2"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="14sp"
+                android:autoSizeStepGranularity="1sp"
+                android:text="Longitude"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/sp_14" />
+
+            <EditText
+                android:id="@+id/etLongitude"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/et_background"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal|numberSigned"
+                android:padding="4dp"
+                android:textColor="@color/darker_gray"
+                android:textCursorDrawable="@null"
+                android:textSize="@dimen/sp_14" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:weightSum="3"
@@ -63,6 +144,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="14sp"
+                android:autoSizeStepGranularity="1sp"
                 android:text="Tx Height (m)"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/sp_14" />
@@ -95,6 +181,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="14sp"
+                android:autoSizeStepGranularity="1sp"
                 android:text="Ant Gain (dBi)"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/sp_14" />
@@ -127,6 +218,11 @@
                      android:layout_width="match_parent"
                      android:layout_height="wrap_content"
                      android:layout_marginTop="8dp"
+                     android:maxLines="1"
+                     android:autoSizeTextType="uniform"
+                     android:autoSizeMinTextSize="8sp"
+                     android:autoSizeMaxTextSize="14sp"
+                     android:autoSizeStepGranularity="1sp"
                      android:text="@string/antenna_azimuth"
                      android:textColor="@android:color/white"
                      android:textSize="@dimen/sp_14" />
@@ -167,6 +263,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="14sp"
+                android:autoSizeStepGranularity="1sp"
                 android:text="@string/radio_frequency"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/sp_14" />
@@ -199,6 +300,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="14sp"
+                android:autoSizeStepGranularity="1sp"
                 android:text="@string/radio_power"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/sp_14" />
@@ -232,6 +338,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="14sp"
+                android:autoSizeStepGranularity="1sp"
                 android:text="@string/radio_bandwidth"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/sp_14" />
@@ -272,6 +383,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="14sp"
+                android:autoSizeStepGranularity="1sp"
                 android:text="Rx Height (m)"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/sp_14" />
@@ -306,6 +422,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="14sp"
+                android:autoSizeStepGranularity="1sp"
                 android:text="Radius (km)"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/sp_14" />
@@ -326,7 +447,7 @@
                 tools:text="10" />
 
         </LinearLayout>
-        
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -339,6 +460,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="8sp"
+                android:autoSizeMaxTextSize="14sp"
+                android:autoSizeStepGranularity="1sp"
                 android:text="@string/radio_noise"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/sp_14" />

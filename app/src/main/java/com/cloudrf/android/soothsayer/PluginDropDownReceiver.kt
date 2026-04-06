@@ -106,6 +106,7 @@ import com.cloudrf.android.soothsayer.util.BestSiteManager
 import com.cloudrf.android.soothsayer.interfaces.CustomPolygonInterface
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
+import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
 import java.io.ByteArrayOutputStream
@@ -651,6 +652,8 @@ class PluginDropDownReceiver(
         radioSettingView.apply {
             val radioName: EditText = findViewById(R.id.etRadioTitle)
             val radioBack: ImageView = findViewById(R.id.ivRadioBack)
+            val etLatitude: EditText = findViewById(R.id.etLatitude)
+            val etLongitude: EditText = findViewById(R.id.etLongitude)
             val etRadioHeight: EditText = findViewById(R.id.etRadioHeight)
             val etReceiverHeight: EditText = findViewById(R.id.etReceiverHeight)
             val etRadioPower: EditText = findViewById(R.id.etRadioPower)
@@ -679,7 +682,9 @@ class PluginDropDownReceiver(
                                 (marker.transmitter?.bwi.toString() != etBandWidth.text.toString() && etBandWidth.text.isNotEmpty()) ||
                                 (marker.output.nf.toString() != etOutputNoiseFloor.text.toString() && etOutputNoiseFloor.text.isNotEmpty()) ||
                                 (marker.output.rad.toString() != etRadius.text.toString() && etRadius.text.isNotEmpty()) ||
-                                (marker.antenna.azi != etAntennaAzimuth.text.toString() && etAntennaAzimuth.text.isNotEmpty())
+                                (marker.antenna.azi != etAntennaAzimuth.text.toString() && etAntennaAzimuth.text.isNotEmpty()) ||
+                                (marker.transmitter?.lat.toString() != etLatitude.text.toString() && etLatitude.text.isNotEmpty()) ||
+                                (marker.transmitter?.lon.toString() != etLongitude.text.toString() && etLongitude.text.isNotEmpty())
 
                     if (isEdit) {
                         // Rename the marker in our list
@@ -697,6 +702,20 @@ class PluginDropDownReceiver(
                             etRadioPower.text.toString().toDoubleOrNull()?.let { transmitter.txw = it }
                             etFrequency.text.toString().toDoubleOrNull()?.let { transmitter.frq = it }
                             etBandWidth.text.toString().toDoubleOrNull()?.let { transmitter.bwi = it }
+
+                            val newLat = etLatitude.text.toString().toDoubleOrNull()
+                            val newLon = etLongitude.text.toString().toDoubleOrNull()
+                            if (newLat != null && newLon != null) {
+                                transmitter.lat = newLat
+                                transmitter.lon = newLon
+                                // Move the map marker to the new position
+                                for (mapItem in mapView.rootGroup.items) {
+                                    if (mapItem.uid == markerDataModel.markerID) {
+                                        (mapItem as? PointMapItem)?.point = GeoPoint(newLat, newLon)
+                                        break
+                                    }
+                                }
+                            }
                         }
 
                         marker.receiver.let{ receiver ->
@@ -746,6 +765,8 @@ class PluginDropDownReceiver(
 
         with(radioSettingView) {
             findViewById<TextView>(R.id.etRadioTitle).text = item.markerDetails.template.name
+            findViewById<EditText>(R.id.etLatitude).setText("${transmitter?.lat ?: ""}")
+            findViewById<EditText>(R.id.etLongitude).setText("${transmitter?.lon ?: ""}")
             findViewById<EditText>(R.id.etRadioHeight).setText("${transmitter?.alt ?: ""}")
             findViewById<EditText>(R.id.etReceiverHeight).setText("${receiver?.alt ?: ""}")
             findViewById<EditText>(R.id.etRadioPower).setText("${transmitter?.txw ?: ""}")

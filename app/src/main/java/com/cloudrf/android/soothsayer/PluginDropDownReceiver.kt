@@ -72,7 +72,12 @@ import com.cloudrf.android.soothsayer.recyclerview.CoOptAdapter
 import com.cloudrf.android.soothsayer.recyclerview.RecyclerViewAdapter
 import com.cloudrf.android.soothsayer.util.CalculationManager
 import com.cloudrf.android.soothsayer.util.Constant
+import android.net.Uri
+import com.atakmap.android.importexport.ImportExportMapComponent
+import com.atakmap.android.importexport.ImportReceiver
 import com.cloudrf.android.soothsayer.util.FOLDER_PATH
+import com.cloudrf.android.soothsayer.util.KMZ_FILE
+import com.cloudrf.android.soothsayer.util.KMZ_FOLDER_PATH
 import com.cloudrf.android.soothsayer.util.PNG_IMAGE
 import com.cloudrf.android.soothsayer.util.addCustomMarker
 import com.cloudrf.android.soothsayer.util.createAndStoreDownloadedFile
@@ -165,6 +170,7 @@ class PluginDropDownReceiver(
     private var sharedPrefs: AtakPreferences? = AtakPreferences(mapView?.context)
     private var cloudRFLayer: CloudRFLayer? = null
     private var singleSiteCloudRFLayer: CloudRFLayer? = null
+    private var multisiteKmzPath: String? = null
     private var markerLinkList: ArrayList<LinkDataModel> = ArrayList()
     private var lineGroup: MapGroup? = null
     private var itemPositionForEdit: Int = -1
@@ -900,19 +906,14 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             showHidePlayBtn();
                             if (response is ResponseModel) {
-
-                                // Fetch the PNG image from the JSON response and create a layer using the bounds metadata
-                                repository.downloadFile(response.PNG_WGS84,
-                                    FOLDER_PATH,
-                                    PNG_IMAGE.getFileName(),
+                                // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
+                                val freq = marker?.transmitter?.frq ?: 0.0
+                                repository.downloadFile(response.kmz,
+                                    KMZ_FOLDER_PATH,
+                                    KMZ_FILE.getFileName(freq),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            addLayer(filePath, response.bounds, false)
-                                            /*addSingleLayer(
-                                                markerData.template.name,
-                                                filePath,
-                                                response.bounds
-                                            )*/
+                                            loadKmzLayer(filePath)
                                         }
                                     })
                             }
@@ -941,15 +942,24 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             showHidePlayBtn();
                             if (response is ResponseModel) {
-                                /*
-                                Fetch the PNG image from the JSON response and create a layer using the bounds metadata
-                                 */
-                                repository.downloadFile(response.PNG_WGS84,
-                                    FOLDER_PATH,
-                                    PNG_IMAGE.getFileName(),
+                                // Remove the previous multisite KMZ layer before loading the new one
+                                multisiteKmzPath?.let { prevPath ->
+                                    ImportReceiver.remove(
+                                        Uri.fromFile(java.io.File(prevPath)),
+                                        "KML",
+                                        "application/vnd.google-earth.kmz"
+                                    )
+                                    java.io.File(prevPath).delete()
+                                }
+                                // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
+                                val freq = markerData?.transmitters?.firstOrNull()?.frq ?: 0.0
+                                repository.downloadFile(response.kmz,
+                                    KMZ_FOLDER_PATH,
+                                    KMZ_FILE.getFileName(freq),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            addLayer(filePath, response.bounds, false)
+                                            multisiteKmzPath = filePath
+                                            loadKmzLayer(filePath)
                                         }
                                     })
                             }
@@ -1081,6 +1091,16 @@ class PluginDropDownReceiver(
 
             refreshView()
         }
+    }
+
+    private fun loadKmzLayer(filePath: String) {
+        val intent = Intent(ImportExportMapComponent.USER_HANDLE_IMPORT_FILE_ACTION)
+        intent.putExtra("filepath", filePath)
+        intent.putExtra("importInPlace", true)
+        intent.putExtra("promptOnMultipleMatch", false)
+        intent.putExtra("zoomToFile", false)
+        AtakBroadcast.getInstance().sendBroadcast(intent)
+        refreshView()
     }
 
     private fun loginUser(){

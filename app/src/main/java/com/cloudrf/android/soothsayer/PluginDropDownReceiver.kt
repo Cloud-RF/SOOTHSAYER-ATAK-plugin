@@ -855,7 +855,7 @@ class PluginDropDownReceiver(
                     }
 
                     override fun onFailed(error: String?, responseCode: Int?) {
-                        stopTrackingLoop()
+                        //stopTrackingLoop()
                         pluginContext.toast("Link error: $error")
                     }
 
@@ -880,11 +880,9 @@ class PluginDropDownReceiver(
         if(templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility == View.VISIBLE){
             templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility = View.GONE;
             templateView.findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE;
-            templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis).visibility = View.GONE;
         }else{
             templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility = View.VISIBLE;
             templateView.findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE;
-            templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis).visibility = View.VISIBLE;
         }
 
     }
@@ -954,8 +952,8 @@ class PluginDropDownReceiver(
                         }
 
                         override fun onFailed(error: String?, responseCode: Int?) {
-                            showHidePlayBtn();
-                            stopTrackingLoop()
+                            //showHidePlayBtn();
+                            //stopTrackingLoop()
                             if (error != null) {
                                 mapView.context.showAlert("API error",error, positiveText = pluginContext.getString(R.string.ok_txt))
                             }

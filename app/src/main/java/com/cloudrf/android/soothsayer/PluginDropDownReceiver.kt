@@ -113,6 +113,8 @@ import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
+import com.atakmap.android.missionpackage.api.MissionPackageApi
+import com.atakmap.android.missionpackage.file.MissionPackageManifest
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.text.SimpleDateFormat
@@ -243,6 +245,7 @@ class PluginDropDownReceiver(
         initRadioSettingView()
         initTemplateSpinner()
         initMegapixelSpinner()
+        initKmzExportSpinner()
         initLoginView()
         initRecyclerview()
         initSettingRecyclerview()
@@ -591,6 +594,46 @@ class PluginDropDownReceiver(
                     calcManager.setMegaPixel(4.0)
                 }
             }
+        }
+    }
+
+    private fun initKmzExportSpinner() {
+        val kmzSpinner = settingsLayersView.findViewById<Spinner>(R.id.kmzFileSpinner)
+        val exportBtn = settingsLayersView.findViewById<Button>(R.id.btnExportKmz)
+        val kmzFolder = File(KMZ_FOLDER_PATH)
+
+        fun loadKmzFiles(): List<File> =
+            kmzFolder.listFiles { f -> f.name.endsWith(".kmz", ignoreCase = true) }
+                ?.sortedBy { it.name }
+                ?: emptyList()
+
+        fun rebuildAdapter(files: List<File>) {
+            val names = if (files.isEmpty()) arrayOf("No KMZ files") else files.map { it.name }.toTypedArray()
+            val adapter = ArrayAdapter(pluginContext, android.R.layout.simple_spinner_dropdown_item, names)
+            kmzSpinner.adapter = adapter
+        }
+
+        rebuildAdapter(loadKmzFiles())
+
+        kmzSpinner.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                rebuildAdapter(loadKmzFiles())
+                kmzSpinner.performClick()
+            }
+            true
+        }
+
+        exportBtn.setOnClickListener {
+            val files = loadKmzFiles()
+            if (files.isEmpty()) {
+                Toast.makeText(pluginContext, "No KMZ files to export", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val kmzFile = files[kmzSpinner.selectedItemPosition]
+            val manifest = MissionPackageApi.CreateTempManifest(
+                kmzFile.nameWithoutExtension, true, true, null)
+            manifest.addFile(kmzFile, null)
+            MissionPackageApi.prepareSend(manifest, null, true)
         }
     }
 

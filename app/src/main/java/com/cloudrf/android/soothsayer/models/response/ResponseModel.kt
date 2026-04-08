@@ -8,7 +8,7 @@ data class ResponseModel(
     val bounds: List<Double>,
     val calculation_adjusted: List<String>,
     val coverage: String,
-    val elapsed: Int,
+    val elapsed: Double,
     val id: String,
     val key: List<Key>,
     val kmz: String,

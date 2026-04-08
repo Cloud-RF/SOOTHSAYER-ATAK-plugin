@@ -25,6 +25,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.Switch
@@ -72,7 +73,10 @@ import com.cloudrf.android.soothsayer.recyclerview.CoOptAdapter
 import com.cloudrf.android.soothsayer.recyclerview.RecyclerViewAdapter
 import com.cloudrf.android.soothsayer.util.CalculationManager
 import com.cloudrf.android.soothsayer.util.Constant
+import java.util.zip.ZipInputStream
 import com.cloudrf.android.soothsayer.util.FOLDER_PATH
+import com.cloudrf.android.soothsayer.util.KMZ_FILE
+import com.cloudrf.android.soothsayer.util.KMZ_FOLDER_PATH
 import com.cloudrf.android.soothsayer.util.PNG_IMAGE
 import com.cloudrf.android.soothsayer.util.addCustomMarker
 import com.cloudrf.android.soothsayer.util.createAndStoreDownloadedFile
@@ -106,8 +110,11 @@ import com.cloudrf.android.soothsayer.util.BestSiteManager
 import com.cloudrf.android.soothsayer.interfaces.CustomPolygonInterface
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
+import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
+import com.atakmap.android.missionpackage.api.MissionPackageApi
+import com.atakmap.android.missionpackage.file.MissionPackageManifest
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.text.SimpleDateFormat
@@ -127,7 +134,7 @@ class PluginDropDownReceiver(
     )
     private val mainLayout: LinearLayout = templateView.findViewById(R.id.llMain)
     private val settingView = templateView.findViewById<LinearLayout>(R.id.ilSettings)
-    private val radioSettingView = templateView.findViewById<LinearLayout>(R.id.ilRadioSetting)
+    private val radioSettingView = templateView.findViewById<ScrollView>(R.id.ilRadioSetting)
     private val coOptView: View = templateView.findViewById(R.id.ilCoOpt)
 
     private val settingsCooptView = templateView.findViewById<LinearLayout>(R.id.settingsCoOptLayout)
@@ -238,6 +245,7 @@ class PluginDropDownReceiver(
         initRadioSettingView()
         initTemplateSpinner()
         initMegapixelSpinner()
+        initKmzExportSpinner()
         initLoginView()
         initRecyclerview()
         initSettingRecyclerview()
@@ -589,6 +597,46 @@ class PluginDropDownReceiver(
         }
     }
 
+    private fun initKmzExportSpinner() {
+        val kmzSpinner = settingsLayersView.findViewById<Spinner>(R.id.kmzFileSpinner)
+        val exportBtn = settingsLayersView.findViewById<Button>(R.id.btnExportKmz)
+        val kmzFolder = File(KMZ_FOLDER_PATH)
+
+        fun loadKmzFiles(): List<File> =
+            kmzFolder.listFiles { f -> f.name.endsWith(".kmz", ignoreCase = true) }
+                ?.sortedBy { it.name }
+                ?: emptyList()
+
+        fun rebuildAdapter(files: List<File>) {
+            val names = if (files.isEmpty()) arrayOf("No KMZ files") else files.map { it.name }.toTypedArray()
+            val adapter = ArrayAdapter(pluginContext, android.R.layout.simple_spinner_dropdown_item, names)
+            kmzSpinner.adapter = adapter
+        }
+
+        rebuildAdapter(loadKmzFiles())
+
+        kmzSpinner.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                rebuildAdapter(loadKmzFiles())
+                kmzSpinner.performClick()
+            }
+            true
+        }
+
+        exportBtn.setOnClickListener {
+            val files = loadKmzFiles()
+            if (files.isEmpty()) {
+                Toast.makeText(pluginContext, "No KMZ files to export", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val kmzFile = files[kmzSpinner.selectedItemPosition]
+            val manifest = MissionPackageApi.CreateTempManifest(
+                kmzFile.nameWithoutExtension, true, true, null)
+            manifest.addFile(kmzFile, null)
+            MissionPackageApi.prepareSend(manifest, null, true)
+        }
+    }
+
     private fun initSettings() {
         etLoginServerUrl = settingView.findViewById(R.id.etLoginServerUrl)
         etLoginServerUrl?.setText(Constant.sServerUrl)
@@ -651,6 +699,8 @@ class PluginDropDownReceiver(
         radioSettingView.apply {
             val radioName: EditText = findViewById(R.id.etRadioTitle)
             val radioBack: ImageView = findViewById(R.id.ivRadioBack)
+            val etLatitude: EditText = findViewById(R.id.etLatitude)
+            val etLongitude: EditText = findViewById(R.id.etLongitude)
             val etRadioHeight: EditText = findViewById(R.id.etRadioHeight)
             val etReceiverHeight: EditText = findViewById(R.id.etReceiverHeight)
             val etRadioPower: EditText = findViewById(R.id.etRadioPower)
@@ -679,7 +729,9 @@ class PluginDropDownReceiver(
                                 (marker.transmitter?.bwi.toString() != etBandWidth.text.toString() && etBandWidth.text.isNotEmpty()) ||
                                 (marker.output.nf.toString() != etOutputNoiseFloor.text.toString() && etOutputNoiseFloor.text.isNotEmpty()) ||
                                 (marker.output.rad.toString() != etRadius.text.toString() && etRadius.text.isNotEmpty()) ||
-                                (marker.antenna.azi != etAntennaAzimuth.text.toString() && etAntennaAzimuth.text.isNotEmpty())
+                                (marker.antenna.azi != etAntennaAzimuth.text.toString() && etAntennaAzimuth.text.isNotEmpty()) ||
+                                (marker.transmitter?.lat.toString() != etLatitude.text.toString() && etLatitude.text.isNotEmpty()) ||
+                                (marker.transmitter?.lon.toString() != etLongitude.text.toString() && etLongitude.text.isNotEmpty())
 
                     if (isEdit) {
                         // Rename the marker in our list
@@ -697,6 +749,20 @@ class PluginDropDownReceiver(
                             etRadioPower.text.toString().toDoubleOrNull()?.let { transmitter.txw = it }
                             etFrequency.text.toString().toDoubleOrNull()?.let { transmitter.frq = it }
                             etBandWidth.text.toString().toDoubleOrNull()?.let { transmitter.bwi = it }
+
+                            val newLat = etLatitude.text.toString().toDoubleOrNull()
+                            val newLon = etLongitude.text.toString().toDoubleOrNull()
+                            if (newLat != null && newLon != null) {
+                                transmitter.lat = newLat
+                                transmitter.lon = newLon
+                                // Move the map marker to the new position
+                                for (mapItem in mapView.rootGroup.items) {
+                                    if (mapItem.uid == markerDataModel.markerID) {
+                                        (mapItem as? PointMapItem)?.point = GeoPoint(newLat, newLon)
+                                        break
+                                    }
+                                }
+                            }
                         }
 
                         marker.receiver.let{ receiver ->
@@ -746,6 +812,8 @@ class PluginDropDownReceiver(
 
         with(radioSettingView) {
             findViewById<TextView>(R.id.etRadioTitle).text = item.markerDetails.template.name
+            findViewById<EditText>(R.id.etLatitude).setText("${transmitter?.lat ?: ""}")
+            findViewById<EditText>(R.id.etLongitude).setText("${transmitter?.lon ?: ""}")
             findViewById<EditText>(R.id.etRadioHeight).setText("${transmitter?.alt ?: ""}")
             findViewById<EditText>(R.id.etReceiverHeight).setText("${receiver?.alt ?: ""}")
             findViewById<EditText>(R.id.etRadioPower).setText("${transmitter?.txw ?: ""}")
@@ -830,7 +898,7 @@ class PluginDropDownReceiver(
                     }
 
                     override fun onFailed(error: String?, responseCode: Int?) {
-                        stopTrackingLoop()
+                        //stopTrackingLoop()
                         pluginContext.toast("Link error: $error")
                     }
 
@@ -855,11 +923,9 @@ class PluginDropDownReceiver(
         if(templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility == View.VISIBLE){
             templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility = View.GONE;
             templateView.findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE;
-            templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis).visibility = View.GONE;
         }else{
             templateView.findViewById<ImageButton>(R.id.btnPlayBtn).visibility = View.VISIBLE;
             templateView.findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE;
-            templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis).visibility = View.VISIBLE;
         }
 
     }
@@ -879,19 +945,14 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             showHidePlayBtn();
                             if (response is ResponseModel) {
-
-                                // Fetch the PNG image from the JSON response and create a layer using the bounds metadata
-                                repository.downloadFile(response.PNG_WGS84,
-                                    FOLDER_PATH,
-                                    PNG_IMAGE.getFileName(),
+                                // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
+                                val freq = marker?.transmitter?.frq ?: 0.0
+                                repository.downloadFile(response.kmz,
+                                    KMZ_FOLDER_PATH,
+                                    KMZ_FILE.getFileName(freq),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            addLayer(filePath, response.bounds, false)
-                                            /*addSingleLayer(
-                                                markerData.template.name,
-                                                filePath,
-                                                response.bounds
-                                            )*/
+                                            loadKmzLayer(filePath, response.bounds)
                                         }
                                     })
                             }
@@ -920,23 +981,22 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             showHidePlayBtn();
                             if (response is ResponseModel) {
-                                /*
-                                Fetch the PNG image from the JSON response and create a layer using the bounds metadata
-                                 */
-                                repository.downloadFile(response.PNG_WGS84,
-                                    FOLDER_PATH,
-                                    PNG_IMAGE.getFileName(),
+                                    // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
+                                val freq = markerData?.transmitters?.firstOrNull()?.frq ?: 0.0
+                                repository.downloadFile(response.kmz,
+                                    KMZ_FOLDER_PATH,
+                                    KMZ_FILE.getFileName(freq),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            addLayer(filePath, response.bounds, false)
+                                            loadKmzLayer(filePath, response.bounds)
                                         }
                                     })
                             }
                         }
 
                         override fun onFailed(error: String?, responseCode: Int?) {
-                            showHidePlayBtn();
-                            stopTrackingLoop()
+                            //showHidePlayBtn();
+                            //stopTrackingLoop()
                             if (error != null) {
                                 mapView.context.showAlert("API error",error, positiveText = pluginContext.getString(R.string.ok_txt))
                             }
@@ -1059,6 +1119,30 @@ class PluginDropDownReceiver(
             handleLayerVisibility()
 
             refreshView()
+        }
+    }
+
+    private fun loadKmzLayer(filePath: String, bounds: List<Double>) {
+        try {
+            val pngPath = filePath.replace(".kmz", ".png", ignoreCase = true)
+            val pngFile = File(pngPath)
+            ZipInputStream(File(filePath).inputStream()).use { zip ->
+                var entry = zip.nextEntry
+                while (entry != null) {
+                    if (entry.name.endsWith(".png", ignoreCase = true)) {
+                        pngFile.outputStream().use { zip.copyTo(it) }
+                        break
+                    }
+                    entry = zip.nextEntry
+                }
+            }
+            if (pngFile.exists()) {
+                addLayer(pngFile.absolutePath, bounds, false)
+            } else {
+                Log.e(TAG, "loadKmzLayer: no PNG found inside $filePath")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "loadKmzLayer: failed to extract PNG from KMZ", e)
         }
     }
 

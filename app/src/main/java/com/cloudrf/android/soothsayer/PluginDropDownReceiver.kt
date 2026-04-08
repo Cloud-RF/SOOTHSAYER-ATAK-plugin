@@ -25,6 +25,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.Switch
@@ -72,9 +73,7 @@ import com.cloudrf.android.soothsayer.recyclerview.CoOptAdapter
 import com.cloudrf.android.soothsayer.recyclerview.RecyclerViewAdapter
 import com.cloudrf.android.soothsayer.util.CalculationManager
 import com.cloudrf.android.soothsayer.util.Constant
-import android.net.Uri
-import com.atakmap.android.importexport.ImportExportMapComponent
-import com.atakmap.android.importexport.ImportReceiver
+import java.util.zip.ZipInputStream
 import com.cloudrf.android.soothsayer.util.FOLDER_PATH
 import com.cloudrf.android.soothsayer.util.KMZ_FILE
 import com.cloudrf.android.soothsayer.util.KMZ_FOLDER_PATH
@@ -133,7 +132,7 @@ class PluginDropDownReceiver(
     )
     private val mainLayout: LinearLayout = templateView.findViewById(R.id.llMain)
     private val settingView = templateView.findViewById<LinearLayout>(R.id.ilSettings)
-    private val radioSettingView = templateView.findViewById<LinearLayout>(R.id.ilRadioSetting)
+    private val radioSettingView = templateView.findViewById<ScrollView>(R.id.ilRadioSetting)
     private val coOptView: View = templateView.findViewById(R.id.ilCoOpt)
 
     private val settingsCooptView = templateView.findViewById<LinearLayout>(R.id.settingsCoOptLayout)
@@ -170,7 +169,6 @@ class PluginDropDownReceiver(
     private var sharedPrefs: AtakPreferences? = AtakPreferences(mapView?.context)
     private var cloudRFLayer: CloudRFLayer? = null
     private var singleSiteCloudRFLayer: CloudRFLayer? = null
-    private var multisiteKmzPath: String? = null
     private var markerLinkList: ArrayList<LinkDataModel> = ArrayList()
     private var lineGroup: MapGroup? = null
     private var itemPositionForEdit: Int = -1
@@ -913,7 +911,7 @@ class PluginDropDownReceiver(
                                     KMZ_FILE.getFileName(freq),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            loadKmzLayer(filePath)
+                                            loadKmzLayer(filePath, response.bounds)
                                         }
                                     })
                             }
@@ -942,24 +940,14 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             showHidePlayBtn();
                             if (response is ResponseModel) {
-                                // Remove the previous multisite KMZ layer before loading the new one
-                                multisiteKmzPath?.let { prevPath ->
-                                    ImportReceiver.remove(
-                                        Uri.fromFile(java.io.File(prevPath)),
-                                        "KML",
-                                        "application/vnd.google-earth.kmz"
-                                    )
-                                    java.io.File(prevPath).delete()
-                                }
-                                // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
+                                    // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
                                 val freq = markerData?.transmitters?.firstOrNull()?.frq ?: 0.0
                                 repository.downloadFile(response.kmz,
                                     KMZ_FOLDER_PATH,
                                     KMZ_FILE.getFileName(freq),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            multisiteKmzPath = filePath
-                                            loadKmzLayer(filePath)
+                                            loadKmzLayer(filePath, response.bounds)
                                         }
                                     })
                             }
@@ -1093,14 +1081,28 @@ class PluginDropDownReceiver(
         }
     }
 
-    private fun loadKmzLayer(filePath: String) {
-        val intent = Intent(ImportExportMapComponent.USER_HANDLE_IMPORT_FILE_ACTION)
-        intent.putExtra("filepath", filePath)
-        intent.putExtra("importInPlace", true)
-        intent.putExtra("promptOnMultipleMatch", false)
-        intent.putExtra("zoomToFile", false)
-        AtakBroadcast.getInstance().sendBroadcast(intent)
-        refreshView()
+    private fun loadKmzLayer(filePath: String, bounds: List<Double>) {
+        try {
+            val pngPath = filePath.replace(".kmz", ".png", ignoreCase = true)
+            val pngFile = File(pngPath)
+            ZipInputStream(File(filePath).inputStream()).use { zip ->
+                var entry = zip.nextEntry
+                while (entry != null) {
+                    if (entry.name.endsWith(".png", ignoreCase = true)) {
+                        pngFile.outputStream().use { zip.copyTo(it) }
+                        break
+                    }
+                    entry = zip.nextEntry
+                }
+            }
+            if (pngFile.exists()) {
+                addLayer(pngFile.absolutePath, bounds, false)
+            } else {
+                Log.e(TAG, "loadKmzLayer: no PNG found inside $filePath")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "loadKmzLayer: failed to extract PNG from KMZ", e)
+        }
     }
 
     private fun loginUser(){

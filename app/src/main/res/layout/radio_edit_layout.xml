@@ -481,7 +481,7 @@
                 android:layout_marginTop="4dp"
                 android:background="@drawable/et_background"
                 android:imeOptions="actionDone"
-                android:inputType="numberSigned"
+                android:inputType="text"
                 android:labelFor="@id/etOutputNoiseFloor"
                 android:padding="4dp"
                 android:textColor="@color/darker_gray"

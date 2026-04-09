@@ -599,7 +599,7 @@ class PluginDropDownReceiver(
 
     private fun initKmzExportSpinner() {
         val kmzSpinner = settingsLayersView.findViewById<Spinner>(R.id.kmzFileSpinner)
-        val exportBtn = settingsLayersView.findViewById<Button>(R.id.btnExportKmz)
+        val exportBtn = settingsLayersView.findViewById<ImageButton>(R.id.btnExportKmz)
         val kmzFolder = File(KMZ_FOLDER_PATH)
 
         fun loadKmzFiles(): List<File> =
@@ -631,8 +631,9 @@ class PluginDropDownReceiver(
             }
             val kmzFile = files[kmzSpinner.selectedItemPosition]
             val manifest = MissionPackageApi.CreateTempManifest(
-                kmzFile.nameWithoutExtension, true, true, null)
-            manifest.addFile(kmzFile, null)
+                "SOOTHSAYER", true, true, null)
+            Log.d("SOOTHSAYER",kmzFile.toString())
+            manifest.addFile(kmzFile, UUID.randomUUID().toString())
             MissionPackageApi.prepareSend(manifest, null, true)
         }
     }
@@ -949,7 +950,7 @@ class PluginDropDownReceiver(
                                 val freq = marker?.transmitter?.frq ?: 0.0
                                 repository.downloadFile(response.kmz,
                                     KMZ_FOLDER_PATH,
-                                    KMZ_FILE.getFileName(freq),
+                                    response.id+"_"+KMZ_FILE.getFileName(freq),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
                                             loadKmzLayer(filePath, response.bounds)
@@ -985,7 +986,7 @@ class PluginDropDownReceiver(
                                 val freq = markerData?.transmitters?.firstOrNull()?.frq ?: 0.0
                                 repository.downloadFile(response.kmz,
                                     KMZ_FOLDER_PATH,
-                                    KMZ_FILE.getFileName(freq),
+                                    response.id+"_"+KMZ_FILE.getFileName(freq),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
                                             loadKmzLayer(filePath, response.bounds)
@@ -1122,6 +1123,12 @@ class PluginDropDownReceiver(
         }
     }
 
+    /*
+    creates filename.png
+    unzips KMZ and extracts .png
+    writes png to filename.png
+    adds png to map with bounds cropping etc
+     */
     private fun loadKmzLayer(filePath: String, bounds: List<Double>) {
         try {
             val pngPath = filePath.replace(".kmz", ".png", ignoreCase = true)

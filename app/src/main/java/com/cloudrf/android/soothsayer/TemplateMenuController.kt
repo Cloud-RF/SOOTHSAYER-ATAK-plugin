@@ -25,7 +25,7 @@ import com.cloudrf.android.soothsayer.util.findFileInFolder
 import com.cloudrf.android.soothsayer.util.getBitmap
 import com.cloudrf.android.soothsayer.util.jsonFile
 import com.cloudrf.android.soothsayer.util.saveSettingTemplateListToPref
-import com.cloudrf.android.soothsayer.util.showAlert
+import com.atakmap.android.missionpackage.api.MissionPackageApi
 import com.cloudrf.android.soothsayer.util.toDataUri
 import com.cloudrf.android.soothsayer.util.toast
 import com.cloudrf.android.soothsayer.util.zipTemplates
@@ -300,11 +300,9 @@ class TemplateMenuController(
     }
 
     private fun openShareDialog(file: File) {
-        context()?.let { pluginContext ->
-            mapView()?.context?.showAlert(
-                pluginContext.getString(R.string.app_name),
-                pluginContext.getString(R.string.file_path_message, file.absolutePath),
-                pluginContext.getString(R.string.ok_txt))
-            }
-        }
+        val manifest = MissionPackageApi.CreateTempManifest(
+            file.nameWithoutExtension, true, true, null)
+        manifest.addFile(file, null)
+        MissionPackageApi.prepareSend(manifest, null, true)
+    }
 }

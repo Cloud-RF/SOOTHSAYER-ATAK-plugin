@@ -18,10 +18,14 @@ import com.atakmap.android.hierarchy.HierarchyListAdapter;
 import com.atakmap.android.hierarchy.HierarchyListFilter;
 import com.atakmap.android.hierarchy.HierarchyListItem;
 import com.atakmap.android.hierarchy.HierarchyListReceiver;
+import com.atakmap.android.hierarchy.action.Export;
 import com.atakmap.android.hierarchy.action.GoTo;
 import com.atakmap.android.hierarchy.action.Search;
 import com.atakmap.android.hierarchy.action.Visibility;
 import com.atakmap.android.hierarchy.action.Visibility2;
+import com.atakmap.android.importexport.ExportFilters;
+import com.atakmap.android.importexport.FormatNotSupportedException;
+import com.atakmap.android.missionpackage.export.MissionPackageExportWrapper;
 import com.atakmap.android.hierarchy.items.AbstractHierarchyListItem2;
 import com.atakmap.android.hierarchy.items.MapItemUser;
 import com.atakmap.android.ipc.AtakBroadcast;
@@ -39,6 +43,9 @@ import com.atakmap.android.util.ATAKUtilities;
 import com.atakmap.coremap.maps.coords.GeoBounds;
 import com.atakmap.coremap.maps.coords.GeoPoint;
 import com.atakmap.map.layer.Layer;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -309,7 +316,7 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
     }
 
     private class LayerHierarchyListItem extends AbstractHierarchyListItem2
-            implements Visibility, GoTo, MapItemUser, View.OnClickListener {
+            implements Visibility, GoTo, MapItemUser, Export, View.OnClickListener {
 
         private final CloudRFLayer _layer;
         private final String _description;
@@ -466,6 +473,61 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
 //                }
 //            }
             return false;
+        }
+
+        // ------------------------------------------------------------------ //
+        //  Export (data package)                                               //
+        // ------------------------------------------------------------------ //
+
+        @Override
+        public boolean isSupported(Class<?> target) {
+            return MissionPackageExportWrapper.class.equals(target);
+        }
+
+        @Override
+        public Object toObjectOf(Class<?> target, ExportFilters filters)
+                throws FormatNotSupportedException {
+            if (!isSupported(target))
+                throw new FormatNotSupportedException(
+                        "Unsupported export target: " + target.getName());
+
+            MissionPackageExportWrapper wrapper = new MissionPackageExportWrapper();
+
+            File pngFile = new File(_layer.fileUri);
+            wrapper.addFile(pngFile);
+
+            // Generate a KML GroundOverlay so the receiving device can
+            // reconstruct the layer with the correct geographic bounds.
+            double north = _layer.upperLeft.getLatitude();
+            double south = _layer.lowerLeft.getLatitude();
+            double east  = _layer.upperRight.getLongitude();
+            double west  = _layer.upperLeft.getLongitude();
+
+            String kmlContent =
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n" +
+                    "<GroundOverlay>\n" +
+                    "  <name>" + _layer.getName() + "</name>\n" +
+                    "  <Icon><href>" + pngFile.getName() + "</href></Icon>\n" +
+                    "  <LatLonBox>\n" +
+                    "    <north>" + north + "</north>\n" +
+                    "    <south>" + south + "</south>\n" +
+                    "    <east>"  + east  + "</east>\n" +
+                    "    <west>"  + west  + "</west>\n" +
+                    "  </LatLonBox>\n" +
+                    "</GroundOverlay>\n" +
+                    "</kml>\n";
+
+            String kmlName = pngFile.getName().replace(".png", ".kml");
+            File kmlFile = new File(pngFile.getParent(), kmlName);
+            try (FileWriter fw = new FileWriter(kmlFile)) {
+                fw.write(kmlContent);
+                wrapper.addFile(kmlFile);
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to write KML for data package", e);
+            }
+
+            return wrapper;
         }
 
         @Override

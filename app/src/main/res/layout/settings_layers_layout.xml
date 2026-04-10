@@ -86,8 +86,8 @@
             android:layout_weight="1" />
 
         <ImageView
-            android:layout_width="45dp"
-            android:layout_height="45dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:src="@drawable/link_icon" />
 
     </LinearLayout>
@@ -112,8 +112,8 @@
             android:layout_weight="1" />
 
         <ImageView
-            android:layout_width="45dp"
-            android:layout_height="45dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:src="@drawable/coverage_icon" />
 
 
@@ -147,5 +147,40 @@
         </TableRow>
 
     </TableLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
+            android:text="KMZ"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <Spinner
+            android:id="@+id/kmzFileSpinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?android:attr/windowBackground"
+            android:popupBackground="?android:attr/windowBackground"
+            android:spinnerMode="dropdown" />
+
+        <ImageButton
+            android:id="@+id/btnExportKmz"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Send data package"
+            android:src="@drawable/share_icon" />
+
+    </LinearLayout>
 
 </LinearLayout>

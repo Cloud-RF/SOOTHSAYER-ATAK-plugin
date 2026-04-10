@@ -39,8 +39,10 @@ import kotlin.math.sqrt
 
 val FOLDER_PATH = Environment.getExternalStorageDirectory().toString() + "/atak/SOOTHSAYER"
 val TEMPLATES_PATH = "$FOLDER_PATH/templates"
+val KMZ_FOLDER_PATH = "$FOLDER_PATH/KMZ"
 const val SOOTHSAYER = "SOOTHSAYER"
 const val PNG_IMAGE = ".png"
+const val KMZ_FILE = ".kmz"
 
 /**
  * Note - this will become a API offering in 4.5.1 and beyond.
@@ -273,6 +275,11 @@ fun Context.isConnected(): Boolean {
 
 fun String.getFileName():String{
    return "${SimpleDateFormat("HHmm", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
+}
+
+fun String.getFileName(freqMHz: Double): String {
+    val freqStr = String.format(Locale.US, "%.0f", freqMHz)
+    return "${SimpleDateFormat("HHmm", Locale.getDefault()).format(Date())}_${freqStr}MHz_$SOOTHSAYER$this"
 }
 
 fun String.setSpannableText():SpannableStringBuilder{

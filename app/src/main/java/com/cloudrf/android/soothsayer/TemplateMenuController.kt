@@ -1,10 +1,16 @@
 package com.cloudrf.android.soothsayer
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.media.MediaScannerConnection
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.MediaStore
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.Button
@@ -25,7 +31,6 @@ import com.cloudrf.android.soothsayer.util.findFileInFolder
 import com.cloudrf.android.soothsayer.util.getBitmap
 import com.cloudrf.android.soothsayer.util.jsonFile
 import com.cloudrf.android.soothsayer.util.saveSettingTemplateListToPref
-import com.atakmap.android.missionpackage.api.MissionPackageApi
 import com.cloudrf.android.soothsayer.util.toDataUri
 import com.cloudrf.android.soothsayer.util.toast
 import com.cloudrf.android.soothsayer.util.zipTemplates
@@ -300,9 +305,38 @@ class TemplateMenuController(
     }
 
     private fun openShareDialog(file: File) {
-        val manifest = MissionPackageApi.CreateTempManifest(
-            file.nameWithoutExtension, true, true, null)
-        manifest.addFile(file, null)
-        MissionPackageApi.prepareSend(manifest, null, true)
+        val mime = if (file.extension == "zip") "application/zip" else "application/json"
+        val ctx = mapView()?.context ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val values = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, file.name)
+                put(MediaStore.Downloads.MIME_TYPE, mime)
+                put(MediaStore.Downloads.IS_PENDING, 1)
+            }
+            val resolver = ctx.contentResolver
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return
+            resolver.openOutputStream(uri)?.use { out -> file.inputStream().use { it.copyTo(out) } }
+            values.clear()
+            values.put(MediaStore.Downloads.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+            launchShareIntent(ctx, uri, file.name, mime)
+        } else {
+            val dest = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), file.name)
+            file.copyTo(dest, overwrite = true)
+            MediaScannerConnection.scanFile(ctx, arrayOf(dest.absolutePath), arrayOf(mime)) { _, uri ->
+                Handler(Looper.getMainLooper()).post { launchShareIntent(ctx, uri ?: Uri.fromFile(dest), file.name, mime) }
+            }
+        }
+    }
+
+    private fun launchShareIntent(ctx: Context, uri: Uri, name: String, mime: String) {
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = mime
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        ctx.startActivity(Intent.createChooser(shareIntent, name).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        })
     }
 }

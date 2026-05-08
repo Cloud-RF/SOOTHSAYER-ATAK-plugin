@@ -28,14 +28,14 @@ data class TemplateDataModel(
 data class Antenna(
     var ant: Int,
     var azi: String, // azimuth can be 0 or "0,90,180,270"
-    val fbr: Double,
-    val hbw: Int,
+    val fbr: Double?=null,
+    val hbw: Int?=null,
     val mode: String?,
     val pol: String,
     val tlt: Int,
     var txg: Double,
     val txl: Double,
-    val vbw: Int
+    val vbw: Int?=null
 ): Serializable
 
 data class Environment(
@@ -61,7 +61,6 @@ data class Model(
 
 data class Output(
         val col: String,
-        val mod: Int,
         var nf: String, // noise floor. Can be -100 or database
         val `out`: Int,
         var rad: Double,

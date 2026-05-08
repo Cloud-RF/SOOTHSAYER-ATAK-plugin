@@ -93,7 +93,7 @@ class BestSiteManager(
         val radius = (polygon.calculateRadius(polyLat, polyLon)) / 1000; // km
         val resolution = ceil(radius); // 0.5 = 1m, 3km = 3m, 20km = 20m, 40km = 40m
         val output = template?.output?.let { it ->
-            Output("BESTSITE.bsa", 7, "-120", 7, radius , resolution, "m", null)
+            Output("BESTSITE.bsa", "-120", 7, radius , resolution, "m", null)
         }
         val ui = 3
 

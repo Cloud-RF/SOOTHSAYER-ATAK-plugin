@@ -32,6 +32,11 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import android.content.ContentValues
+import android.media.MediaScannerConnection
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -629,12 +634,7 @@ class PluginDropDownReceiver(
                 Toast.makeText(pluginContext, "No KMZ files to export", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val kmzFile = files[kmzSpinner.selectedItemPosition]
-            val manifest = MissionPackageApi.CreateTempManifest(
-                "SOOTHSAYER", true, true, null)
-            Log.d("SOOTHSAYER",kmzFile.toString())
-            manifest.addFile(kmzFile, UUID.randomUUID().toString())
-            MissionPackageApi.prepareSend(manifest, null, true)
+            shareKmzFile(files[kmzSpinner.selectedItemPosition])
         }
     }
 
@@ -996,7 +996,7 @@ class PluginDropDownReceiver(
                         }
 
                         override fun onFailed(error: String?, responseCode: Int?) {
-                            //showHidePlayBtn();
+                            showHidePlayBtn();
                             //stopTrackingLoop()
                             if (error != null) {
                                 mapView.context.showAlert("API error",error, positiveText = pluginContext.getString(R.string.ok_txt))
@@ -1825,5 +1825,43 @@ class PluginDropDownReceiver(
 
     private fun calculate(item: MarkerDataModel?) {
         calcManager.calculate(item)
+    }
+
+    private fun shareKmzFile(kmzFile: File) {
+        val ctx = mapView?.context ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val values = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, kmzFile.name)
+                put(MediaStore.Downloads.MIME_TYPE, "application/vnd.google-earth.kmz")
+                put(MediaStore.Downloads.IS_PENDING, 1)
+            }
+            val resolver = ctx.contentResolver
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: run {
+                Toast.makeText(pluginContext, "Failed to create share URI", Toast.LENGTH_SHORT).show()
+                return
+            }
+            resolver.openOutputStream(uri)?.use { out -> kmzFile.inputStream().use { it.copyTo(out) } }
+            values.clear()
+            values.put(MediaStore.Downloads.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+            launchShareIntent(uri, kmzFile.name)
+        } else {
+            val dest = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), kmzFile.name)
+            kmzFile.copyTo(dest, overwrite = true)
+            MediaScannerConnection.scanFile(ctx, arrayOf(dest.absolutePath), arrayOf("application/vnd.google-earth.kmz")) { _, uri ->
+                Handler(Looper.getMainLooper()).post { launchShareIntent(uri ?: Uri.fromFile(dest), kmzFile.name) }
+            }
+        }
+    }
+
+    private fun launchShareIntent(uri: Uri, name: String) {
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/vnd.google-earth.kmz"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        mapView?.context?.startActivity(Intent.createChooser(shareIntent, name).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        })
     }
 }

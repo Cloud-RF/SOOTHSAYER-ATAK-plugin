@@ -8,7 +8,7 @@ data class BestSiteResponse(
     @SerializedName("PNG_WGS84")
     val pngWGS84: String,
     val area: Double,
-    val balance: Int,
+    val balance: Long, // private server returns 1e10
     val bounds: List<Double>,
     val coverage: Double,
     val elapsed: Double,

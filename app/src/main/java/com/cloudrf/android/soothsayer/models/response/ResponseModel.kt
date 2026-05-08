@@ -4,7 +4,7 @@ data class ResponseModel(
     val PNG_Mercator: String,
     val PNG_WGS84: String,
     val area: Double,
-    val balance: Int,
+    val balance: Long, // private server returns 1e10
     val bounds: List<Double>,
     val calculation_adjusted: List<String>,
     val coverage: String,

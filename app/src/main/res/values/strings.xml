@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">SOOTHSAYER</string>
-    <string name="help_title">SOOTHSAYER ATAK plugin v2.8.0</string>
+    <string name="help_title">SOOTHSAYER ATAK plugin</string>
     <!-- description -->
     <string name="app_desc">Interface to the SOOTHSAYER radio planning API</string>
     <string name="example_layer_description">This is an example layer.</string>
@@ -12,7 +12,7 @@
     <string name="open_settings_txt">Open Settings</string>
     <string name="template">System</string>
     <string name="add_marker">+</string>
-    <string name="settings">SOOTHSAYER settings</string>
+    <string name="settings">SOOTHSAYER plugin settings</string>
     <string name="template_option_prompt" translatable="false">System templates</string>
     <string name="save">Save</string>
     <string name="option_a">Option TBC</string>

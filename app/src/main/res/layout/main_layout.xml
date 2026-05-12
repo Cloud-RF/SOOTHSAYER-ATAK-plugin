@@ -235,4 +235,20 @@
         android:text=""
         android:visibility="gone"/>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/tvPluginVersion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:paddingEnd="6dp"
+        android:paddingBottom="4dp"
+        android:textSize="9sp"
+        android:textColor="#555555"
+        android:text="@string/plugin_version" />
+
 </LinearLayout>

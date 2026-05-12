@@ -277,9 +277,12 @@ fun String.getFileName():String{
    return "${SimpleDateFormat("HHmm", Locale.getDefault()).format(Date())}_$SOOTHSAYER$this"
 }
 
-fun String.getFileName(freqMHz: Double): String {
-    val freqStr = String.format(Locale.US, "%.0f", freqMHz)
-    return "${SimpleDateFormat("HHmm", Locale.getDefault()).format(Date())}_${freqStr}MHz_$SOOTHSAYER$this"
+fun kmzFileName(freqMHz: Double, powerW: Double, heightM: Double): String {
+    val ts = SimpleDateFormat("dd_HHmm.ss", Locale.US).format(Date())
+    val freq = String.format(Locale.US, "%.0f", freqMHz)
+    val power = String.format(Locale.US, "%.0f", powerW)
+    val height = String.format(Locale.US, "%.0f", heightM)
+    return "${ts}_${freq}MHz_${power}W_${height}m$KMZ_FILE"
 }
 
 fun String.setSpannableText():SpannableStringBuilder{

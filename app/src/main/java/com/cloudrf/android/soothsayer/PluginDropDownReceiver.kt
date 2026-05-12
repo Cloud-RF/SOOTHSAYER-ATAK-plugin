@@ -32,6 +32,11 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import android.content.ContentValues
+import android.media.MediaScannerConnection
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -87,7 +92,7 @@ import com.cloudrf.android.soothsayer.util.drawLinksForResponse
 import com.cloudrf.android.soothsayer.util.getAllAvailableMarkers
 import com.cloudrf.android.soothsayer.util.getAllFilesFromAssets
 import com.cloudrf.android.soothsayer.util.getBitmap
-import com.cloudrf.android.soothsayer.util.getFileName
+import com.cloudrf.android.soothsayer.util.kmzFileName
 import com.cloudrf.android.soothsayer.util.getModifiedMarker
 import com.cloudrf.android.soothsayer.util.getModifiedReceiver
 import com.cloudrf.android.soothsayer.util.getSettingTemplateListFromPref
@@ -305,6 +310,11 @@ class PluginDropDownReceiver(
         val tvHelp = settingView.findViewById<ImageButton>(R.id.tvHelp)
         tvHelp.setOnClickListener {
             showHelpDialog()
+        }
+
+        val btnHelpPdf = settingView.findViewById<ImageButton>(R.id.btnHelpPdf)
+        btnHelpPdf.setOnClickListener {
+            openHelpPdf()
         }
 
         val ivBack = settingView.findViewById<ImageView>(R.id.ivBack)
@@ -604,7 +614,7 @@ class PluginDropDownReceiver(
 
         fun loadKmzFiles(): List<File> =
             kmzFolder.listFiles { f -> f.name.endsWith(".kmz", ignoreCase = true) }
-                ?.sortedBy { it.name }
+                ?.sortedByDescending { it.lastModified() }
                 ?: emptyList()
 
         fun rebuildAdapter(files: List<File>) {
@@ -629,12 +639,7 @@ class PluginDropDownReceiver(
                 Toast.makeText(pluginContext, "No KMZ files to export", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val kmzFile = files[kmzSpinner.selectedItemPosition]
-            val manifest = MissionPackageApi.CreateTempManifest(
-                "SOOTHSAYER", true, true, null)
-            Log.d("SOOTHSAYER",kmzFile.toString())
-            manifest.addFile(kmzFile, UUID.randomUUID().toString())
-            MissionPackageApi.prepareSend(manifest, null, true)
+            shareKmzFile(files[kmzSpinner.selectedItemPosition])
         }
     }
 
@@ -947,10 +952,10 @@ class PluginDropDownReceiver(
                             showHidePlayBtn();
                             if (response is ResponseModel) {
                                 // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
-                                val freq = marker?.transmitter?.frq ?: 0.0
+                                val tx = marker?.transmitter
                                 repository.downloadFile(response.kmz,
                                     KMZ_FOLDER_PATH,
-                                    response.id+"_"+KMZ_FILE.getFileName(freq),
+                                    kmzFileName(tx?.frq ?: 0.0, tx?.txw ?: 0.0, tx?.alt ?: 0.0),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
                                             loadKmzLayer(filePath, response.bounds)
@@ -983,10 +988,10 @@ class PluginDropDownReceiver(
                             showHidePlayBtn();
                             if (response is ResponseModel) {
                                     // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
-                                val freq = markerData?.transmitters?.firstOrNull()?.frq ?: 0.0
+                                val tx = markerData?.transmitters?.firstOrNull()
                                 repository.downloadFile(response.kmz,
                                     KMZ_FOLDER_PATH,
-                                    response.id+"_"+KMZ_FILE.getFileName(freq),
+                                    kmzFileName(tx?.frq ?: 0.0, tx?.txw ?: 0.0, tx?.alt ?: 0.0),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
                                             loadKmzLayer(filePath, response.bounds)
@@ -996,7 +1001,7 @@ class PluginDropDownReceiver(
                         }
 
                         override fun onFailed(error: String?, responseCode: Int?) {
-                            //showHidePlayBtn();
+                            showHidePlayBtn();
                             //stopTrackingLoop()
                             if (error != null) {
                                 mapView.context.showAlert("API error",error, positiveText = pluginContext.getString(R.string.ok_txt))
@@ -1825,5 +1830,92 @@ class PluginDropDownReceiver(
 
     private fun calculate(item: MarkerDataModel?) {
         calcManager.calculate(item)
+    }
+
+    private fun shareKmzFile(kmzFile: File) {
+        val ctx = mapView?.context ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val values = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, kmzFile.name)
+                put(MediaStore.Downloads.MIME_TYPE, "application/vnd.google-earth.kmz")
+                put(MediaStore.Downloads.IS_PENDING, 1)
+            }
+            val resolver = ctx.contentResolver
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: run {
+                Toast.makeText(pluginContext, "Failed to create share URI", Toast.LENGTH_SHORT).show()
+                return
+            }
+            resolver.openOutputStream(uri)?.use { out -> kmzFile.inputStream().use { it.copyTo(out) } }
+            values.clear()
+            values.put(MediaStore.Downloads.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+            launchShareIntent(uri, kmzFile.name)
+        } else {
+            val dest = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), kmzFile.name)
+            kmzFile.copyTo(dest, overwrite = true)
+            MediaScannerConnection.scanFile(ctx, arrayOf(dest.absolutePath), arrayOf("application/vnd.google-earth.kmz")) { _, uri ->
+                Handler(Looper.getMainLooper()).post { launchShareIntent(uri ?: Uri.fromFile(dest), kmzFile.name) }
+            }
+        }
+    }
+
+    private fun launchShareIntent(uri: Uri, name: String) {
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/vnd.google-earth.kmz"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_TITLE, name)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        mapView?.context?.startActivity(Intent.createChooser(shareIntent, name).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        })
+    }
+
+    private fun openHelpPdf() {
+        val pdfName = "SOOTHSAYER-ATAK-plugin.pdf"
+        val pdfFile = File(FOLDER_PATH, pdfName)
+        if (!pdfFile.exists()) {
+            try {
+                pluginContext.assets.open(pdfName).use { input ->
+                    pdfFile.parentFile?.mkdirs()
+                    pdfFile.outputStream().use { input.copyTo(it) }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(pluginContext, "Help PDF not found", Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
+        val ctx = mapView?.context ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val values = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, pdfName)
+                put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
+                put(MediaStore.Downloads.IS_PENDING, 1)
+            }
+            val resolver = ctx.contentResolver
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: run {
+                Toast.makeText(pluginContext, "Failed to open help PDF", Toast.LENGTH_SHORT).show()
+                return
+            }
+            resolver.openOutputStream(uri)?.use { out -> pdfFile.inputStream().use { it.copyTo(out) } }
+            values.clear()
+            values.put(MediaStore.Downloads.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+            ctx.startActivity(Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/pdf")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            })
+        } else {
+            MediaScannerConnection.scanFile(ctx, arrayOf(pdfFile.absolutePath), arrayOf("application/pdf")) { _, uri ->
+                Handler(Looper.getMainLooper()).post {
+                    ctx.startActivity(Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(uri ?: Uri.fromFile(pdfFile), "application/pdf")
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    })
+                }
+            }
+        }
     }
 }

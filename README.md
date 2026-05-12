@@ -8,7 +8,7 @@ Users can task the `Area`, `Multisite`, `Points` and `Satellite` APIs to plan fu
 
 # Latest release
 
-The **latest signed release is 2.7** built for ATAK 5.6, is available to download [here](https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin/releases).
+The **latest release is built for ATAK 5.6** and the APK is available [here](https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin/releases).
 
 [![Get it on Google Play](help/googleplay.png)](https://play.google.com/store/apps/details?id=com.cloudrf.android.soothsayer.plugin)
 
@@ -17,7 +17,7 @@ The **latest signed release is 2.7** built for ATAK 5.6, is available to downloa
 - Issue board: https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin
 - Developer email: [support@cloudrf.com](mailto:support@cloudrf.com)
 
-*This is a fully supported, genuine, privately funded, open source application by a UK small business. It's open source so others can benefit from it and you're free to take code from our plugin to use in your own.*
+*This is a fully supported, genuine, privately funded, open source application by a UK small business. It's open source so others can benefit from it and you're free to take code from our plugin to use in your own. It's also written in Kotlin which is a junk language :p*
 
 ## Ports Required
 
@@ -33,9 +33,9 @@ Outgoing: TCP 443
 
 ## Documentation
 
-The user documentation is online and available as a PDF at https://cloudrf.com/documentation/06_atak_plugin.html
+The user documentation PDF can be found by clicking the help button in the settings.
 
-You can find a concise text guide within the app's settings.
+It is also online and available at https://cloudrf.com/documentation/06_atak_plugin.html
 
 ## Quickstart
 You can find a ready made APK release [here](https://github.com/Cloud-RF/SOOTHSAYER-ATAK-plugin/releases). Copy the .apk file to your phone and install it using ATAK's plugin manager.

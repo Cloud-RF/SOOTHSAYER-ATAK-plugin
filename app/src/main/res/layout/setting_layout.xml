@@ -157,6 +157,17 @@
             android:paddingBottom="@dimen/dp_3"
             android:src="@android:drawable/ic_dialog_info" />
 
+        <ImageButton
+            android:id="@+id/btnHelpPdf"
+            style="@style/darkButton"
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
+            android:layout_margin="5dp"
+            android:paddingHorizontal="@dimen/dp_16"
+            android:paddingVertical="8dp"
+            android:paddingBottom="@dimen/dp_3"
+            android:src="@drawable/ic_book" />
+
         <View
             android:layout_width="0dp"
             android:layout_height="match_parent"

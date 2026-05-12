@@ -90,7 +90,7 @@ fun TemplateDataModel.isTemplateValid(): Boolean {
             && antenna.tlt in -90..90
             && antenna.hbw in 0..360
             && antenna.vbw in 0..360
-            && antenna.fbr in .0..60.0
+            && antenna.fbr?.let { it in .0..60.0 }!!
             && antenna.pol in arrayOf("v", "h")
 
 }

@@ -53,7 +53,7 @@ class BestSiteManager(
                         listener = { isDownloaded, filePath ->
                             Log.d("SOOTHSAYER", "isDownloaded: $isDownloaded filePath: $filePath")
                             if (isDownloaded) {
-                                pluginDropDownReceiver.addLayer(filePath, response.bounds, true)
+                                pluginDropDownReceiver.addLayer(filePath, response.bounds, true, pluginContext.getString(R.string.best_site_layer))
                             }
                         })
                 }

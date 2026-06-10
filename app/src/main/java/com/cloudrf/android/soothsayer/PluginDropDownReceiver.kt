@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -174,7 +176,8 @@ class PluginDropDownReceiver(
     private val mItemType: String = "custom-type"
     private val repository by lazy { PluginRepository.getInstance() }
     private var sharedPrefs: AtakPreferences? = AtakPreferences(mapView?.context)
-    private var cloudRFLayer: CloudRFLayer? = null
+    private val networkLayers = HashMap<String, CloudRFLayer?>()
+    private val pendingRequests = java.util.concurrent.atomic.AtomicInteger(0)
     private var singleSiteCloudRFLayer: CloudRFLayer? = null
     private var markerLinkList: ArrayList<LinkDataModel> = ArrayList()
     private var lineGroup: MapGroup? = null
@@ -185,6 +188,7 @@ class PluginDropDownReceiver(
     private val trackingHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var trackingRunnable: Runnable? = null
     private var preImportTemplates: ArrayList<TemplateDataModel> = ArrayList()
+    private var selectedNetwork: String = ""
     private var spinnerAdapter: ArrayAdapter<TemplateDataModel>?=null
     private val calcManager by lazy {
         CalculationManager(pluginContext, sharedPrefs, mapView, markersList, this)
@@ -221,6 +225,7 @@ class PluginDropDownReceiver(
 
     // Initialise views, listeners and handle map clicks
     init {
+        lineGroup = mapOverlay.getLinkLinesGroup()
         if (!filePickerReceiverRegistered) {
             pluginContext.registerReceiver(
                 filePickedReceiver,
@@ -716,6 +721,13 @@ class PluginDropDownReceiver(
             val etOutputNoiseFloor: EditText = findViewById(R.id.etOutputNoiseFloor)
             val etRadius: EditText = findViewById(R.id.etRadius)
             val etAntennaGain: EditText = findViewById(R.id.etAntGain)
+            val btnColorRed: View = findViewById(R.id.btnColorRed)
+            val btnColorBlue: View = findViewById(R.id.btnColorBlue)
+            val btnColorGreen: View = findViewById(R.id.btnColorGreen)
+            applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen)
+            btnColorRed.setOnClickListener { selectedNetwork = "ATAK-RED"; applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen) }
+            btnColorBlue.setOnClickListener { selectedNetwork = "ATAK-BLUE"; applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen) }
+            btnColorGreen.setOnClickListener { selectedNetwork = "ATAK-GREEN"; applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen) }
 
             radioBack.setOnClickListener {
                 setEditViewVisibility(false)
@@ -737,7 +749,8 @@ class PluginDropDownReceiver(
                                 (marker.output.rad.toString() != etRadius.text.toString() && etRadius.text.isNotEmpty()) ||
                                 (marker.antenna.azi != etAntennaAzimuth.text.toString() && etAntennaAzimuth.text.isNotEmpty()) ||
                                 (marker.transmitter?.lat.toString() != etLatitude.text.toString() && etLatitude.text.isNotEmpty()) ||
-                                (marker.transmitter?.lon.toString() != etLongitude.text.toString() && etLongitude.text.isNotEmpty())
+                                (marker.transmitter?.lon.toString() != etLongitude.text.toString() && etLongitude.text.isNotEmpty()) ||
+                                (selectedNetwork.isNotEmpty() && marker.network != selectedNetwork)
 
                     if (isEdit) {
                         // Rename the marker in our list
@@ -780,6 +793,7 @@ class PluginDropDownReceiver(
                         etOutputNoiseFloor.text.toString().let { marker.output.nf = it }
 
                         etAntennaAzimuth.text.toString().let { marker.antenna.azi = it }
+                        if (selectedNetwork.isNotEmpty()) { marker.network = selectedNetwork }
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
 
@@ -829,6 +843,28 @@ class PluginDropDownReceiver(
             findViewById<EditText>(R.id.etBandWidth).setText("${transmitter?.bwi ?: ""}")
             findViewById<EditText>(R.id.etOutputNoiseFloor).setText(item.markerDetails.output.nf) // string: database OR -100
             findViewById<EditText>(R.id.etRadius).setText(item.markerDetails.output.rad.toString()) // radius in km
+        }
+        selectedNetwork = item.markerDetails.network
+        applyNetworkSwatches(
+            radioSettingView.findViewById(R.id.btnColorRed),
+            radioSettingView.findViewById(R.id.btnColorBlue),
+            radioSettingView.findViewById(R.id.btnColorGreen)
+        )
+    }
+
+    private fun applyNetworkSwatches(red: View, blue: View, green: View) {
+        val strokePx = (3 * pluginContext.resources.displayMetrics.density).toInt()
+        listOf(
+            Triple(red,   Color.parseColor("#CC2222"), "ATAK-RED"),
+            Triple(blue,  Color.parseColor("#2255CC"), "ATAK-BLUE"),
+            Triple(green, Color.parseColor("#22AA44"), "ATAK-GREEN")
+        ).forEach { (view, color, network) ->
+            val gd = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(color)
+                if (selectedNetwork == network) setStroke(strokePx, Color.WHITE)
+            }
+            view.background = gd
         }
     }
 
@@ -919,7 +955,7 @@ class PluginDropDownReceiver(
 
         // many to many now ;)
         markersList.forEach{
-            mapView.removeLinkLinesFromMap(pluginContext,it)
+            mapView.removeLinkLinesFromMap(pluginContext, it, lineGroup)
             getLinksBetween(it)
         }
 
@@ -935,6 +971,9 @@ class PluginDropDownReceiver(
         }
 
     }
+
+    fun setPendingRequests(count: Int) { pendingRequests.set(count) }
+
     // The Area API simulates one transmitter only and can use a CPU or a GPU
     fun sendSingleSiteDataToServer(marker: TemplateDataModel?) {
         if (pluginContext.isConnected()) {
@@ -975,7 +1014,7 @@ class PluginDropDownReceiver(
         }
     }
 
-    fun sendMultiSiteDataToServer(markerData: MultisiteRequest?) {
+    fun sendMultiSiteDataToServer(markerData: MultisiteRequest?, layerName: String = pluginContext.getString(R.string.coverage_layer)) {
         if (pluginContext.isConnected()) {
             markerData?.let {
                 repository.sendMultiSiteMarkerData(
@@ -985,7 +1024,7 @@ class PluginDropDownReceiver(
 
                         }
                         override fun onSuccess(response: Any?) {
-                            showHidePlayBtn();
+                            if (pendingRequests.decrementAndGet() == 0) showHidePlayBtn()
                             if (response is ResponseModel) {
                                     // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
                                 val tx = markerData?.transmitters?.firstOrNull()
@@ -994,14 +1033,14 @@ class PluginDropDownReceiver(
                                     kmzFileName(tx?.frq ?: 0.0, tx?.txw ?: 0.0, tx?.alt ?: 0.0),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            loadKmzLayer(filePath, response.bounds)
+                                            loadKmzLayer(filePath, response.bounds, layerName)
                                         }
                                     })
                             }
                         }
 
                         override fun onFailed(error: String?, responseCode: Int?) {
-                            showHidePlayBtn();
+                            if (pendingRequests.decrementAndGet() == 0) showHidePlayBtn()
                             //stopTrackingLoop()
                             if (error != null) {
                                 mapView.context.showAlert("API error",error, positiveText = pluginContext.getString(R.string.ok_txt))
@@ -1090,17 +1129,16 @@ class PluginDropDownReceiver(
         }
     }
 
-    fun addLayer(filePath: String, bounds: List<Double>, bsa: Boolean) {
+    fun addLayer(filePath: String, bounds: List<Double>, bsa: Boolean, layerName: String = pluginContext.getString(R.string.coverage_layer)) {
         val file = File(filePath)
         synchronized(this@PluginDropDownReceiver) {
-            if (cloudRFLayer != null) {
-                mapView.removeLayer(MapView.RenderStack.MAP_SURFACE_OVERLAYS, cloudRFLayer)
-                cloudRFLayer = null
+            networkLayers[layerName]?.let { existing ->
+                mapView.removeLayer(MapView.RenderStack.MAP_SURFACE_OVERLAYS, existing)
                 GLLayerFactory.unregister(GLCloudRFLayer.SPI)
             }
+            networkLayers.remove(layerName)
             GLLayerFactory.register(GLCloudRFLayer.SPI)
-            val layerName = pluginContext.getString(R.string.coverage_layer)
-            cloudRFLayer =
+            networkLayers[layerName] =
                 CloudRFLayer(
                     pluginContext,
                     layerName,
@@ -1116,12 +1154,12 @@ class PluginDropDownReceiver(
                 )
         }
 
-        cloudRFLayer?.let {
+        networkLayers[layerName]?.let { layer ->
             mapView.addLayer(
                 MapView.RenderStack.MAP_SURFACE_OVERLAYS,
-                cloudRFLayer
+                layer
             )
-            cloudRFLayer?.isVisible = true
+            layer.isVisible = true
             handleLayerVisibility()
 
             refreshView()
@@ -1134,7 +1172,7 @@ class PluginDropDownReceiver(
     writes png to filename.png
     adds png to map with bounds cropping etc
      */
-    private fun loadKmzLayer(filePath: String, bounds: List<Double>) {
+    private fun loadKmzLayer(filePath: String, bounds: List<Double>, layerName: String = pluginContext.getString(R.string.coverage_layer)) {
         try {
             val pngPath = filePath.replace(".kmz", ".png", ignoreCase = true)
             val pngFile = File(pngPath)
@@ -1149,7 +1187,7 @@ class PluginDropDownReceiver(
                 }
             }
             if (pngFile.exists()) {
-                addLayer(pngFile.absolutePath, bounds, false)
+                addLayer(pngFile.absolutePath, bounds, false, layerName)
             } else {
                 Log.e(TAG, "loadKmzLayer: no PNG found inside $filePath")
             }
@@ -1284,14 +1322,11 @@ class PluginDropDownReceiver(
                 )
                 singleSiteCloudRFLayer = null
             }
-            if (cloudRFLayer != null) {
-                mapView.removeLayer(
-                    MapView.RenderStack.MAP_SURFACE_OVERLAYS,
-                    cloudRFLayer
-                )
-                GLLayerFactory.unregister(GLCloudRFLayer.SPI)
+            networkLayers.values.filterNotNull().forEach { layer ->
+                mapView.removeLayer(MapView.RenderStack.MAP_SURFACE_OVERLAYS, layer)
             }
-            cloudRFLayer = null
+            if (networkLayers.isNotEmpty()) GLLayerFactory.unregister(GLCloudRFLayer.SPI)
+            networkLayers.clear()
         } catch (e: java.lang.Exception) {
             Log.e(TAG, "error", e)
         }
@@ -1386,9 +1421,7 @@ class PluginDropDownReceiver(
     }
 
     private fun handleLinkLineVisibility() {
-        val mapGroup =
-            mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
-        mapGroup.visible = cbLinkLines.isChecked
+        mapOverlay.getLinkLinesGroup().setVisible(cbLinkLines.isChecked)
         refreshView()
     }
 
@@ -1410,7 +1443,7 @@ class PluginDropDownReceiver(
             }
         }
 
-        mapView.removeLinkLinesFromMap(pluginContext,marker)
+        mapView.removeLinkLinesFromMap(pluginContext, marker, lineGroup)
         removeMarkerFromList(marker)
         mapView.removeMarkerFromMap(marker)
 

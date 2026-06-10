@@ -25,7 +25,7 @@
         android:singleLine="false"
         android:includeFontPadding="false"
         android:id="@+id/tvMarkerDetails"
-        android:layout_toStartOf="@id/ivRemove"
+        android:layout_toStartOf="@id/vNetworkColor"
         android:layout_toEndOf="@id/ivMarker"
         android:layout_width="match_parent"
         tools:text="Motorola DMR 2W"/>
@@ -35,13 +35,21 @@
         style="@style/TextStyle"
         android:layout_width="match_parent"
         android:layout_below="@id/tvMarkerDetails"
-        android:layout_toStartOf="@id/ivRemove"
+        android:layout_toStartOf="@id/vNetworkColor"
         android:layout_toEndOf="@id/ivMarker"
         android:includeFontPadding="false"
         android:textColor="@color/darker_gray"
         android:textSize="12sp"
         android:textStyle="normal"
         tools:text="Location: 51.96403, -2.113952" />
+
+    <View
+        android:id="@+id/vNetworkColor"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_toStartOf="@id/ivRemove"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="@dimen/dp_4" />
 
     <ImageView
         android:id="@+id/ivRemove"

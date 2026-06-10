@@ -54,6 +54,7 @@ public class PluginMapComponent extends DropDownMapComponent {
     protected void onDestroyImpl(Context context, MapView view) {
         super.onDestroyImpl(context, view);
         view.getMapOverlayManager().removeOverlay(mapOverlay);
+        view.getRootGroup().removeGroup(mapOverlay.getLinkLinesGroup());
 
         for (MapItem item : view.getRootGroup().getItems())
             if (item.getMetaBoolean("CLOUDRF", true))

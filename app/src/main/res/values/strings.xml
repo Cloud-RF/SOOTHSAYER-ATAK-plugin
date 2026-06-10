@@ -54,6 +54,7 @@
     <string name="soothsayer_layer">SOOTHSAYER Layer</string>
     <string name="layer">%1$s Layer</string>
     <string name="coverage_layer">RF coverage layer</string>
+    <string name="best_site_layer">Best Site Analysis</string>
 
     <!--Prompt Dialog strings-->
     <string name="civ_delete_layer">Delete layer</string>

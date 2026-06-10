@@ -12,7 +12,7 @@ data class TemplateDataModel(
     val environment: Environment,
     val feeder: Feeder,
     val model: Model,
-    val network: String,
+    var network: String,
     var output: Output,
     var `receiver`: Receiver,
     val reference: String,

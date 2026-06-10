@@ -66,6 +66,7 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
     private final DefaultMapGroup _group;
 
     private PluginListModel _listModel;
+    private final MapGroup _linksGroup;
 
     public PluginMapOverlay(MapView mapView, Context plugin) {
         _mapView = mapView;
@@ -73,6 +74,13 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
         _query = new PluginDeepMapItemQuery();
         _group = new DefaultMapGroup("Plugin Map Group");
         _group.setMetaBoolean("addToObjList", false);
+        _linksGroup = new DefaultMapGroup("SOOTHSAYER Links");
+        _linksGroup.setMetaBoolean("addToObjList", false);
+        mapView.getRootGroup().addGroup(_linksGroup);
+    }
+
+    public MapGroup getLinkLinesGroup() {
+        return _linksGroup;
     }
 
     @Override
@@ -239,6 +247,10 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
                 if (this.filter.accept(item))
                     filtered.add(item);
             }
+
+            LinksGroupHierarchyListItem linksItem = new LinksGroupHierarchyListItem(_linksGroup);
+            if (this.filter.accept(linksItem))
+                filtered.add(linksItem);
 
             // Sort
             sortItems(filtered);
@@ -540,6 +552,71 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
     }
 
 
+
+    private class LinksGroupHierarchyListItem extends AbstractHierarchyListItem2
+            implements Visibility {
+
+        private final MapGroup _lGroup;
+
+        LinksGroupHierarchyListItem(MapGroup group) {
+            _lGroup = group;
+        }
+
+        @Override
+        public String getTitle() {
+            return _plugin.getString(R.string.link_lines);
+        }
+
+        @Override
+        public String getDescription() {
+            return "";
+        }
+
+        @Override
+        public String getIconUri() {
+            return "android.resource://" + _plugin.getPackageName()
+                    + "/" + R.drawable.ic_launcher;
+        }
+
+        @Override
+        public Object getUserObject() {
+            return _lGroup;
+        }
+
+        @Override
+        public View getExtraView() {
+            return null;
+        }
+
+        @Override
+        public boolean isChildSupported() {
+            return false;
+        }
+
+        @Override
+        public int getDescendantCount() {
+            return _lGroup.getItemCount();
+        }
+
+        @Override
+        public void refreshImpl() {}
+
+        @Override
+        public boolean hideIfEmpty() {
+            return true;
+        }
+
+        @Override
+        public boolean setVisible(boolean visible) {
+            _lGroup.setVisible(visible);
+            return true;
+        }
+
+        @Override
+        public boolean isVisible() {
+            return _lGroup.getVisible();
+        }
+    }
 
     private class PluginDeepMapItemQuery implements DeepMapItemQuery {
 

@@ -14,6 +14,7 @@ import android.os.Looper
 import android.text.InputType
 import android.util.Base64
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -27,9 +28,11 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ListView
 import android.widget.ScrollView
 import android.widget.ProgressBar
 import android.widget.Spinner
+import com.atakmap.android.gui.PluginSpinner
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -120,6 +123,7 @@ import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.atakmap.android.missionpackage.api.MissionPackageApi
 import com.atakmap.android.missionpackage.file.MissionPackageManifest
 import java.io.ByteArrayOutputStream
@@ -159,6 +163,7 @@ class PluginDropDownReceiver(
     private val cbCoOptDistanceRefresh: CheckBox = settingsCooptView.findViewById(R.id.cbCoOptDistanceRefresh)
     private val etCoOptDistanceThreshold: EditText = settingsCooptView.findViewById(R.id.etCoOptDistanceThreshold)
     private val loginView = templateView.findViewById<LinearLayout>(R.id.ilLogin)
+    private val colourKeyView: ColourKeyView = templateView.findViewById(R.id.colourKeyView)
     private var templateRecyclerView: RecyclerView? = null
     private val cbSelectAllTemplates = templatesMenuView.findViewById<CheckBox>(R.id.cbTemplatesAll)
     private val spinner: Spinner = templateView.findViewById(R.id.spTemplate)
@@ -189,6 +194,7 @@ class PluginDropDownReceiver(
     private var trackingRunnable: Runnable? = null
     private var preImportTemplates: ArrayList<TemplateDataModel> = ArrayList()
     private var selectedNetwork: String = ""
+    private var selectedColourKey: String = ""
     private var spinnerAdapter: ArrayAdapter<TemplateDataModel>?=null
     private val calcManager by lazy {
         CalculationManager(pluginContext, sharedPrefs, mapView, markersList, this)
@@ -432,7 +438,12 @@ class PluginDropDownReceiver(
             templateItems,
             settingTemplateList,
             sharedPrefs,
-            onDeleteTemplate = {deleteSelectedTemplates()}
+            onDeleteTemplate = { deleteSelectedTemplates() },
+            onTemplateItemsRefreshed = { newTemplates ->
+                templateItems.clear()
+                templateItems.addAll(newTemplates.filter { it.template != null })
+                spinnerAdapter?.notifyDataSetChanged()
+            }
         )
     }
 
@@ -473,7 +484,7 @@ class PluginDropDownReceiver(
     private fun getTemplatesForSettingView():MutableList<MutableTuple<TemplateDataModel, Boolean, String?>>{
         val tupleList: MutableList<MutableTuple<TemplateDataModel, Boolean, String?>> = mutableListOf()
         // we can remove limit if required
-        for (template in getTemplatesFromFolder().take(MAX_ITEMS)) {
+        for (template in getTemplatesFromFolder().first.take(MAX_ITEMS)) {
             val icon = pluginContext.getBitmap(R.drawable.marker_icon_svg)
             val tuple = MutableTuple(template, false, icon?.toBase64String())
             tupleList.add(tuple)
@@ -515,7 +526,7 @@ class PluginDropDownReceiver(
     private fun initTemplateSpinner() {
         templateItems.apply {
             clear()
-            addAll(getTemplatesFromFolder().filter { it.template != null }) // only picking valid templates.
+            addAll(getTemplatesFromFolder().first.filter { it.template != null }) // only picking valid templates.
         }
 
         spinnerAdapter = object :
@@ -567,12 +578,15 @@ class PluginDropDownReceiver(
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     Log.d(TAG, "extraTemplates : ACTION_DOWN clicked")
-                    val extraTemplates = getTemplatesFromFolder()
+                    val (extraTemplates, badTemplates) = getTemplatesFromFolder()
+                    if (badTemplates.isNotEmpty()) {
+                        pluginContext.toast("Invalid templates skipped: ${badTemplates.joinToString()}")
+                    }
                     if (extraTemplates.isEmpty()) {
 //                        pluginContext.createAndStoreFiles(getAllFilesFromAssets())
                         templateItems.clear()
                         spinnerAdapter?.notifyDataSetChanged()
-//                        templateItems.addAll(getTemplatesFromFolder())
+//                        templateItems.addAll(getTemplatesFromFolder().first)
                     } else {
                         if (extraTemplates.size != templateItems.size) {
                             Log.d(TAG, "extraTemplates : ${extraTemplates.size}")
@@ -664,6 +678,17 @@ class PluginDropDownReceiver(
         etUsername?.setText(Constant.sUsername)
     }
 
+    private data class LoginProfile(val url: String, val username: String, val password: String)
+
+    private fun loadProfiles(): ArrayList<LoginProfile> {
+        val json = sharedPrefs?.get(Constant.PreferenceKey.sLoginProfiles, null) ?: return ArrayList()
+        return Gson().fromJson(json, object : TypeToken<ArrayList<LoginProfile>>() {}.type) ?: ArrayList()
+    }
+
+    private fun saveProfiles(profiles: ArrayList<LoginProfile>) {
+        sharedPrefs?.set(Constant.PreferenceKey.sLoginProfiles, Gson().toJson(profiles))
+    }
+
     private fun initLoginView() {
         etLoginServerUrl = loginView.findViewById(R.id.etLoginServerUrl)
         etUsername = loginView.findViewById(R.id.etUserName)
@@ -707,6 +732,56 @@ class PluginDropDownReceiver(
                 it.setSelection(it.text.length)
             }
         }
+
+        val lvProfiles = loginView.findViewById<ListView>(R.id.lvProfiles)
+        val profilesAdapter = object : ArrayAdapter<LoginProfile>(pluginContext, R.layout.login_profile_item, ArrayList()) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = convertView ?: LayoutInflater.from(pluginContext).inflate(R.layout.login_profile_item, parent, false)
+                val profile = getItem(position) ?: return view
+                view.findViewById<TextView>(R.id.tvProfileUrl).text = profile.url
+                view.findViewById<TextView>(R.id.btnDeleteProfile).setOnClickListener {
+                    val profiles = loadProfiles()
+                    profiles.removeAll { it.url == profile.url }
+                    saveProfiles(profiles)
+                    clear()
+                    addAll(profiles)
+                    notifyDataSetChanged()
+                }
+                return view
+            }
+        }
+        lvProfiles.adapter = profilesAdapter
+
+        fun refreshProfiles() {
+            profilesAdapter.clear()
+            profilesAdapter.addAll(loadProfiles())
+            profilesAdapter.notifyDataSetChanged()
+        }
+
+        refreshProfiles()
+
+        loginView.findViewById<Button>(R.id.btnSaveProfile).setOnClickListener {
+            val url = etLoginServerUrl?.text?.toString()?.trim() ?: ""
+            val user = etUsername?.text?.toString()?.trim() ?: ""
+            val pass = etPassword?.text?.toString() ?: ""
+            if (url.isEmpty() || user.isEmpty()) {
+                pluginContext.toast(pluginContext.getString(R.string.invalid_url_error))
+                return@setOnClickListener
+            }
+            val profiles = loadProfiles()
+            val idx = profiles.indexOfFirst { it.url == url }
+            if (idx >= 0) profiles[idx] = LoginProfile(url, user, pass)
+            else profiles.add(LoginProfile(url, user, pass))
+            saveProfiles(profiles)
+            refreshProfiles()
+        }
+
+        lvProfiles.setOnItemClickListener { _, _, position, _ ->
+            val p = profilesAdapter.getItem(position) ?: return@setOnItemClickListener
+            etLoginServerUrl?.setText(p.url)
+            etUsername?.setText(p.username)
+            etPassword?.setText(p.password)
+        }
     }
 
     private fun setLoginViewVisibility(isMoveBack: Boolean,isAfterLogin:Boolean=false) {
@@ -738,6 +813,18 @@ class PluginDropDownReceiver(
             btnColorBlue.setOnClickListener { selectedNetwork = "ATAK-BLUE"; applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen) }
             btnColorGreen.setOnClickListener { selectedNetwork = "ATAK-GREEN"; applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen) }
 
+            val colourKeys = listOf("LTE.dBm" to "LTE.dBm", "RAINBOW.dBm" to "RAINBOW.dBm", "4" to "BLUE", "3" to "GREEN", "2" to "RED")
+            val colourKeySpinner = findViewById<PluginSpinner>(R.id.spinnerColourKey)
+            val colourKeyAdapter = ArrayAdapter(pluginContext, android.R.layout.simple_spinner_item, colourKeys.map { it.second })
+            colourKeyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            colourKeySpinner.adapter = colourKeyAdapter
+            colourKeySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    selectedColourKey = colourKeys[position].first
+                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+
             radioBack.setOnClickListener {
                 setEditViewVisibility(false)
             }
@@ -759,7 +846,8 @@ class PluginDropDownReceiver(
                                 (marker.antenna.azi != etAntennaAzimuth.text.toString() && etAntennaAzimuth.text.isNotEmpty()) ||
                                 (marker.transmitter?.lat.toString() != etLatitude.text.toString() && etLatitude.text.isNotEmpty()) ||
                                 (marker.transmitter?.lon.toString() != etLongitude.text.toString() && etLongitude.text.isNotEmpty()) ||
-                                (selectedNetwork.isNotEmpty() && marker.network != selectedNetwork)
+                                (selectedNetwork.isNotEmpty() && marker.network != selectedNetwork) ||
+                                (selectedColourKey.isNotEmpty() && marker.output.col != selectedColourKey)
 
                     if (isEdit) {
                         // Rename the marker in our list
@@ -803,6 +891,7 @@ class PluginDropDownReceiver(
 
                         etAntennaAzimuth.text.toString().let { marker.antenna.azi = it }
                         if (selectedNetwork.isNotEmpty()) { marker.network = selectedNetwork }
+                        if (selectedColourKey.isNotEmpty()) { marker.output.col = selectedColourKey }
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
 
@@ -815,9 +904,12 @@ class PluginDropDownReceiver(
     }
 
     private fun showHelpDialog() {
-        mapView.context.showAlert(pluginContext.getString(R.string.help_title),
-            pluginContext.getString(R.string.help_msg),
-            positiveText = pluginContext.getString(R.string.ok_txt))
+        val view = LayoutInflater.from(pluginContext).inflate(R.layout.dialog_help, null)
+        android.app.AlertDialog.Builder(mapView.context)
+            .setTitle(pluginContext.getString(R.string.help_title))
+            .setView(view)
+            .setPositiveButton(pluginContext.getString(R.string.ok_txt), null)
+            .show()
     }
 
     private fun moveBackToMainLayout() {
@@ -859,6 +951,11 @@ class PluginDropDownReceiver(
             radioSettingView.findViewById(R.id.btnColorBlue),
             radioSettingView.findViewById(R.id.btnColorGreen)
         )
+        selectedColourKey = item.markerDetails.output.col
+        val colourKeys = listOf("LTE.dBm" to "LTE.dBm", "RAINBOW.dBm" to "RAINBOW.dBm", "4" to "BLUE", "3" to "GREEN", "2" to "RED")
+        val spinner = radioSettingView.findViewById<PluginSpinner>(R.id.spinnerColourKey)
+        val idx = colourKeys.indexOfFirst { it.first == selectedColourKey }.takeIf { it >= 0 } ?: 0
+        spinner.setSelection(idx)
     }
 
     private fun applyNetworkSwatches(red: View, blue: View, green: View) {
@@ -999,6 +1096,7 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             showHidePlayBtn();
                             if (response is ResponseModel) {
+                                colourKeyView.setKey(response.key)
                                 // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
                                 val tx = marker?.transmitter
                                 repository.downloadFile(response.kmz,
@@ -1035,7 +1133,8 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             if (pendingRequests.decrementAndGet() == 0) showHidePlayBtn()
                             if (response is ResponseModel) {
-                                    // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
+                                colourKeyView.setKey(response.key)
+                                // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
                                 val tx = markerData?.transmitters?.firstOrNull()
                                 repository.downloadFile(response.kmz,
                                     KMZ_FOLDER_PATH,
@@ -1286,6 +1385,10 @@ class PluginDropDownReceiver(
 
     private fun fetchTemplateDetail(items: TemplatesResponse){
         if (items.isEmpty()) {
+            val (_, badTemplates) = getTemplatesFromFolder()
+            if (badTemplates.isNotEmpty()) {
+                pluginContext.toast("Invalid templates skipped: ${badTemplates.joinToString()}")
+            }
             return
         }
 

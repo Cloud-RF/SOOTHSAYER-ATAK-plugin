@@ -158,12 +158,12 @@ fun createAndStoreDownloadedFile(data: TemplateDataModel){
     }
 }
 
-fun getTemplatesFromFolder(): ArrayList<TemplateDataModel> {
+fun getTemplatesFromFolder(): Pair<ArrayList<TemplateDataModel>, List<String>> {
     val folder = File(TEMPLATES_PATH)
     val templateList: ArrayList<TemplateDataModel> = ArrayList()
+    val badTemplates = ArrayList<String>()
     if (folder.exists()) {
         val files = folder.listFiles()?.filter { it.path.endsWith(".json") } ?: ArrayList()
-//        Log.d(PluginDropDownReceiver.TAG, "files : ${files.size}")
         for (file in files) {
             val jsonString = File(TEMPLATES_PATH, file.name).readText()
             try {
@@ -174,17 +174,18 @@ fun getTemplatesFromFolder(): ArrayList<TemplateDataModel> {
                         PluginDropDownReceiver.TAG,
                         "fileName: ${file.name} \n${JSONObject(jsonString)}"
                     )
+                } ?: run {
+                    Log.d(PluginDropDownReceiver.TAG, "Bad template: ${file.name}")
+                    badTemplates.add(file.name)
                 }
             } catch (e: Exception) {
-                Log.d(
-                        PluginDropDownReceiver.TAG,
-                        "Bad template: ${file.name}")
+                Log.d(PluginDropDownReceiver.TAG, "Bad template: ${file.name}")
                 Log.e(PluginDropDownReceiver.TAG, ("${e.stackTrace} \n ${e.message}"))
+                badTemplates.add(file.name)
             }
         }
     }
-//    Log.d(PluginDropDownReceiver.TAG, "templateList : ${Gson().toJson(templateList)}")
-    return templateList
+    return templateList to badTemplates
 }
 
 /**

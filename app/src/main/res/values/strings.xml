@@ -103,6 +103,7 @@
     <string name="empty_password">Please enter password.</string>
     <string name="template_downloading">Synchronising templates..</string>
     <string name="login_loading">Attempting login..</string>
+    <string name="saved_profiles">Saved profiles</string>
 
     <string name="settings_layers_button">Layers</string>
     <string name="settings_coopt_button">Co-Opt</string>

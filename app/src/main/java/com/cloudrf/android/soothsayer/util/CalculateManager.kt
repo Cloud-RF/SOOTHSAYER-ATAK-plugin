@@ -69,7 +69,8 @@ class CalculationManager(
         }
 
         if (config.showLinks && markersList.size > 1) {
-            pluginDropDownReceiver.updateLinkLines(item)
+            val linksDelay = if (config.showCoverage) 1000L else 0L
+            Handler(Looper.getMainLooper()).postDelayed({ pluginDropDownReceiver.updateLinkLines(item) }, linksDelay)
         } else {
             mapView?.removeLinkLinesFromMap(pluginContext, item)
         }

@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingHorizontal="@dimen/dp_20">
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -34,92 +33,145 @@
         android:layout_margin="3dp"
         android:background="@android:color/white" />
 
-    <RelativeLayout
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dp_2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    <TextView
-        android:id="@+id/tvLoginServerUrl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/server_txt"
-        android:layout_marginEnd="@dimen/dp_4"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/sp_14" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-    <!-- For all usages of Spinners in plugins one must make
-             use of the PluginSpinner class supplied with the SDK -->
-    </RelativeLayout>
-
-    <EditText
-        android:id="@+id/etLoginServerUrl"
-        style="@style/EditTextStyle"
-        android:imeOptions="actionNext"
-        android:labelFor="@id/etLoginServerUrl"
-        tools:ignore="Autofill,TextFields"
-        tools:text="https://cloudrf.com" />
-
-    <TextView
-        android:id="@+id/tvUserName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/username"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/sp_14" />
-
-    <EditText
-        android:id="@+id/etUserName"
-        style="@style/EditTextStyle"
-        android:labelFor="@id/etUserName"
-        tools:text="@string/username"
-        android:hint="@string/username"
-        android:importantForAutofill="no" />
-
-    <TextView
-        android:id="@+id/tvPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/password"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/sp_14" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/tvLoginServerUrl"
+            android:layout_width="72dp"
+            android:layout_height="wrap_content"
+            android:text="@string/server_txt"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_13" />
 
         <EditText
-            android:id="@+id/etPassword"
+            android:id="@+id/etLoginServerUrl"
             style="@style/EditTextStyle"
-            android:labelFor="@id/etPassword"
-            tools:text="@string/password"
-            android:hint="@string/password"
-            android:imeOptions="actionDone"
-            android:inputType="textPassword"
-            android:importantForAutofill="no" />
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="0dp"
+            android:imeOptions="actionNext"
+            android:labelFor="@id/etLoginServerUrl"
+            tools:ignore="Autofill,TextFields"
+            tools:text="https://cloudrf.com" />
+    </LinearLayout>
 
-        <ImageView
-            android:id="@+id/ivPasswordToggle"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_2"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvUserName"
+            android:layout_width="72dp"
+            android:layout_height="wrap_content"
+            android:text="@string/username"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_13" />
+
+        <EditText
+            android:id="@+id/etUserName"
+            style="@style/EditTextStyle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="0dp"
+            android:hint="@string/username"
+            android:importantForAutofill="no"
+            android:labelFor="@id/etUserName"
+            tools:text="@string/username" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_2"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvPassword"
+            android:layout_width="72dp"
+            android:layout_height="wrap_content"
+            android:text="@string/password"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_13" />
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <EditText
+                android:id="@+id/etPassword"
+                style="@style/EditTextStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:hint="@string/password"
+                android:imeOptions="actionDone"
+                android:importantForAutofill="no"
+                android:inputType="textPassword"
+                android:labelFor="@id/etPassword"
+                tools:text="@string/password" />
+
+            <ImageView
+                android:id="@+id/ivPasswordToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="@dimen/dp_4"
+                android:contentDescription="@string/password"
+                android:src="@drawable/ic_eye_closed" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="@dimen/dp_8"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnLogin"
+            style="@style/darkButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_eye_closed"
-            android:layout_marginEnd="@dimen/dp_4"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:contentDescription="@string/password" />
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:text="@string/login" />
 
-    </RelativeLayout>
+        <Button
+            android:id="@+id/btnSaveProfile"
+            style="@style/darkButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_8"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:text="@string/save" />
+    </LinearLayout>
 
-    <Button
-        android:id="@+id/btnLogin"
-        style="@style/darkButton"
-        android:layout_width="wrap_content"
+    <TextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/login" />
+        android:layout_marginTop="@dimen/dp_8"
+        android:text="@string/saved_profiles"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/sp_13" />
+
+    <ListView
+        android:id="@+id/lvProfiles"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp" />
 
 </LinearLayout>

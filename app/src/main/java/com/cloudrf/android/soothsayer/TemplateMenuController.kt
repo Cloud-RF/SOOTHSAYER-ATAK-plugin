@@ -29,8 +29,10 @@ import com.cloudrf.android.soothsayer.plugin.R
 import com.cloudrf.android.soothsayer.util.createAndStoreDownloadedFile
 import com.cloudrf.android.soothsayer.util.findFileInFolder
 import com.cloudrf.android.soothsayer.util.getBitmap
+import com.cloudrf.android.soothsayer.util.getTemplatesFromFolder
 import com.cloudrf.android.soothsayer.util.jsonFile
 import com.cloudrf.android.soothsayer.util.saveSettingTemplateListToPref
+import com.cloudrf.android.soothsayer.util.toBase64String
 import com.cloudrf.android.soothsayer.util.toDataUri
 import com.cloudrf.android.soothsayer.util.toast
 import com.cloudrf.android.soothsayer.util.zipTemplates
@@ -51,7 +53,8 @@ class TemplateMenuController(
     private val templateItems: MutableList<TemplateDataModel>,
     private val settingTemplateList: MutableList<MutableTuple<TemplateDataModel, Boolean, String?>>,
     private val sharedPrefs: AtakPreferences?,
-    private val onDeleteTemplate: () -> Unit
+    private val onDeleteTemplate: () -> Unit,
+    private val onTemplateItemsRefreshed: (List<TemplateDataModel>) -> Unit
 ) {
 
     private val mapViewRef = WeakReference(mapView)
@@ -91,7 +94,7 @@ class TemplateMenuController(
         settingsView()?.findViewById<Button>(R.id.btnOpenTemplateManager)?.setOnClickListener {
             settingsView()?.visibility = View.GONE
             templatesMenuView()?.visibility = View.VISIBLE
-            setEmptySettingView(templateAdapter?.itemCount == 0)
+            refreshFromFolder()
         }
 
         // Back from templates menu
@@ -216,6 +219,28 @@ class TemplateMenuController(
         templatesMenuView()?.findViewById<ImageButton>(R.id.btnShareTemplates)?.setOnClickListener {
             shareFile()
         }
+
+        // refresh templates from SD card folder
+        templatesMenuView()?.findViewById<ImageButton>(R.id.btnRefreshTemplates)?.setOnClickListener {
+            refreshFromFolder()
+            context()?.toast("Templates refreshed")
+        }
+    }
+
+    private fun refreshFromFolder() {
+        val ctx = context() ?: return
+        val (templates, _) = getTemplatesFromFolder()
+        val defaultIcon = ctx.getBitmap(R.drawable.marker_icon_svg)?.toBase64String()
+
+        settingTemplateList.clear()
+        templates.take(TemplateRecyclerViewAdapter.MAX_ITEMS).forEach { template ->
+            val icon = template.customIcon ?: defaultIcon
+            settingTemplateList.add(MutableTuple(template, false, icon))
+        }
+        templateAdapter?.notifyDataSetChanged()
+        setEmptySettingView(settingTemplateList.isEmpty())
+        sharedPrefs.saveSettingTemplateListToPref(settingTemplateList)
+        onTemplateItemsRefreshed(templates)
     }
 
     private fun handleImportTemplate() {

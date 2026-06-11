@@ -150,7 +150,12 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/INDEX.LIST'
+        jniLibs {
+            useLegacyPackaging = true
+        }
+        resources {
+            excludes += ['META-INF/INDEX.LIST']
+        }
     }
 
     sourceSets {

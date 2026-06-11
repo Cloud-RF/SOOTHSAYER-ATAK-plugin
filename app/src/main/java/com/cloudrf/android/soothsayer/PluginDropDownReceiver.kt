@@ -339,6 +339,13 @@ class PluginDropDownReceiver(
         }
         val btnAddPolygon = templateView.findViewById<ImageButton>(R.id.btnAddPolygon)
         val btnBestSiteAnalysis = templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis)
+
+        // Enable immediately if a bounds polygon already exists
+        if (CustomPolygonTool.getMaskingPolygon() != null) {
+            btnBestSiteAnalysis.isEnabled = true
+            btnBestSiteAnalysis.alpha = 1.0f
+        }
+
         btnBestSiteAnalysis.setOnClickListener {
             bestSiteManager.performBestSiteAnalysis(selectedMarkerType)
         }
@@ -347,6 +354,8 @@ class PluginDropDownReceiver(
                 pluginContext.shortToast("Draw a polygon for the study area")
                 CustomPolygonTool.createPolygon(object: CustomPolygonInterface{
                     override fun onPolygonDrawn(polygon: Shape) {
+                        btnBestSiteAnalysis.isEnabled = true
+                        btnBestSiteAnalysis.alpha = 1.0f
                     }
                 })
             }

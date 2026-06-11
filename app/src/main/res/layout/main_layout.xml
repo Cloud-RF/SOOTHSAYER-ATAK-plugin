@@ -63,6 +63,8 @@
                 android:layout_toRightOf="@id/btnAddPolygon"
                 android:padding="6dp"
                 android:src="@drawable/analysis"
+                android:enabled="false"
+                android:alpha="0.4"
                 android:visibility="visible"
                 tools:visibility="visible" />
 

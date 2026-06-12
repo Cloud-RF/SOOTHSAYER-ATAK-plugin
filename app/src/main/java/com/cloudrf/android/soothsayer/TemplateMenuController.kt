@@ -1,5 +1,6 @@
 package com.cloudrf.android.soothsayer
 
+import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -146,11 +147,22 @@ class TemplateMenuController(
         // Delete templates
         templatesMenuView()?.findViewById<ImageButton>(R.id.btnDeleteTemplates)
             ?.setOnClickListener {
-                onDeleteTemplate()
-                templateAdapter?.selectAll(false)
-                cbSelectAllTemplates()?.isChecked = false
-                setEmptySettingView(templateAdapter?.itemCount == 0)
-                sharedPrefs.saveSettingTemplateListToPref(settingTemplateList)
+                val selectedCount = settingTemplateList.count { it.second }
+                if (selectedCount == 0) return@setOnClickListener
+                val ctx = mapView()?.context ?: return@setOnClickListener
+                val pluginCtx = context() ?: return@setOnClickListener
+                AlertDialog.Builder(ctx)
+                    .setTitle(pluginCtx.getString(R.string.alert_title))
+                    .setMessage("Delete $selectedCount template${if (selectedCount == 1) "" else "s"}?")
+                    .setPositiveButton(pluginCtx.getString(R.string.delete)) { _, _ ->
+                        onDeleteTemplate()
+                        templateAdapter?.selectAll(false)
+                        cbSelectAllTemplates()?.isChecked = false
+                        setEmptySettingView(templateAdapter?.itemCount == 0)
+                        sharedPrefs.saveSettingTemplateListToPref(settingTemplateList)
+                    }
+                    .setNegativeButton(pluginCtx.getString(R.string.cancel), null)
+                    .show()
             }
 
         // Back from new template view

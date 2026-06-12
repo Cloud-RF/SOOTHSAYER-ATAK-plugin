@@ -245,33 +245,26 @@ fun Context.shortToast(message: String) {
 }
 
 fun Context.isConnected(): Boolean {
-    var result = false
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        val networkCapabilities = connectivityManager.activeNetwork
-        networkCapabilities?.let { capabilities ->
-            val actNw = connectivityManager.getNetworkCapabilities(capabilities)
-            actNw?.let {
-                result = when {
-                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-                    else -> {
-                        false
-                    }
-                }
-            }
+        // Any network with capabilities counts — avoids false negatives for USB tethering,
+        // VPNs, or interfaces with no default route. The HTTP stack will report unreachable
+        // servers on its own.
+        if (connectivityManager.activeNetwork != null &&
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork) != null) {
+            return true
+        }
+        return connectivityManager.allNetworks.any { network ->
+            connectivityManager.getNetworkCapabilities(network) != null
         }
     } else {
-        result = try {
-            connectivityManager.activeNetworkInfo != null && connectivityManager.activeNetworkInfo!!.isConnected
+        return try {
+            connectivityManager.activeNetworkInfo?.isConnected == true
         } catch (e: Exception) {
             e.printStackTrace()
             false
         }
     }
-
-    return result
 }
 
 fun String.getFileName():String{

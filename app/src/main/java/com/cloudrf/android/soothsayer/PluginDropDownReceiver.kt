@@ -700,6 +700,9 @@ class PluginDropDownReceiver(
         etUsername?.setText(username)
         etLoginServerUrl?.setText(server)
         Constant.sAccessToken = apiKey.toString()
+        val resolvedServer = server ?: "https://api.cloudrf.com"
+        RetrofitClient.BASE_URL = resolvedServer
+        Constant.sServerUrl = resolvedServer
         Log.d(TAG, "SOOTHSAYER saved server: "+server+" User: "+username+" apiKey: "+apiKey)
 
         val btnLogin = loginView.findViewById<Button>(R.id.btnLogin)
@@ -1338,7 +1341,7 @@ class PluginDropDownReceiver(
                                     )
                                     sharedPrefs?.set(Constant.PreferenceKey.etPassword, etPassword?.text.toString())
                                     setLoginViewVisibility(isMoveBack = false, isAfterLogin = true)
-                                    Constant.sServerUrl = etServerUrl?.text.toString()
+                                    Constant.sServerUrl = etLoginServerUrl?.text.toString() ?: ""
                                     downloadTemplatesFromApi()
                                     Constant.sUsername = etUsername?.text.toString()
                                 }
@@ -1467,6 +1470,18 @@ class PluginDropDownReceiver(
                 val l = mapOverlay.findLayer(intent.getStringExtra("uid"))
                 if (l != null) {
                     promptDelete(l)
+                }
+            }
+            LAYER_SEND -> {
+                val uid = intent.getStringExtra("uid") ?: return
+                val layer = mapOverlay.findLayer(uid) ?: return
+                val pngFile = File(layer.fileUri)
+                val kmzFile = File(pngFile.parent, pngFile.name.replace(Regex("(?i)\\.png$"), ".kmz"))
+                if (kmzFile.exists()) {
+                    MissionPackageApi.Send(kmzFile, layer.name)
+                } else {
+                    pluginContext.toast(pluginContext.getString(R.string.error_msg))
+                    Log.e(TAG, "LAYER_SEND: no KMZ found at ${kmzFile.absolutePath}")
                 }
             }
             RADIO_EDIT -> {
@@ -1621,6 +1636,7 @@ class PluginDropDownReceiver(
         const val SHOW_PLUGIN = "com.cloudrf.android.soothsayer.SHOW_PLUGIN"
         const val LAYER_VISIBILITY = "com.cloudrf.android.soothsayer.LAYER_VISIBILITY"
         const val LAYER_DELETE = "com.cloudrf.android.soothsayer.LAYER_DELETE"
+        const val LAYER_SEND = "com.cloudrf.android.soothsayer.LAYER_SEND"
         const val GRG_DELETE = "com.atakmap.android.grg.DELETE"
         const val GRG_TOGGLE_VISIBILITY = "com.atakmap.android.grg.TOGGLE_VISIBILITY"
         const val GRG_BRIGHTNESS = "com.atakmap.android.grg.BRIGHTNESS"

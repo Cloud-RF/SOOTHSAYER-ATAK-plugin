@@ -1,1 +1,71 @@
-{"customIcon":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABh0lEQVR4nO2ZPU7DMBxHXxBLN47AyFjGbhwhbEhZ4CTNVjaOAIsFG91YuzHCDTr2CB3NQFBTiD+b+oPkSZasxMP7/2LHjQsjw2UKXEV28OIZkE3bRnax5oJvWdnRkqad9u82j+ilRZf2GjiPZmbgkUzT3pBh2gvUaS8iemnRpb0h4bTnqNN+iOhlZI1aPEazDussAVnrIoqOAlLfHfecT3UjpTiuiS1Fpb53Ek7jOIwFxEa7BkJRVNQ/fSl2fRuSKADcpNtkP4VM+0AdyKNW9Luu7Tlnv5FlP4VMi7gOIWFBrbqhnUKJ/pQY1hTqpKiYAG/sTtaWUlD25OSEcwFFxR1/T9TK5jHPpOC9By9rnApoktcdBwaVB/c1YBQsKl48XbxwLWBqMebGw8Ob7N9CrgV8Wox5ctfwx7WAmWmAFNz6qfjhVIAUbIFrzZDLw3TccV4DUvAKTIBV6/JSCpCCj77EbPHaiZsn0aY8XMWPwb2FkuNffpHdBxLxwdpN959AMifTIyMj8AWIw9s35k4TRgAAAABJRU5ErkJggg==","antenna":{"ant":1,"azi":"180","fbr":2.0,"hbw":1,"mode":"template","pol":"v","tlt":0,"txg":2.0,"txl":0.0,"vbw":1},"coordinates":3,"engine":1,"environment":{"buildings":1,"clt":"Temperate.clt","elevation":2,"landcover":1,"obstacles":0},"feeder":{"fcc":0,"fll":0,"flt":1},"model":{"ked":2,"pe":2,"pm":10,"rel":90},"network":"ATAK","output":{"col":"LTE.dBm","mod":7,"nf":"-110","out":2,"rad":5.0,"res":10.0,"units":"m"},"receiver":{"alt":1.5,"lat":45.174496,"lon":-112.04872,"rxg":2.0,"rxs":-90},"reference":"https://cloudrf.com/documentation/developer/swagger-ui/","site":"CNR","template":{"bom_value":0,"created_at":"2025-12-13T13:06:28+00:00","name":"VHF CNR 75MHz","owner":34858,"service":"CloudRF https://api.cloudrf.com"},"transmitter":{"alt":1.5,"bwi":0.0125,"frq":75.0,"lat":51.763657,"lon":-2.375821,"powerUnit":"W","txw":5.0},"version":"CloudRF-API-v3.29.0"}
+{
+  "customIcon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABQ0lEQVR4nO2ZsQ3CMBBFvxEDMAIlJSNkBEqkNGxCCR0jQBNByQiMwAaUjEBpCiJhUHL4TiTnAz/JTXDx/l0cOwHI/C9TAIWyg4g9AF+Pm7JLNBM8ZH3DSJqw2u9jqehFQlX7AmCsZvaBLYxW+wqD1V6hvdorRS8SqtpXJFztJdqrvVH0+sgF7eIaI7pYowRko0O4hgCp744vzkNqpq+6NYnFle2/DfrT6IYcQBvzAchF3BfhIuU+OMx3wHwA8xuZ+Q6YD5CPEtqI9wFX4oTnl7WjrzD7gg8bUQfqlhbBpRnV5i5hB6BENUKwArgS54g5B7GNAG4HphFz5gIPMeafQtwA54g5O76GnK/fQr7CQmQihBUglZ05hL0GghCn4PLRVzoByeN0KhV/21/ycTopfvKNbN2TiIRoN+o/gWS+TGcyGeAOlZrM+pUecSkAAAAASUVORK5CYII",
+  "antenna": {
+    "ant": 1,
+    "azi": "180",
+    "fbr": 2.0,
+    "hbw": 1,
+    "mode": "template",
+    "pol": "v",
+    "tlt": 0,
+    "txg": 2.0,
+    "txl": 0.0,
+    "vbw": 1
+  },
+  "coordinates": 3,
+  "engine": 1,
+  "environment": {
+    "buildings": 1,
+    "clt": "Temperate.clt",
+    "elevation": 2,
+    "landcover": 1,
+    "obstacles": 0
+  },
+  "feeder": {
+    "fcc": 0,
+    "fll": 0,
+    "flt": 1
+  },
+  "model": {
+    "ked": 2,
+    "pe": 2,
+    "pm": 10,
+    "rel": 90
+  },
+  "network": "ATAK",
+  "output": {
+    "col": "LTE.dBm",
+    "mod": 7,
+    "nf": "-110",
+    "out": 2,
+    "rad": 5.0,
+    "res": 10.0,
+    "units": "m"
+  },
+  "receiver": {
+    "alt": 1.5,
+    "lat": 45.174496,
+    "lon": -112.04872,
+    "rxg": 2.0,
+    "rxs": -90
+  },
+  "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
+  "site": "CNR",
+  "template": {
+    "bom_value": 0,
+    "created_at": "2025-12-13T13:06:28+00:00",
+    "name": "VHF CNR 75MHz",
+    "owner": 34858,
+    "service": "CloudRF https://api.cloudrf.com"
+  },
+  "transmitter": {
+    "alt": 1.5,
+    "bwi": 0.0125,
+    "frq": 75.0,
+    "lat": 51.763657,
+    "lon": -2.375821,
+    "powerUnit": "W",
+    "txw": 5.0
+  },
+  "version": "CloudRF-API-v3.29.0"
+}

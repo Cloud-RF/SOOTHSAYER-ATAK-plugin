@@ -1,1 +1,71 @@
-{"customIcon":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAEFElEQVR4nO2ZIXQbORCGvz1kM5elzGEOS1jKUtSUteh6b4kP3StrUcoSlrLAwpTo5VjKEuYUNcxhCbNZw2LmYzqgdSrNjnZXm01R/vf0njW7+uefXWmkHcMTnvDbcAj8AO6AadHvdcT9ATgp+I+BcUe8DABb05bAsCX3sob7Jw94SOMG4v12mMC9l8j9JlX8u0QHKUEcteRWg8gU2wA3z30srGEQDMzpA9eUp88WcBURv4lbPz7mwIY1LD3u58CM8vR5BiwCHYqTOwjEfrUmvqiynE/AZ2mO3G5F/7M1fKrg/kb45P8D+nWOfCe31rAWc+A5ugB2PFPpSQFruEW5wqU1bDfgXhA+0EDzH+L+D6K/rhBuSZs1gXhwqVDiRIwJxGc5/SznmTLuuegH60wG8Eo4Wfr9LAdgmuWQ5eXgPOwotujTznK+4lLqXZaH60dqkNwygFGFk11hmlUEMVBsaj4vxI8902ZMQ4FAowxgXjHwu2KrCqIWinhwC7UKc78jA7iMjSpe5UvlkhbEuXLfN79TZJix4qdu570IeMTFHgRz7sqa8JVmOS+BSY2Tdcpvc4TbN6Kwpmwr1oSvoY/3lurSKMBbazgVpHVBNN0Hfl3Qxf9NOaNVplEop87TLA+nhDVMgBcRLfOI/c+IPSb+nLL4jRiHxBfanVdku+uIxyrB1OK4Q+cPbcEmmILthg6mLUQ1PZXK/acVRrhF6xOfEp5EUwOo4p5Qsak+FjSR17hjsbRPunKqZaG2WIj+pTWMrGGI2HyUfmt0GcBA9Ofe71txratiQKfQptBh0aT9Z4Tj0dDDZY0fuKPGNe7DfIVd0hawv4h7uCBnBfeUtAJBJYYNhNSVRh6SetuWbADYbynsMdp+qvjUuo3WJripcNpREI2n1Zoy+NoarN+IT4E9nfb+qK6NeSW4e7h1Ju8bStImx+mP1nAUDMr5F1f8iiH5OI2rDQXfC1nOAXDgmZLLKvNiI/JJ68SDqyTI3C/LKhrWrWEm/N0QHiuCko3cyILXnyC+L/pflHuORP8v5R7t81SWcQKNMoAdhRS4f50l8daglT7eKBTBWGs4AV4r983EfUlllU2FcIUDadC+pFJgDWcohYLiUzKGyrLKVcXAj8J5FbTSiFouKT5Pt4TtuIL7xu/IAC5io4pMtA7sNnjyGo9WallxT3Hr6G0qd3IW0qAUd5tkoXNr6r+2spzbYuy9yb+uHacX3u9hlpdK59LBe8qLX4rXbLs1c31VufPFl6Zh0z84bqwpf+JlOXPKu+MGYp562KT8B0eJu+LPE61sr2JMu/OKzPUa2pZsxk2E+/gn0UHKiXH/scWvUHUAW7W2Z/ZRA+FL9FJ9K+wBZ7hMMiF+6kxFD/dGznC78FmH3E94Qh3+B5F3pcsLQcIDAAAAAElFTkSuQmCC","antenna":{"ant":1,"azi":"0","fbr":2.0,"hbw":1,"mode":"template","pol":"v","tlt":0,"txg":2.0,"txl":0.0,"vbw":1},"coordinates":3,"engine":1,"environment":{"buildings":1,"clt":"Temperate.clt","elevation":2,"landcover":1,"obstacles":0},"feeder":{"fcc":0,"fll":0,"flt":1},"model":{"ked":4,"pe":2,"pm":1,"rel":50},"network":"ATAK","output":{"col":"SNR21.dB","mod":7,"nf":"-104","out":4,"rad":5.0,"res":10.0,"units":"m"},"receiver":{"alt":1.5,"lat":45.174496,"lon":-112.04872,"rxg":2.0,"rxs":5},"reference":"https://cloudrf.com/documentation/developer/swagger-ui/","site":"UAS","template":{"bom_value":0,"created_at":"2025-12-13T13:25:46+00:00","name":"UAS S 100m AGL","owner":34858,"service":"CloudRF https://api.cloudrf.com"},"transmitter":{"alt":100.0,"bwi":10.0,"frq":2220.0,"lat":51.762535,"lon":-2.376092,"powerUnit":"W","txw":2.0},"version":"CloudRF-API-v3.29.0"}
+{
+  "customIcon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADpUlEQVR4nO2ZL1AbQRTGf+lUBJc66lKXutQh44rEtTMxcbU46pDgkJVgbqgDBy44cMQFxzlwxIHbir3A7ru3t3eboyrfzM5k926/973bf29fYI01/hsOgGvgCbgt6t2WuHeB04L/GJi0xEsPMJHyDPQTuZ8j3A+s8JEmNcS75aAB915D7p2m4n82NNDEiaNEbtWJjtLWw85zFwuT0fM6jgHIKU+fb8AsIH6IXT8ucqBvshL3C+Xp8wlYeDoUI0/giT0xWXhRFcZKzYHXjagfmozfFdzn+F/+BdiIGXKNPJqMzZABx9AVMHKaSl8K2MQuyiVuTMZWDe4F/gf1NH8Q7+8qRqMwmSce7FYocSr6RMUX6Im6t84+ioffhREP7nSRzwRGSltQcGfMCW97/8xkDF07Ypp63HIEBpWyfKNV6Clt6n4uxANv4gPwNEoH8khnaXwlKOLBLtQq5G5FOnCTIELDpdJ2Lvqdo4QMJouevFcej3jYxR7vS3jzsTBcB18oj+YAmFd10tZVZ8wMf1pt4IySHAE5fENRjy3eJXKl7a6qQwWv1OBplA6A/Xqv6IyhM/anRMSJPND+I9Qh8OUvldH+WmnZwR/S4hVZnlriMehnSyWOWzS+avEOwSbYqmngNkFU3ah0O1W8iwEwFcRn+JFoUwequKc0OFTbgiZyDtwr7dO2jGq7UCoWon5jMgYmo484fJR6Mtp0oCfqufP7UTxrKxnQKrQpdFAU2f4Q4Hg3dLG7xjU21JhjL+ZLbNNsAbuLuIt18r7gvqVZgqAS/RpCYqmRVbbe1JQNAPuJwt6j7DcV3zRvo5UpdiqcteRE7Wm1qXSemwzjFsJTYE+nfQ3VVYGC22DXmXyvL0ljWQnbUL4b/8Umv0Kom1YJ2ijsSJTSKrFzIE8QD3o2ozLDoV2UCtvuPaKLOG+kA97wF6eoa6SOeLDhuMRRrFPgtidjIk+jdGAUsVESbzJ1+HdifUOXIumE8t7IrUgHhjpt5RAnI7F/ZVpl1pJxLTWipksSnPDu1tKBq1Av11ANoxqPlmpZmTu2jeZyIWtQkrufKUegMrl7abL4basz5hF/B6tM7oIf1/c7Yw5jRigvfilea6sj/gRffGka1v2D485k5SteZ6z+wfGVcA5oSPkPjibcWtpexYS0eCW615OespnUEe7iV0MDTSLG/fcWv0RlAFaU1Jh9UEP4M3qqPgl7wAV2J5kSjjqboosdkQvsreyiRe411ojhH+UJgCI4j+RiAAAAAElFTkSuQmCC",
+  "antenna": {
+    "ant": 1,
+    "azi": "0",
+    "fbr": 2.0,
+    "hbw": 1,
+    "mode": "template",
+    "pol": "v",
+    "tlt": 0,
+    "txg": 2.0,
+    "txl": 0.0,
+    "vbw": 1
+  },
+  "coordinates": 3,
+  "engine": 1,
+  "environment": {
+    "buildings": 1,
+    "clt": "Temperate.clt",
+    "elevation": 2,
+    "landcover": 1,
+    "obstacles": 0
+  },
+  "feeder": {
+    "fcc": 0,
+    "fll": 0,
+    "flt": 1
+  },
+  "model": {
+    "ked": 4,
+    "pe": 2,
+    "pm": 1,
+    "rel": 50
+  },
+  "network": "ATAK",
+  "output": {
+    "col": "SNR21.dB",
+    "mod": 7,
+    "nf": "-104",
+    "out": 4,
+    "rad": 5.0,
+    "res": 10.0,
+    "units": "m"
+  },
+  "receiver": {
+    "alt": 1.5,
+    "lat": 45.174496,
+    "lon": -112.04872,
+    "rxg": 2.0,
+    "rxs": 5
+  },
+  "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
+  "site": "UAS",
+  "template": {
+    "bom_value": 0,
+    "created_at": "2025-12-13T13:25:46+00:00",
+    "name": "UAS S 100m AGL",
+    "owner": 34858,
+    "service": "CloudRF https://api.cloudrf.com"
+  },
+  "transmitter": {
+    "alt": 100.0,
+    "bwi": 10.0,
+    "frq": 2220.0,
+    "lat": 51.762535,
+    "lon": -2.376092,
+    "powerUnit": "W",
+    "txw": 2.0
+  },
+  "version": "CloudRF-API-v3.29.0"
+}

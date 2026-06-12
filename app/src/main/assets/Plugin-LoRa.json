@@ -1,1 +1,71 @@
-{"customIcon":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAB00lEQVR4nO2YL1PDMByGn3KISebATU4ON8nc9gnYXc2mQPItJocDN0zv5gAFbvAJhpsEN9xwk0V0vQulydK0NC2X5y53Sd8k9/7aNP/A4agdbWACLIE1sNnlp8CZPVtqWkRmQ820JQrUOg30TcsCOSrbdMxkj7k1sNil1Z66NyV7Zykxcq7RdiRp+/4XRlXkfYMXiT5KJx7/LUWdLtDR6KNSLJCP9ZVFX3vpoj/79HU79Qq3KSfrUCjTmxbimpD2U4vTbmVp5NQdlcPmj5Ic60ZeDgowYhUXgG1cALapfQCHGnXOUG+Ji2KU8uwDeDHtsE2+82yRqSUzqVo8qrapSvUq+wdKP0RrME17KPsCa+BYKF8X7UaTKyH/CZwkK8gC2CDcx4RBkZ708HyaOx8xX0AzWa/206hRAJ5P0/MZKrRx1namZA7A8+kRfdq55//SBjttlqKNZe3yYPIFnsSC53MpFO8Tmni7MFNoxpgEME+UH4X8Q0J7FfLPCs2YzAGEASPglmhWGIQBa0EbClovDNgKWh+4I5oOT0UtD24atU3tA5ChuoC1lRZZAmhVwHAyiXszLaYVMB2nH2uIyL7LpDbR1rqjHXaxvAFjopOZw+H4j3wDarcsaYL+qr8AAAAASUVORK5CYII=","antenna":{"ant":1,"azi":"0","fbr":1.0,"hbw":90,"mode":"template","pol":"v","tlt":0,"txg":1.0,"txl":0.0,"vbw":15},"coordinates":1,"engine":1,"environment":{"buildings":1,"clt":"Temperate.clt","elevation":2,"landcover":1,"obstacles":0},"feeder":{"fcc":0,"fll":0,"flt":1},"model":{"ked":2,"pe":2,"pm":10,"rel":50},"network":"ATAK","output":{"col":"LORA.dBm","mod":7,"nf":"-100","out":2,"rad":10.0,"res":20.0,"units":"m"},"receiver":{"alt":2.0,"lat":51.67328710976944,"lon":-2.5791951696936883,"rxg":1.0,"rxs":-140},"reference":"https://cloudrf.com/documentation/developer/swagger-ui/","site":"LORA","template":{"bom_value":0,"created_at":"2025-12-13T16:04:48+00:00","name":"LoRa EU868","owner":34858,"service":"CloudRF https://api.cloudrf.com"},"transmitter":{"alt":2.0,"bwi":0.125,"frq":868.0,"lat":51.798763,"lon":-2.456738,"powerUnit":"W","txw":0.1},"version":"CloudRF-API-v3.29.0"}
+{
+  "customIcon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABnklEQVR4nO2Yr1PDMBTHP+UQk+DAVVZOTk7uP4C7maGw/BeTw4EDszvkJG78B8NNghtuOHBDdLvLZU36mmVNy+Vz9+7avDT7viV5+QGRSOvIgDGwAFbAevs8AfrhZNlJycVuhPZDHmhwOshFmwI5q1v0jnGJuBUw39qypO5DzdpZGIRcCb4dGb79OIZQG4f+g7daG7WzG/+ppU4P6AraaBRzzGN9GVBXKT3k2WcgbTTxLtNM1aFQpzYR6ppQNKnVtNtYOgf6I40j5ETRx7qTlhMPQoISAwhNDCA0rQ/gVFCnj31L7ItRQdkn8ObaYMZh51mflppE2haPpm2qCrWa5kDth2gBk6JCUw+sgAvl/d63GiF3yvMXcKlXMAWwRrmP2Ux9apKRDPeKvoFzvbD1abT1AUjWgT3U7tWHl6vPlco9kAz5dfQdBZch9GLxzSy+V4ffKqVyAJspI+CRPCvovmuLbwA8k6dDb8Q0GprWB2DCdgEbyuZVAkgbIFg3dW8mYtIA0Tt7Moksu0zKyLfWXXHYfnkHbshPZpFI5D/yB3+FGXRq1dRYAAAAAElFTkSuQmCC",
+  "antenna": {
+    "ant": 1,
+    "azi": "0",
+    "fbr": 1.0,
+    "hbw": 90,
+    "mode": "template",
+    "pol": "v",
+    "tlt": 0,
+    "txg": 1.0,
+    "txl": 0.0,
+    "vbw": 15
+  },
+  "coordinates": 1,
+  "engine": 1,
+  "environment": {
+    "buildings": 1,
+    "clt": "Temperate.clt",
+    "elevation": 2,
+    "landcover": 1,
+    "obstacles": 0
+  },
+  "feeder": {
+    "fcc": 0,
+    "fll": 0,
+    "flt": 1
+  },
+  "model": {
+    "ked": 2,
+    "pe": 2,
+    "pm": 10,
+    "rel": 50
+  },
+  "network": "ATAK",
+  "output": {
+    "col": "LORA.dBm",
+    "mod": 7,
+    "nf": "-100",
+    "out": 2,
+    "rad": 10.0,
+    "res": 20.0,
+    "units": "m"
+  },
+  "receiver": {
+    "alt": 2.0,
+    "lat": 51.67328710976944,
+    "lon": -2.5791951696936883,
+    "rxg": 0.0,
+    "rxs": -135
+  },
+  "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
+  "site": "LORA",
+  "template": {
+    "bom_value": 0,
+    "created_at": "2025-12-13T16:04:48+00:00",
+    "name": "LoRa EU868",
+    "owner": 34858,
+    "service": "CloudRF https://api.cloudrf.com"
+  },
+  "transmitter": {
+    "alt": 2.0,
+    "bwi": 0.125,
+    "frq": 868.0,
+    "lat": 51.798763,
+    "lon": -2.456738,
+    "powerUnit": "W",
+    "txw": 0.1
+  },
+  "version": "CloudRF-API-v3.29.0"
+}

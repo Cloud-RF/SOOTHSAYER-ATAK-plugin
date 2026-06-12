@@ -1,1 +1,71 @@
-{"customIcon":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACI0lEQVR4nO2Zr04DQRDGPwjicIcrrrjKSmQdlXU04QGwuOJ4BhSymKa4PgMKXCUSSV3rilvE3SXNdGd39t9dS+6XbJrb7sx8e52b3dsCLS0HyQcARdpXo4qEdLAvnLZuU+Ik2MRXLYsV8DSWIwDficbWBr3L92oGpWZQAEaa76NwEssRiCg1I4Hu9safA/gNDRorhXJyrRNG+6iNF7EmsCHXuoeU9q1iBE6WQiVv5ec4cewo9CAvo72GNFp5gl38pDF1Qky/RDd2sJR5SJ+JJLFirsSNcPQTOAu0vwXwKBy7ZPqfAbz6CgidwCWAvnAsNy4PEXD0KXT0EwgtbTn4FKB7/itm3AoBu9J/uw5cpwgWyEDXaZrANpkUdxSYKmZ6iDOTYU1cw/L6KalCSwDzKHLcWKA4XzIiLaNj1JtSWxQHAVZc1oE6UqpKGfG5ETeBjcFmiTRVqg9zyvy4ODMdEereb3X4nAMNDXG7Qh+sABfxOnsp3CScoQ4WgfYuTAPtARQrH3WSO9j7CqiKxW4bcINt+xNdYOmexncv5BTTVkYvmADRjsd3qO68RIMTE+gfqpHFziWFxkyMB0/NeyyYAKbaLJlAVvrQ+XYtGlZemEAKxf9fHTLeNIEMxQsP528aW3yFaaHZ/VXmjKi1wH6YSnyF7e75tnVq4ZQeil1jqPAtGv7nMoN+5bS1KHme4kW7D+AGxY41L/s2AD4BvJefLS2Hwh99ISdE0OqpFwAAAABJRU5ErkJggg==","antenna":{"ant":1,"azi":"0","fbr":1.0,"hbw":90,"mode":"template","pol":"v","tlt":0,"txg":1.0,"txl":0.0,"vbw":15},"coordinates":1,"engine":1,"environment":{"buildings":1,"clt":"Temperate.clt","elevation":1,"landcover":1,"obstacles":0},"feeder":{"fcc":0,"fll":0,"flt":1},"model":{"ked":2,"pe":2,"pm":10,"rel":50},"network":"ATAK","output":{"col":"LTE.dBm","mod":7,"nf":"-113","out":2,"rad":15.0,"res":20.0,"units":"m"},"receiver":{"alt":2.0,"lat":51.67328710976944,"lon":-2.5791951696936883,"rxg":1.0,"rxs":-95},"reference":"https://cloudrf.com/documentation/developer/swagger-ui/","site":"VHF","template":{"bom_value":0,"created_at":"2025-12-13T15:57:09+00:00","name":"Marine VHF CH16","owner":34858,"service":"CloudRF https://api.cloudrf.com"},"transmitter":{"alt":8.0,"bwi":0.0125,"frq":156.8,"lat":51.755808,"lon":-2.415728,"powerUnit":"W","txw":5.0},"version":"CloudRF-API-v3.29.0"}
+{
+  "customIcon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACHklEQVR4nO2ZIVPDMBTH/3CIyuKGG25ycnKOyTl2x5fADcdnQCGH4cDtM6DATSKRzG1uuCHScN1bXvLSJO3G9XeX25rLy/u/9vUlbYGWloPkHcCWtM9GFQnpYF84bd2mxElwidcti+XwNNZEAL4SjbVyEmsiqDO72/FcOLlJ5zvmFdhBi6f/S0RJo1gB5OT4xzCG9lGbSsQKYE2OTWeX9i1jOE56DwB4LX4niX1HoQd5Ge01pNHJPdzip42pE2K7Et3YzlLmIb0nkvhKtg7UxdEHcBZofw3gTjh2wfQ/AHiqKiA0gAsAfeFYblweIuDoU+joAwgtbTn4FKB7/ktm3BLmzZ+If7sODFI4C2Ro6rQFsEkmxZ8tmCpmu4kzm2FNDGDepv8hqUILAC9R5Pgxh3q/ZEVaRieoN6U2AMaSgT7rQB0ppVNG/MDPBbC22CyQpkr1YU+Zb5/JbK8ITc+3JqidhJHFb1c4ByvAR7zJXgoXhDd0gnmgvQ+zQHsAauWjk+Qe9lUF6GJRbkNusGt/YnIs3dNU3Qt5+XSV0XPGQbTX4yX0mZdo8GIK8001dtj5pNCE8XFbUfMec8aBrTZLAsiKOUxz+xYNJ4+Moy3U968OGW8LIIN64OHmm8UWr7EtNOWr8sKIWgnsR6nEa1xnr2pbpRZO6UHtGkOFb9Dwl8sM5pXT1aLkeYoH7T6AK6gda170rQF8AHgrfltaDoVfx3gbof9RS4oAAAAASUVORK5CYII",
+  "antenna": {
+    "ant": 1,
+    "azi": "0",
+    "fbr": 1.0,
+    "hbw": 90,
+    "mode": "template",
+    "pol": "v",
+    "tlt": 0,
+    "txg": 1.0,
+    "txl": 0.0,
+    "vbw": 15
+  },
+  "coordinates": 1,
+  "engine": 1,
+  "environment": {
+    "buildings": 1,
+    "clt": "Temperate.clt",
+    "elevation": 1,
+    "landcover": 1,
+    "obstacles": 0
+  },
+  "feeder": {
+    "fcc": 0,
+    "fll": 0,
+    "flt": 1
+  },
+  "model": {
+    "ked": 2,
+    "pe": 2,
+    "pm": 10,
+    "rel": 50
+  },
+  "network": "ATAK",
+  "output": {
+    "col": "LTE.dBm",
+    "mod": 7,
+    "nf": "-113",
+    "out": 2,
+    "rad": 15.0,
+    "res": 20.0,
+    "units": "m"
+  },
+  "receiver": {
+    "alt": 2.0,
+    "lat": 51.67328710976944,
+    "lon": -2.5791951696936883,
+    "rxg": 1.0,
+    "rxs": -95
+  },
+  "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
+  "site": "VHF",
+  "template": {
+    "bom_value": 0,
+    "created_at": "2025-12-13T15:57:09+00:00",
+    "name": "Marine VHF CH16",
+    "owner": 34858,
+    "service": "CloudRF https://api.cloudrf.com"
+  },
+  "transmitter": {
+    "alt": 8.0,
+    "bwi": 0.0125,
+    "frq": 156.8,
+    "lat": 51.755808,
+    "lon": -2.415728,
+    "powerUnit": "W",
+    "txw": 5.0
+  },
+  "version": "CloudRF-API-v3.29.0"
+}

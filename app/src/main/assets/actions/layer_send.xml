@@ -1,15 +1,9 @@
 <set>
     <broadcast>
-        <action>com.atakmap.android.cotdetails.SEND_RADIAL_INTENT</action>
+        <action>com.cloudrf.android.soothsayer.LAYER_SEND</action>
         <extras>
             <string key='uid'>${uid}</string>
         </extras>
-    </broadcast>
-    <broadcast>
-        <action>com.atakmap.android.maps.HIDE_DETAILS</action>
-    </broadcast>
-    <broadcast>
-        <action>com.atakmap.android.maps.UNFOCUS</action>
     </broadcast>
     <broadcast>
         <action>com.atakmap.android.maps.HIDE_MENU</action>

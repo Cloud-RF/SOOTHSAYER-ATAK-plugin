@@ -1,1 +1,71 @@
-{"customIcon":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAFSElEQVR4nOWZO2xcRRSGv9mHd21287DNIyZBcQgoYIKgAQmIgAKBEBJEgurSUNKlhoKSipqW5pbIIESRAkJ4CIJAoIgQIYtEcuKAIeAkDo6Nd3cozpnd67t31zN3107BL428d3x35pw5Z/7zzyz4wQD3AXOATbQm8DFwh+c4DncBnwPrOk4LuAS8CoyFDFTwfM/q31Kq3wBV/RuCCuJ0MTFOHdiZmMsLvg4ArABXUxO4KISiAIyw0fEi4liITd4vjyGGXqF7hYJWbBOERtLbgRXEgTW6IzBMB9xY3lEICtcQYche7XVkQ3svio8DBkmhXUA5NXEvQ3zGLKf6WsA/CCmM+g6UZpUsWOAGsoEd7SX/lyeFymQ78AewTAAx+DgAG7k/jTwRKNChUIcWcBlohA7kC4tEIAmXCnnTKD3+WuggIQ5k0agBxvGPpEMlo6+lLQihhex8ahIDTAC3BM5ZoTtVVjP6NoXPyjkj70cMTW+wEQJYA8l9gxhs9bOr6E8DtwHfA9cCxuyLGvARsIjkqONp11o6ea+2ntEaGeM01amLwOPDMt458Etqsq1u7wzTgVHg9DY7YJGCtil8NrFF9Pt24y2fl3zpL80yRRvnktE9YSIeBn5IdB3y+d7NEnNDg08EsgpMEcBElOjkbLKyZuojG/ctVLlkuY8DJbojVTYRO5PPyJGwl6wwQMFEHERo9C86Zws7SDr6RiC9OmU6XH4nwttHgL10s4fReWr6vSXgJPA+Qs8tE1EEZrbKAVd8nPxtIvK6qX1PAseQSl2ht7Bz/U3gAKL9z9lYBKKJOBxuvp8Drpq2n20sqtFETACPIVcuvtchJWAP8CCwIzVPMHxZKDlRCcBEXQcSX7gD0m+IQHSospEsXgKeyzlHF9K6pYQ4NQJEwNfIScrpnKy2rob/juT/MzqOsTEWmETSKl2R+9aDUB2fxKgafRIJ/xFkQ2cp0waiLheAs4jaPGdj1k3UzoJxuo+ZALNIig6EDRHQFduBpKBBIjGB3LZNIWy0L9Wm1Mi6vl9E0mZMx3ue3rqoJ3JHwMZcNRGFZHFKrKbvEbPhWAhxLBiDpFBXZe1XabVql9BzwiZV2RsDOeCgK+9uGmrafR1Z4aaJqAN3AweRW+h5Fz0TUbJx36Pkar+5cztgImo25nqiaw9SkR/R52+BL03ECPAE8II6MIdcyX+h741oJX6lx1Tv9bMjlwOaDsl7nRJwL3BUjQVhpD8R6nwKeBFxcgahy+/0vTWy2Qdk9V/vZ0seOe3uL5NhryIsMw3cqm2aDvPcDuxGpMZufXaV29q4fcBP4jIelwW5IpCxAVeR3D6PrDz6+RIShZ+AB5CT3bw+X+sxlkP6Ei0TeRwoA2huN9SABqIsP0QkAsAp7SsAJxAnpxHHvqL7Fi4XK/ny9RJyO+1QBiZt3DYWE1FFCtkBNW4eSQNXBOtIdBaAZRvzr37PFcPDwI+JOT5A9lRfDEKj7RAri+xH9M2j2n0K+AS555kBngXuQVjoeII+dyGSJM/9qjeWSFxAaekv0xFiFTVwFrkAW0Quw15GZMSbiAZaBn4G3kA2cR2Y0jEeYqN8mPUxLA8LFQBSKVBG2GUSKWQ1Oj+IVBH+36v9+5BIjAM3bMxCDhvaGIqU0LPBBeAMnb1yBtkHi0jaXECcuKjPfyd0UG4MRUog+mYOCfuv2nda+1aA49rX3gPk+C0gC0NxQDVNAfgU+Ea7V1Ca1cp9FonOFWBtE/0zdJxg++9G3x6mA/tvggNel7shmN1G44/5GhVaPA4B7yKcvRX4DHgN2Sf/D/wHTQAiItGrKzwAAAAASUVORK5CYII=","antenna":{"ant":1,"azi":"180","fbr":2.0,"hbw":1,"mode":"template","pol":"v","tlt":0,"txg":2.0,"txl":0.0,"vbw":1},"coordinates":3,"engine":1,"environment":{"buildings":1,"clt":"Temperate.clt","elevation":2,"landcover":1,"obstacles":0},"feeder":{"fcc":0,"fll":0,"flt":1},"model":{"ked":2,"pe":2,"pm":10,"rel":50},"network":"ATAK","output":{"col":"SNR21.dB","mod":7,"nf":"-104","out":4,"rad":2.0,"res":4.0,"units":"m"},"receiver":{"alt":1.5,"lat":45.174496,"lon":-112.04872,"rxg":2.0,"rxs":3},"reference":"https://cloudrf.com/documentation/developer/swagger-ui/","site":"SBand","template":{"bom_value":0,"created_at":"2025-12-13T13:16:21+00:00","name":"MANET S 10W WB","owner":34858,"service":"CloudRF https://api.cloudrf.com"},"transmitter":{"alt":1.5,"bwi":10.0,"frq":2220.0,"lat":51.766998,"lon":-2.367441,"powerUnit":"W","txw":10.0},"version":"CloudRF-API-v3.29.0"}
+{
+  "customIcon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADxElEQVR4nM2ZO2hUQRSGv5unifER3+KDCBaJWFgKqRQLwUIRIcVaxEq0CqYQbIQ0VqYzlgYlhVhEULFTsRO0UUIUwQjxgTFg4iMmJNlrcWbizey9u2c2k01+GPbemblnzj/nzJkzs6BDBLQB74E4UeaBR8AOpRyLvcBzYNbIyQNfgLNAo4+gKmW/2PzWOPURsMb8+qAeIV2dkLMO2JAYSwUtAYApYNIZwFrBF1VAHYuJVyPEfHRSd25EFJ2gcIa8ZqwEfC2pJjCFEJih0AIhCVhZait4mSsgItJnexZZ0OpJ0RCIEBfaCNQ6A2cpopFZ69TlgT9IUGjQCnKjShpi4C+ygG3YS7aV40K1pBMYA37hERg0BGBx7HdRjgWq+B9CLfLAODDnK0iLGLFAEtYVynUjV/6MrxAfAmlhNAI2obekRX1KXd4UL/huZCPOIBGwGVjrOWY9ha4ynVJXEpqZs0oeQBR1F1gdHlED8f0IUTg2z3ZHPwJsA14BPz1kFkUT8AD4hviojdO25M3gWWU2pcylyJk3pD4B7aGUtwTeOYMtd7kekkAD8LrCBGJkQysJzSKOkfy90riq6aQNfwVRJh7wUqYkolxBVavmu5VK5oJBQ6CsDaZS0BCoUfZbEWjWgCo/j3LcAHZTGD0iM04Tkjf9iAc46qlnJjQE7OZj0995nEwyyvESOIekCFmJna2fj3J8jAdo8dY2BRrXsLvpwnsyAkU5+pArl0aEWFVGsYefGmBnlOP20tXX+/b6xLNv5unCHpC+prQlg8Up4HgpYeUsTvebi8Ab4DeS42TlRHNIrjMGPAEup8iedt4fU2I/WOpsWhwG+oBdpGemc0h2+RnoBk5nyHGPmQCDiIumIhQBEEssFWkEltcCzoKuOEJaoGh+5JILlUut2h02AXdhL0JQCwBEOXoB4gEuOU29wH7kir7bQ2R/scagFohy3AU6gA7zbOt7gJPAMSS+9yhFTgMXinUoxwLJtMLFPmBr4tliO9CMpBrN5r0UxhOyMhF6DYwA300ZSdSfB4aRf2GGzXspuJdoqSiHQNbsg7jPPVM6nLZ24A6Bbxy0LjSJ3E5r0FWk7YpSBsALTaflCKO3TElDf+jByiFQ7Hh5HzhhykOn7S1wBlkDwRAiG01iC3LyamKxy/Ujp7UmYA8BLRHahYaAD6YMJeo7gVHkz4tR8x4EoXfiZHg86LS1ITPfGXLASudCnRUebwFPqfzd6LWQBFpWgIDqctcHgxVUvkurlO+fc63ATeCQ53daPEPulyaWSf7qwz85J17tCa2o1AAAAABJRU5ErkJggg",
+  "antenna": {
+    "ant": 1,
+    "azi": "180",
+    "fbr": 2.0,
+    "hbw": 1,
+    "mode": "template",
+    "pol": "v",
+    "tlt": 0,
+    "txg": 2.0,
+    "txl": 0.0,
+    "vbw": 1
+  },
+  "coordinates": 3,
+  "engine": 1,
+  "environment": {
+    "buildings": 1,
+    "clt": "Temperate.clt",
+    "elevation": 2,
+    "landcover": 1,
+    "obstacles": 0
+  },
+  "feeder": {
+    "fcc": 0,
+    "fll": 0,
+    "flt": 1
+  },
+  "model": {
+    "ked": 2,
+    "pe": 2,
+    "pm": 10,
+    "rel": 50
+  },
+  "network": "ATAK",
+  "output": {
+    "col": "SNR21.dB",
+    "mod": 7,
+    "nf": "-104",
+    "out": 4,
+    "rad": 2.0,
+    "res": 4.0,
+    "units": "m"
+  },
+  "receiver": {
+    "alt": 1.5,
+    "lat": 45.174496,
+    "lon": -112.04872,
+    "rxg": 2.0,
+    "rxs": 3
+  },
+  "reference": "https://cloudrf.com/documentation/developer/swagger-ui/",
+  "site": "SBand",
+  "template": {
+    "bom_value": 0,
+    "created_at": "2025-12-13T13:16:21+00:00",
+    "name": "MANET S 10W WB",
+    "owner": 34858,
+    "service": "CloudRF https://api.cloudrf.com"
+  },
+  "transmitter": {
+    "alt": 1.5,
+    "bwi": 10.0,
+    "frq": 2220.0,
+    "lat": 51.766998,
+    "lon": -2.367441,
+    "powerUnit": "W",
+    "txw": 10.0
+  },
+  "version": "CloudRF-API-v3.29.0"
+}

@@ -1,1 +1,71 @@
-{"customIcon":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABzklEQVR4nO2ZK3LDMBRFzxQFZgmBgYaBgdlBqXdR2CUUFgZ10h0EBnYJKTMsLDR0QeLUo9j6vSdZIHdGxLGkcyR/ZAUeeaTY1EAD/ADP86KEpwU6o7S5Oq+F9Y/cw/flKGzbmXrQWWym4KXtOrNV6mw2AYCDQoezCoBcYnYBkEkUIQDxEsUIQJxEUQIQLlGcAIRJFCkA/hLFCoCfxGrknGIEQEeizsBpjYZEkwPUFg2JDthkYB3N1wSQmWrivGE5pcf9z9IDyEzlUafjMmNJ8+YJIpF4TwXvC64hofr5WUfCSyVUHreNEF5DookB3yiBa0l0XD55vWLbVfC5dlNKnFzwv5Hg+0EboTOxjehPRaBlfFpjAEIlRAIHWwNCiLHliYpAi//+psZI7rDfT94CrtGWClhhgAWBn7S9gGQ32QU8Nss+2QWeHx2XwCuyfaeFJqwZnxfgqfu4XZ6xEklyxg1/eyiUJLFywNpK8E2qHcmyoy8rBBJPkeDLaye7yPrDNMA38GkcTzoTFfKRHxvxbJeTr0CL//qqTxYJm8D5+ruZNdM7GSZkconKaHxP2Atmca1jAzQl9vG491mj++f1y8TxXuJVsa/s2c4N8Igtfyhf0acLy8f6AAAAAElFTkSuQmCC","antenna":{"ant":1,"azi":"0","fbr":2.0,"hbw":90,"mode":"template","pol":"v","tlt":0,"txg":2.0,"txl":0.0,"vbw":15},"coordinates":3,"engine":1,"environment":{"buildings":0,"clt":"Temperate.clt","elevation":1,"landcover":0,"obstacles":0},"feeder":{"fcc":0,"fll":0,"flt":1},"model":{"ked":0,"pe":2,"pm":2,"rel":50},"network":"ATAK","output":{"col":"GREEN.dBm","mod":7,"nf":"-104","out":2,"rad":3.0,"res":5.0,"units":"m"},"receiver":{"alt":50.0,"lat":45.174496,"lon":-112.04872,"rxg":1.0,"rxs":-105},"reference":"https://cloudrf.com/documentation/developer/swagger-ui/","site":"CUAS","template":{"bom_value":0,"created_at":"2025-12-13T13:37:45+00:00","name":"CUAS 50m AGL DSM","owner":34858,"service":"CloudRF https://api.cloudrf.com"},"transmitter":{"alt":2.0,"bwi":10.0,"frq":100.0,"lat":51.771385,"lon":-2.363273,"powerUnit":"W","txw":10.0},"version":"CloudRF-API-v3.29.0"}
+{
+  "customIcon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABtElEQVR4nO2Zr3bCMBSHP4nkEZDIykkkbzDbt5jcI0xOonZ4BCRyj4CsnJys7AT0jBPa9Cb35o/gd04MTZPvSwpNAjzzTLVpgQ74AV7LooSnBwan9Lk6b5X3n3iEH8tJ2fZi2rvOYjMHr213MTujzooJABwNOiwqAHqJ4gKgk6hCAOIlqhGAOImqBCBcojoBCJOoUgDkEtUKgExiM1GnGgGwkWgzcHpjIdHlAPXFQmIAXjKwTuZ7BshNM1PvvpzT4/5nLQBy0wjuGbjOWNJ8CEE0Ep+p4KXgFhKm2882El4rYfJz2ynhLSS6GPAXI3AriYHrllcU36mC5NlNKXFegv+NBD/ctRE6E7uI/kwEeqanNQYgVEIlcPQ1oISYWp6YCPTIzzctRnKP//skFlgaba2AFwZYEbilHQU0p8lLwFOzLMk+sH50JKOuOXdaWcK6kbwAz8OXWiJJLshGfwD6miQ2C7ApHyd1NMuOohJrI/BiEk0CAXJKSAV65OurMVkkfAKX23U3W+ZPMlzI5BKN0/iBsBfM6naPD9CVOMTjPmaL7Z/XbzOfjxLvhn1lz640wDO+/AHLjefl0AUORgAAAABJRU5ErkJggg",
+  "antenna": {
+    "ant": 1,
+    "azi": "0",
+    "fbr": 2.0,
+    "hbw": 90,
+    "mode": "template",
+    "pol": "v",
+    "tlt": 0,
+    "txg": 2.0,
+    "txl": 0.0,
+    "vbw": 15
+  },
+  "coordinates": 3,
+  "engine": 1,
+  "environment": {
+    "buildings": 0,
+    "clt": "Temperate.clt",
+    "elevation": 1,
+    "landcover": 0,
+    "obstacles": 0
+  },
+  "feeder": {
+    "fcc": 0,
+    "fll": 0,
+    "flt": 1
+  },
+  "model": {
+    "ked": 0,
+    "pe": 2,
+    "pm": 2,
+    "rel": 50
+  },
+  "network": "ATAK",
+  "output": {
+    "col": "GREEN.dBm",
+    "mod": 7,
+    "nf": "-104",
+    "out": 2,
+    "rad": 3.0,
+    "res": 5.0,
+    "units": "m"
+  },
+  "receiver": {
+    "alt": 50.0,
+    "lat": 45.174496,
+    "lon": -112.04872,
+    "rxg": 1.0,
+    "rxs": -105
+  },
+  "reference": "https://cloudrf.com/documentation/developer/",
+  "site": "CUAS",
+  "template": {
+    "bom_value": 0,
+    "created_at": "2025-12-13T13:37:45+00:00",
+    "name": "CUAS 50m AGL LiDAR",
+    "owner": 34858,
+    "service": "CloudRF https://api.cloudrf.com"
+  },
+  "transmitter": {
+    "alt": 2.0,
+    "bwi": 10.0,
+    "frq": 100.0,
+    "lat": 51.771385,
+    "lon": -2.363273,
+    "powerUnit": "W",
+    "txw": 10.0
+  },
+  "version": "CloudRF-API-v3.29.0"
+}

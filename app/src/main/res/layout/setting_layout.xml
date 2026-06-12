@@ -168,11 +168,21 @@
             android:paddingBottom="@dimen/dp_3"
             android:src="@drawable/ic_book" />
 
+        <ImageButton
+            android:id="@+id/btnSettingLogin"
+            style="@style/darkButton"
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
+            android:layout_margin="5dp"
+            android:paddingHorizontal="@dimen/dp_16"
+            android:paddingVertical="8dp"
+            android:paddingBottom="0dp"
+            android:src="@drawable/account" />
+
         <View
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            />
+            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/btnSpotBeam"
@@ -185,23 +195,6 @@
             android:paddingVertical="@dimen/dp_3"
             android:src="@drawable/spotbeam_marker_icon"
             android:visibility="invisible" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            />
-
-        <ImageButton
-            android:id="@+id/btnSettingLogin"
-            style="@style/darkButton"
-            android:layout_width="@dimen/dp_60"
-            android:layout_height="@dimen/dp_60"
-            android:layout_margin="5dp"
-            android:paddingHorizontal="@dimen/dp_16"
-            android:paddingVertical="8dp"
-            android:paddingBottom="0dp"
-            android:src="@drawable/account" />
 
     </LinearLayout>
 

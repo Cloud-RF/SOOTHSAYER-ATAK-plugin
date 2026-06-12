@@ -2,7 +2,9 @@ package com.cloudrf.android.soothsayer.recyclerview
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -56,6 +58,22 @@ class RecyclerViewAdapter(
                     item.transmitter?.lon ?: "", item.transmitter?.alt ?: "", item.transmitter?.txw
                     ?: "")
         }
+        val networkColor = when (list[position].markerDetails.network) {
+            "ATAK-RED"   -> Color.parseColor("#CC2222")
+            "ATAK-BLUE"  -> Color.parseColor("#2255CC")
+            "ATAK-GREEN" -> Color.parseColor("#22AA44")
+            else         -> null
+        }
+        if (networkColor != null) {
+            holder.vNetworkColor.background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(networkColor)
+            }
+            holder.vNetworkColor.visibility = View.VISIBLE
+        } else {
+            holder.vNetworkColor.visibility = View.INVISIBLE
+        }
+
         holder.ivRemove.setOnClickListener {
             onItemRemove(list[position])
         }
@@ -82,12 +100,14 @@ class RecyclerViewAdapter(
         val tvLocation: TextView
         val ivRemove: ImageView
         val ivMarker: ImageView
+        val vNetworkColor: View
 
         init {
             markerDetails = view.findViewById(R.id.tvMarkerDetails)
             tvLocation = view.findViewById(R.id.tvLocation)
             ivRemove = view.findViewById(R.id.ivRemove)
             ivMarker = view.findViewById(R.id.ivMarker)
+            vNetworkColor = view.findViewById(R.id.vNetworkColor)
         }
     }
 }

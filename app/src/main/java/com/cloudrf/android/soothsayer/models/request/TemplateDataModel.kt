@@ -12,7 +12,7 @@ data class TemplateDataModel(
     val environment: Environment,
     val feeder: Feeder,
     val model: Model,
-    val network: String,
+    var network: String,
     var output: Output,
     var `receiver`: Receiver,
     val reference: String,
@@ -60,7 +60,7 @@ data class Model(
 ): Serializable
 
 data class Output(
-        val col: String,
+        var col: String,
         var nf: String, // noise floor. Can be -100 or database
         val `out`: Int,
         var rad: Double,

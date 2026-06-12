@@ -84,6 +84,8 @@ fun TemplateDataModel.isTemplateValid(): Boolean {
             && transmitter.txw in .001..2_000_000.0
             && transmitter.bwi in .001..200.0
 
+            && this.model.pm in 1..13
+
             && antenna.txg in -10.0..60.0
             && antenna.txl in .0..60.0
             && antenna.azi.split(",").all { it.toInt() in 0..360 }

@@ -158,12 +158,12 @@ fun createAndStoreDownloadedFile(data: TemplateDataModel){
     }
 }
 
-fun getTemplatesFromFolder(): ArrayList<TemplateDataModel> {
+fun getTemplatesFromFolder(): Pair<ArrayList<TemplateDataModel>, List<String>> {
     val folder = File(TEMPLATES_PATH)
     val templateList: ArrayList<TemplateDataModel> = ArrayList()
+    val badTemplates = ArrayList<String>()
     if (folder.exists()) {
         val files = folder.listFiles()?.filter { it.path.endsWith(".json") } ?: ArrayList()
-//        Log.d(PluginDropDownReceiver.TAG, "files : ${files.size}")
         for (file in files) {
             val jsonString = File(TEMPLATES_PATH, file.name).readText()
             try {
@@ -174,17 +174,18 @@ fun getTemplatesFromFolder(): ArrayList<TemplateDataModel> {
                         PluginDropDownReceiver.TAG,
                         "fileName: ${file.name} \n${JSONObject(jsonString)}"
                     )
+                } ?: run {
+                    Log.d(PluginDropDownReceiver.TAG, "Bad template: ${file.name}")
+                    badTemplates.add(file.name)
                 }
             } catch (e: Exception) {
-                Log.d(
-                        PluginDropDownReceiver.TAG,
-                        "Bad template: ${file.name}")
+                Log.d(PluginDropDownReceiver.TAG, "Bad template: ${file.name}")
                 Log.e(PluginDropDownReceiver.TAG, ("${e.stackTrace} \n ${e.message}"))
+                badTemplates.add(file.name)
             }
         }
     }
-//    Log.d(PluginDropDownReceiver.TAG, "templateList : ${Gson().toJson(templateList)}")
-    return templateList
+    return templateList to badTemplates
 }
 
 /**
@@ -244,33 +245,26 @@ fun Context.shortToast(message: String) {
 }
 
 fun Context.isConnected(): Boolean {
-    var result = false
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        val networkCapabilities = connectivityManager.activeNetwork
-        networkCapabilities?.let { capabilities ->
-            val actNw = connectivityManager.getNetworkCapabilities(capabilities)
-            actNw?.let {
-                result = when {
-                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-                    else -> {
-                        false
-                    }
-                }
-            }
+        // Any network with capabilities counts — avoids false negatives for USB tethering,
+        // VPNs, or interfaces with no default route. The HTTP stack will report unreachable
+        // servers on its own.
+        if (connectivityManager.activeNetwork != null &&
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork) != null) {
+            return true
+        }
+        return connectivityManager.allNetworks.any { network ->
+            connectivityManager.getNetworkCapabilities(network) != null
         }
     } else {
-        result = try {
-            connectivityManager.activeNetworkInfo != null && connectivityManager.activeNetworkInfo!!.isConnected
+        return try {
+            connectivityManager.activeNetworkInfo?.isConnected == true
         } catch (e: Exception) {
             e.printStackTrace()
             false
         }
     }
-
-    return result
 }
 
 fun String.getFileName():String{

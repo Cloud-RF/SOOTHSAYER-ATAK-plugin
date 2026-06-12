@@ -46,6 +46,8 @@ public class PluginMapComponent extends DropDownMapComponent {
                 "Edit marker");
         ddFilter.addAction(PluginDropDownReceiver.RADIO_DELETE,
                 "Delete marker");
+        ddFilter.addAction(PluginDropDownReceiver.LAYER_SEND,
+                "Send coverage layer as mission package");
         registerDropDownReceiver(ddr, ddFilter);
         // CoT service connection removed - using direct map marker collection instead
     }
@@ -54,6 +56,7 @@ public class PluginMapComponent extends DropDownMapComponent {
     protected void onDestroyImpl(Context context, MapView view) {
         super.onDestroyImpl(context, view);
         view.getMapOverlayManager().removeOverlay(mapOverlay);
+        view.getRootGroup().removeGroup(mapOverlay.getLinkLinesGroup());
 
         for (MapItem item : view.getRootGroup().getItems())
             if (item.getMetaBoolean("CLOUDRF", true))

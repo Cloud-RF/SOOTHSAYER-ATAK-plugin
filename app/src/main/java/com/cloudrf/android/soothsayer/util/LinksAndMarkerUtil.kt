@@ -262,18 +262,14 @@ fun MapView.delete(mapOverlay: PluginMapOverlay, layer: CloudRFLayer?) {
     }
 }
 
-fun MapView.removeLinkLinesFromMap(pluginContext:Context,marker: MarkerDataModel?) {
-
-    val data = this.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
-
-    for (it in data.items){
-
-        // There could be objects with null titles
-        if(it.title?.isNotEmpty() == true){
-            if(it.title.contains(" dB")){
-                Log.d(TAG,"Removing "+it.toString())
-                data.removeItem(it)
-            }
+fun MapView.removeLinkLinesFromMap(pluginContext: Context, marker: MarkerDataModel?, linksGroup: MapGroup? = null) {
+    val data = linksGroup
+        ?: this.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
+        ?: return
+    for (it in data.items.toList()) {
+        if (it.title?.isNotEmpty() == true && it.title.contains(" dB")) {
+            Log.d(TAG, "Removing $it")
+            data.removeItem(it)
         }
     }
 }

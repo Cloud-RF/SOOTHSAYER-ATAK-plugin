@@ -66,6 +66,7 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
     private final DefaultMapGroup _group;
 
     private PluginListModel _listModel;
+    private final MapGroup _linksGroup;
 
     public PluginMapOverlay(MapView mapView, Context plugin) {
         _mapView = mapView;
@@ -73,6 +74,13 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
         _query = new PluginDeepMapItemQuery();
         _group = new DefaultMapGroup("Plugin Map Group");
         _group.setMetaBoolean("addToObjList", false);
+        _linksGroup = new DefaultMapGroup("SOOTHSAYER Links");
+        _linksGroup.setMetaBoolean("addToObjList", false);
+        mapView.getRootGroup().addGroup(_linksGroup);
+    }
+
+    public MapGroup getLinkLinesGroup() {
+        return _linksGroup;
     }
 
     @Override
@@ -239,6 +247,10 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
                 if (this.filter.accept(item))
                     filtered.add(item);
             }
+
+            LinksGroupHierarchyListItem linksItem = new LinksGroupHierarchyListItem(_linksGroup);
+            if (this.filter.accept(linksItem))
+                filtered.add(linksItem);
 
             // Sort
             sortItems(filtered);
@@ -494,37 +506,45 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
             MissionPackageExportWrapper wrapper = new MissionPackageExportWrapper();
 
             File pngFile = new File(_layer.fileUri);
-            wrapper.addFile(pngFile);
+            String kmzName = pngFile.getName().replaceAll("(?i)\\.png$", ".kmz");
+            File kmzFile = new File(pngFile.getParent(), kmzName);
 
-            // Generate a KML GroundOverlay so the receiving device can
-            // reconstruct the layer with the correct geographic bounds.
-            double north = _layer.upperLeft.getLatitude();
-            double south = _layer.lowerLeft.getLatitude();
-            double east  = _layer.upperRight.getLongitude();
-            double west  = _layer.upperLeft.getLongitude();
+            if (kmzFile.exists()) {
+                // KMZ already contains the PNG and geo-bounds — send it directly.
+                wrapper.addFile(kmzFile);
+            } else {
+                // Fallback for layers loaded from a bare PNG (e.g. SpotBeam):
+                // bundle the PNG with a generated KML GroundOverlay.
+                wrapper.addFile(pngFile);
 
-            String kmlContent =
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n" +
-                    "<GroundOverlay>\n" +
-                    "  <name>" + _layer.getName() + "</name>\n" +
-                    "  <Icon><href>" + pngFile.getName() + "</href></Icon>\n" +
-                    "  <LatLonBox>\n" +
-                    "    <north>" + north + "</north>\n" +
-                    "    <south>" + south + "</south>\n" +
-                    "    <east>"  + east  + "</east>\n" +
-                    "    <west>"  + west  + "</west>\n" +
-                    "  </LatLonBox>\n" +
-                    "</GroundOverlay>\n" +
-                    "</kml>\n";
+                double north = _layer.upperLeft.getLatitude();
+                double south = _layer.lowerLeft.getLatitude();
+                double east  = _layer.upperRight.getLongitude();
+                double west  = _layer.upperLeft.getLongitude();
 
-            String kmlName = pngFile.getName().replace(".png", ".kml");
-            File kmlFile = new File(pngFile.getParent(), kmlName);
-            try (FileWriter fw = new FileWriter(kmlFile)) {
-                fw.write(kmlContent);
-                wrapper.addFile(kmlFile);
-            } catch (IOException e) {
-                Log.e(TAG, "Failed to write KML for data package", e);
+                String kmlContent =
+                        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n" +
+                        "<GroundOverlay>\n" +
+                        "  <name>" + _layer.getName() + "</name>\n" +
+                        "  <Icon><href>" + pngFile.getName() + "</href></Icon>\n" +
+                        "  <LatLonBox>\n" +
+                        "    <north>" + north + "</north>\n" +
+                        "    <south>" + south + "</south>\n" +
+                        "    <east>"  + east  + "</east>\n" +
+                        "    <west>"  + west  + "</west>\n" +
+                        "  </LatLonBox>\n" +
+                        "</GroundOverlay>\n" +
+                        "</kml>\n";
+
+                String kmlName = pngFile.getName().replaceAll("(?i)\\.png$", ".kml");
+                File kmlFile = new File(pngFile.getParent(), kmlName);
+                try (FileWriter fw = new FileWriter(kmlFile)) {
+                    fw.write(kmlContent);
+                    wrapper.addFile(kmlFile);
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to write KML for data package", e);
+                }
             }
 
             return wrapper;
@@ -540,6 +560,71 @@ public class PluginMapOverlay extends AbstractMapOverlay2 {
     }
 
 
+
+    private class LinksGroupHierarchyListItem extends AbstractHierarchyListItem2
+            implements Visibility {
+
+        private final MapGroup _lGroup;
+
+        LinksGroupHierarchyListItem(MapGroup group) {
+            _lGroup = group;
+        }
+
+        @Override
+        public String getTitle() {
+            return _plugin.getString(R.string.link_lines);
+        }
+
+        @Override
+        public String getDescription() {
+            return "";
+        }
+
+        @Override
+        public String getIconUri() {
+            return "android.resource://" + _plugin.getPackageName()
+                    + "/" + R.drawable.ic_launcher;
+        }
+
+        @Override
+        public Object getUserObject() {
+            return _lGroup;
+        }
+
+        @Override
+        public View getExtraView() {
+            return null;
+        }
+
+        @Override
+        public boolean isChildSupported() {
+            return false;
+        }
+
+        @Override
+        public int getDescendantCount() {
+            return _lGroup.getItemCount();
+        }
+
+        @Override
+        public void refreshImpl() {}
+
+        @Override
+        public boolean hideIfEmpty() {
+            return true;
+        }
+
+        @Override
+        public boolean setVisible(boolean visible) {
+            _lGroup.setVisible(visible);
+            return true;
+        }
+
+        @Override
+        public boolean isVisible() {
+            return _lGroup.getVisible();
+        }
+    }
 
     private class PluginDeepMapItemQuery implements DeepMapItemQuery {
 

@@ -2,7 +2,7 @@
 <menu
     buttonBg='bgs/button.xml'
     buttonRadius='65'
-    buttonSpan='180'
+    buttonSpan='120'
     buttonWidth='90' >
 
     <button angle='-90'
@@ -11,4 +11,7 @@
 
     <button icon='icons/eye.png'
         onClick='actions/layer_toggle_visibility.xml'/>
+
+    <button icon='icons/send_icon.png'
+        onClick='actions/layer_send.xml'/>
 </menu>

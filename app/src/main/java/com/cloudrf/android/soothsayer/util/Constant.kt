@@ -32,5 +32,6 @@ object Constant {
         const val sCoOptTimeRefreshInterval = "Co-Opt Time Refresh Interval"
         const val sCoOptDistanceRefreshEnabled = "Co-Opt Distance Refresh Enabled"
         const val sCoOptDistanceRefreshThreshold = "Co-Opt Distance Refresh Threshold"
+        const val sLoginProfiles = "Login Profiles"
     }
 }

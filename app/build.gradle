@@ -8,10 +8,10 @@
 
 buildscript {
 
-    ext.PLUGIN_VERSION = "2.9.0"
+    ext.PLUGIN_VERSION = "3.0.1"
     ext.ATAK_VERSION = "5.6.0"
 
-    def takdevVersion = '2.+'
+    def takdevVersion = '3.+'
 
     ext.getValueFromPropertiesFile = { propFile, key ->
         if(!propFile.isFile() || !propFile.canRead())
@@ -89,6 +89,15 @@ apply plugin: 'com.android.application'
 apply plugin: 'atak-takdev-plugin'
 apply plugin: 'kotlin-android'
 
+// Rolling build number — read at configuration time, incremented in preBuild.
+ext.getBuildNumber = {
+    def propsFile = rootProject.file('build_number.properties')
+    if (!propsFile.exists()) return 0
+    def props = new Properties()
+    propsFile.withReader { props.load(it) }
+    return Integer.parseInt(props.getProperty('BUILD_NUMBER', '0'))
+}
+
 android {
     compileSdkVersion 35
 
@@ -101,6 +110,10 @@ android {
         storeArchive {
             enable = false
         }
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     lintOptions {
@@ -150,7 +163,12 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/INDEX.LIST'
+        jniLibs {
+            useLegacyPackaging = true
+        }
+        resources {
+            excludes += ['META-INF/INDEX.LIST']
+        }
     }
 
     sourceSets {
@@ -177,9 +195,12 @@ android {
 
     defaultConfig {
         minSdkVersion 26
-        versionCode 8
-        versionName "2.9.0"
-        resValue "string", "plugin_version", PLUGIN_VERSION
+        versionCode 9
+        versionName "3.0.1"
+        def buildNum = getBuildNumber() + 1
+        resValue "string", "plugin_version", PLUGIN_VERSION + "  #" + buildNum
+        buildConfigField "int", "BUILD_NUMBER", String.valueOf(buildNum)
+        buildConfigField "String", "PLUGIN_VERSION", "\"${PLUGIN_VERSION}\""
         //noinspection OldTargetApi
         targetSdkVersion 35
         ndk {
@@ -238,4 +259,18 @@ configurations.implementation {
     exclude group: 'androidx.lifecycle', module: 'lifecycle-process'
     exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     exclude group: 'com.squareup.okio', module: 'okio'
+}
+
+// Increment the rolling build number on every real build invocation.
+afterEvaluate {
+    tasks.named('preBuild').configure {
+        doFirst {
+            def propsFile = rootProject.file('build_number.properties')
+            def props = new Properties()
+            if (propsFile.exists()) propsFile.withReader { props.load(it) }
+            def current = Integer.parseInt(props.getProperty('BUILD_NUMBER', '0'))
+            props.setProperty('BUILD_NUMBER', String.valueOf(current + 1))
+            propsFile.withWriter { props.store(it, null) }
+        }
+    }
 }

@@ -41,12 +41,38 @@
 
         <EditText
             android:id="@+id/etRadioTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="10"
             android:inputType="text"
             android:text="Name" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/btnColorRed"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_margin="3dp" />
+
+            <View
+                android:id="@+id/btnColorBlue"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_margin="3dp" />
+
+            <View
+                android:id="@+id/btnColorGreen"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_margin="3dp" />
+
+        </LinearLayout>
     </LinearLayout>
 
     <View
@@ -492,6 +518,29 @@
 
     </LinearLayout>
 
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Colour Key"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_14" />
+
+        <com.atakmap.android.gui.PluginSpinner
+            android:id="@+id/spinnerColourKey"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/btnReCalculate"

@@ -1,6 +1,7 @@
 package com.cloudrf.android.soothsayer.network.remote
 
 import com.cloudrf.android.soothsayer.network.ApiService
+import com.cloudrf.android.soothsayer.plugin.BuildConfig
 import com.cloudrf.android.soothsayer.util.Constant
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -18,6 +19,7 @@ object RetrofitClient {
     private const val mContentType = "Content-type"
     private const val mContentTypeJson = "application/json"
     private const val mAuthorizationKey = "key"
+    private const val mUserAgentKey = "User-Agent"
 
     var BASE_URL = "https://api.cloudrf.com"
 
@@ -51,9 +53,8 @@ object RetrofitClient {
             }
             val authRequest = originalRequest.newBuilder()
                 .header(mContentType, mContentTypeJson)
-                .header(
-                    mAuthorizationKey, apiKey
-                ) // This should be from user input.
+                .header(mAuthorizationKey, apiKey)
+                .header(mUserAgentKey, "ATAK plugin ${BuildConfig.PLUGIN_VERSION}")
                 .build()
             return chain.proceed(authRequest)
         }

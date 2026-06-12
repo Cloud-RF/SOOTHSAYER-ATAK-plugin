@@ -6,12 +6,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.text.InputType
 import android.util.Base64
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -25,9 +28,11 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ListView
 import android.widget.ScrollView
 import android.widget.ProgressBar
 import android.widget.Spinner
+import com.atakmap.android.gui.PluginSpinner
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -118,6 +123,7 @@ import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.coremap.maps.coords.GeoPoint
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.atakmap.android.missionpackage.api.MissionPackageApi
 import com.atakmap.android.missionpackage.file.MissionPackageManifest
 import java.io.ByteArrayOutputStream
@@ -157,6 +163,7 @@ class PluginDropDownReceiver(
     private val cbCoOptDistanceRefresh: CheckBox = settingsCooptView.findViewById(R.id.cbCoOptDistanceRefresh)
     private val etCoOptDistanceThreshold: EditText = settingsCooptView.findViewById(R.id.etCoOptDistanceThreshold)
     private val loginView = templateView.findViewById<LinearLayout>(R.id.ilLogin)
+    private val colourKeyView: ColourKeyView = templateView.findViewById(R.id.colourKeyView)
     private var templateRecyclerView: RecyclerView? = null
     private val cbSelectAllTemplates = templatesMenuView.findViewById<CheckBox>(R.id.cbTemplatesAll)
     private val spinner: Spinner = templateView.findViewById(R.id.spTemplate)
@@ -174,7 +181,8 @@ class PluginDropDownReceiver(
     private val mItemType: String = "custom-type"
     private val repository by lazy { PluginRepository.getInstance() }
     private var sharedPrefs: AtakPreferences? = AtakPreferences(mapView?.context)
-    private var cloudRFLayer: CloudRFLayer? = null
+    private val networkLayers = HashMap<String, CloudRFLayer?>()
+    private val pendingRequests = java.util.concurrent.atomic.AtomicInteger(0)
     private var singleSiteCloudRFLayer: CloudRFLayer? = null
     private var markerLinkList: ArrayList<LinkDataModel> = ArrayList()
     private var lineGroup: MapGroup? = null
@@ -185,6 +193,8 @@ class PluginDropDownReceiver(
     private val trackingHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var trackingRunnable: Runnable? = null
     private var preImportTemplates: ArrayList<TemplateDataModel> = ArrayList()
+    private var selectedNetwork: String = ""
+    private var selectedColourKey: String = ""
     private var spinnerAdapter: ArrayAdapter<TemplateDataModel>?=null
     private val calcManager by lazy {
         CalculationManager(pluginContext, sharedPrefs, mapView, markersList, this)
@@ -221,6 +231,7 @@ class PluginDropDownReceiver(
 
     // Initialise views, listeners and handle map clicks
     init {
+        lineGroup = mapOverlay.getLinkLinesGroup()
         if (!filePickerReceiverRegistered) {
             pluginContext.registerReceiver(
                 filePickedReceiver,
@@ -334,6 +345,13 @@ class PluginDropDownReceiver(
         }
         val btnAddPolygon = templateView.findViewById<ImageButton>(R.id.btnAddPolygon)
         val btnBestSiteAnalysis = templateView.findViewById<ImageButton>(R.id.btnBestSiteAnalysis)
+
+        // Enable immediately if a bounds polygon already exists
+        if (CustomPolygonTool.getMaskingPolygon() != null) {
+            btnBestSiteAnalysis.isEnabled = true
+            btnBestSiteAnalysis.alpha = 1.0f
+        }
+
         btnBestSiteAnalysis.setOnClickListener {
             bestSiteManager.performBestSiteAnalysis(selectedMarkerType)
         }
@@ -342,6 +360,8 @@ class PluginDropDownReceiver(
                 pluginContext.shortToast("Draw a polygon for the study area")
                 CustomPolygonTool.createPolygon(object: CustomPolygonInterface{
                     override fun onPolygonDrawn(polygon: Shape) {
+                        btnBestSiteAnalysis.isEnabled = true
+                        btnBestSiteAnalysis.alpha = 1.0f
                     }
                 })
             }
@@ -418,7 +438,12 @@ class PluginDropDownReceiver(
             templateItems,
             settingTemplateList,
             sharedPrefs,
-            onDeleteTemplate = {deleteSelectedTemplates()}
+            onDeleteTemplate = { deleteSelectedTemplates() },
+            onTemplateItemsRefreshed = { newTemplates ->
+                templateItems.clear()
+                templateItems.addAll(newTemplates.filter { it.template != null })
+                spinnerAdapter?.notifyDataSetChanged()
+            }
         )
     }
 
@@ -459,7 +484,7 @@ class PluginDropDownReceiver(
     private fun getTemplatesForSettingView():MutableList<MutableTuple<TemplateDataModel, Boolean, String?>>{
         val tupleList: MutableList<MutableTuple<TemplateDataModel, Boolean, String?>> = mutableListOf()
         // we can remove limit if required
-        for (template in getTemplatesFromFolder().take(MAX_ITEMS)) {
+        for (template in getTemplatesFromFolder().first.take(MAX_ITEMS)) {
             val icon = pluginContext.getBitmap(R.drawable.marker_icon_svg)
             val tuple = MutableTuple(template, false, icon?.toBase64String())
             tupleList.add(tuple)
@@ -501,7 +526,7 @@ class PluginDropDownReceiver(
     private fun initTemplateSpinner() {
         templateItems.apply {
             clear()
-            addAll(getTemplatesFromFolder().filter { it.template != null }) // only picking valid templates.
+            addAll(getTemplatesFromFolder().first.filter { it.template != null }) // only picking valid templates.
         }
 
         spinnerAdapter = object :
@@ -553,12 +578,15 @@ class PluginDropDownReceiver(
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     Log.d(TAG, "extraTemplates : ACTION_DOWN clicked")
-                    val extraTemplates = getTemplatesFromFolder()
+                    val (extraTemplates, badTemplates) = getTemplatesFromFolder()
+                    if (badTemplates.isNotEmpty()) {
+                        pluginContext.toast("Invalid templates skipped: ${badTemplates.joinToString()}")
+                    }
                     if (extraTemplates.isEmpty()) {
 //                        pluginContext.createAndStoreFiles(getAllFilesFromAssets())
                         templateItems.clear()
                         spinnerAdapter?.notifyDataSetChanged()
-//                        templateItems.addAll(getTemplatesFromFolder())
+//                        templateItems.addAll(getTemplatesFromFolder().first)
                     } else {
                         if (extraTemplates.size != templateItems.size) {
                             Log.d(TAG, "extraTemplates : ${extraTemplates.size}")
@@ -650,6 +678,17 @@ class PluginDropDownReceiver(
         etUsername?.setText(Constant.sUsername)
     }
 
+    private data class LoginProfile(val url: String, val username: String, val password: String)
+
+    private fun loadProfiles(): ArrayList<LoginProfile> {
+        val json = sharedPrefs?.get(Constant.PreferenceKey.sLoginProfiles, null) ?: return ArrayList()
+        return Gson().fromJson(json, object : TypeToken<ArrayList<LoginProfile>>() {}.type) ?: ArrayList()
+    }
+
+    private fun saveProfiles(profiles: ArrayList<LoginProfile>) {
+        sharedPrefs?.set(Constant.PreferenceKey.sLoginProfiles, Gson().toJson(profiles))
+    }
+
     private fun initLoginView() {
         etLoginServerUrl = loginView.findViewById(R.id.etLoginServerUrl)
         etUsername = loginView.findViewById(R.id.etUserName)
@@ -661,6 +700,9 @@ class PluginDropDownReceiver(
         etUsername?.setText(username)
         etLoginServerUrl?.setText(server)
         Constant.sAccessToken = apiKey.toString()
+        val resolvedServer = server ?: "https://api.cloudrf.com"
+        RetrofitClient.BASE_URL = resolvedServer
+        Constant.sServerUrl = resolvedServer
         Log.d(TAG, "SOOTHSAYER saved server: "+server+" User: "+username+" apiKey: "+apiKey)
 
         val btnLogin = loginView.findViewById<Button>(R.id.btnLogin)
@@ -693,6 +735,56 @@ class PluginDropDownReceiver(
                 it.setSelection(it.text.length)
             }
         }
+
+        val lvProfiles = loginView.findViewById<ListView>(R.id.lvProfiles)
+        val profilesAdapter = object : ArrayAdapter<LoginProfile>(pluginContext, R.layout.login_profile_item, ArrayList()) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = convertView ?: LayoutInflater.from(pluginContext).inflate(R.layout.login_profile_item, parent, false)
+                val profile = getItem(position) ?: return view
+                view.findViewById<TextView>(R.id.tvProfileUrl).text = profile.url
+                view.findViewById<TextView>(R.id.btnDeleteProfile).setOnClickListener {
+                    val profiles = loadProfiles()
+                    profiles.removeAll { it.url == profile.url }
+                    saveProfiles(profiles)
+                    clear()
+                    addAll(profiles)
+                    notifyDataSetChanged()
+                }
+                return view
+            }
+        }
+        lvProfiles.adapter = profilesAdapter
+
+        fun refreshProfiles() {
+            profilesAdapter.clear()
+            profilesAdapter.addAll(loadProfiles())
+            profilesAdapter.notifyDataSetChanged()
+        }
+
+        refreshProfiles()
+
+        loginView.findViewById<Button>(R.id.btnSaveProfile).setOnClickListener {
+            val url = etLoginServerUrl?.text?.toString()?.trim() ?: ""
+            val user = etUsername?.text?.toString()?.trim() ?: ""
+            val pass = etPassword?.text?.toString() ?: ""
+            if (url.isEmpty() || user.isEmpty()) {
+                pluginContext.toast(pluginContext.getString(R.string.invalid_url_error))
+                return@setOnClickListener
+            }
+            val profiles = loadProfiles()
+            val idx = profiles.indexOfFirst { it.url == url }
+            if (idx >= 0) profiles[idx] = LoginProfile(url, user, pass)
+            else profiles.add(LoginProfile(url, user, pass))
+            saveProfiles(profiles)
+            refreshProfiles()
+        }
+
+        lvProfiles.setOnItemClickListener { _, _, position, _ ->
+            val p = profilesAdapter.getItem(position) ?: return@setOnItemClickListener
+            etLoginServerUrl?.setText(p.url)
+            etUsername?.setText(p.username)
+            etPassword?.setText(p.password)
+        }
     }
 
     private fun setLoginViewVisibility(isMoveBack: Boolean,isAfterLogin:Boolean=false) {
@@ -716,6 +808,25 @@ class PluginDropDownReceiver(
             val etOutputNoiseFloor: EditText = findViewById(R.id.etOutputNoiseFloor)
             val etRadius: EditText = findViewById(R.id.etRadius)
             val etAntennaGain: EditText = findViewById(R.id.etAntGain)
+            val btnColorRed: View = findViewById(R.id.btnColorRed)
+            val btnColorBlue: View = findViewById(R.id.btnColorBlue)
+            val btnColorGreen: View = findViewById(R.id.btnColorGreen)
+            applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen)
+            btnColorRed.setOnClickListener { selectedNetwork = "ATAK-RED"; applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen) }
+            btnColorBlue.setOnClickListener { selectedNetwork = "ATAK-BLUE"; applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen) }
+            btnColorGreen.setOnClickListener { selectedNetwork = "ATAK-GREEN"; applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen) }
+
+            val colourKeys = listOf("LTE.dBm" to "LTE.dBm", "RAINBOW.dBm" to "RAINBOW.dBm", "4" to "BLUE", "3" to "GREEN", "2" to "RED")
+            val colourKeySpinner = findViewById<PluginSpinner>(R.id.spinnerColourKey)
+            val colourKeyAdapter = ArrayAdapter(pluginContext, android.R.layout.simple_spinner_item, colourKeys.map { it.second })
+            colourKeyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            colourKeySpinner.adapter = colourKeyAdapter
+            colourKeySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    selectedColourKey = colourKeys[position].first
+                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
 
             radioBack.setOnClickListener {
                 setEditViewVisibility(false)
@@ -737,7 +848,9 @@ class PluginDropDownReceiver(
                                 (marker.output.rad.toString() != etRadius.text.toString() && etRadius.text.isNotEmpty()) ||
                                 (marker.antenna.azi != etAntennaAzimuth.text.toString() && etAntennaAzimuth.text.isNotEmpty()) ||
                                 (marker.transmitter?.lat.toString() != etLatitude.text.toString() && etLatitude.text.isNotEmpty()) ||
-                                (marker.transmitter?.lon.toString() != etLongitude.text.toString() && etLongitude.text.isNotEmpty())
+                                (marker.transmitter?.lon.toString() != etLongitude.text.toString() && etLongitude.text.isNotEmpty()) ||
+                                (selectedNetwork.isNotEmpty() && marker.network != selectedNetwork) ||
+                                (selectedColourKey.isNotEmpty() && marker.output.col != selectedColourKey)
 
                     if (isEdit) {
                         // Rename the marker in our list
@@ -780,6 +893,8 @@ class PluginDropDownReceiver(
                         etOutputNoiseFloor.text.toString().let { marker.output.nf = it }
 
                         etAntennaAzimuth.text.toString().let { marker.antenna.azi = it }
+                        if (selectedNetwork.isNotEmpty()) { marker.network = selectedNetwork }
+                        if (selectedColourKey.isNotEmpty()) { marker.output.col = selectedColourKey }
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
 
@@ -792,9 +907,12 @@ class PluginDropDownReceiver(
     }
 
     private fun showHelpDialog() {
-        mapView.context.showAlert(pluginContext.getString(R.string.help_title),
-            pluginContext.getString(R.string.help_msg),
-            positiveText = pluginContext.getString(R.string.ok_txt))
+        val view = LayoutInflater.from(pluginContext).inflate(R.layout.dialog_help, null)
+        android.app.AlertDialog.Builder(mapView.context)
+            .setTitle(pluginContext.getString(R.string.help_title))
+            .setView(view)
+            .setPositiveButton(pluginContext.getString(R.string.ok_txt), null)
+            .show()
     }
 
     private fun moveBackToMainLayout() {
@@ -829,6 +947,33 @@ class PluginDropDownReceiver(
             findViewById<EditText>(R.id.etBandWidth).setText("${transmitter?.bwi ?: ""}")
             findViewById<EditText>(R.id.etOutputNoiseFloor).setText(item.markerDetails.output.nf) // string: database OR -100
             findViewById<EditText>(R.id.etRadius).setText(item.markerDetails.output.rad.toString()) // radius in km
+        }
+        selectedNetwork = item.markerDetails.network
+        applyNetworkSwatches(
+            radioSettingView.findViewById(R.id.btnColorRed),
+            radioSettingView.findViewById(R.id.btnColorBlue),
+            radioSettingView.findViewById(R.id.btnColorGreen)
+        )
+        selectedColourKey = item.markerDetails.output.col
+        val colourKeys = listOf("LTE.dBm" to "LTE.dBm", "RAINBOW.dBm" to "RAINBOW.dBm", "4" to "BLUE", "3" to "GREEN", "2" to "RED")
+        val spinner = radioSettingView.findViewById<PluginSpinner>(R.id.spinnerColourKey)
+        val idx = colourKeys.indexOfFirst { it.first == selectedColourKey }.takeIf { it >= 0 } ?: 0
+        spinner.setSelection(idx)
+    }
+
+    private fun applyNetworkSwatches(red: View, blue: View, green: View) {
+        val strokePx = (3 * pluginContext.resources.displayMetrics.density).toInt()
+        listOf(
+            Triple(red,   Color.parseColor("#CC2222"), "ATAK-RED"),
+            Triple(blue,  Color.parseColor("#2255CC"), "ATAK-BLUE"),
+            Triple(green, Color.parseColor("#22AA44"), "ATAK-GREEN")
+        ).forEach { (view, color, network) ->
+            val gd = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(color)
+                if (selectedNetwork == network) setStroke(strokePx, Color.WHITE)
+            }
+            view.background = gd
         }
     }
 
@@ -919,7 +1064,7 @@ class PluginDropDownReceiver(
 
         // many to many now ;)
         markersList.forEach{
-            mapView.removeLinkLinesFromMap(pluginContext,it)
+            mapView.removeLinkLinesFromMap(pluginContext, it, lineGroup)
             getLinksBetween(it)
         }
 
@@ -935,6 +1080,9 @@ class PluginDropDownReceiver(
         }
 
     }
+
+    fun setPendingRequests(count: Int) { pendingRequests.set(count) }
+
     // The Area API simulates one transmitter only and can use a CPU or a GPU
     fun sendSingleSiteDataToServer(marker: TemplateDataModel?) {
         if (pluginContext.isConnected()) {
@@ -951,6 +1099,7 @@ class PluginDropDownReceiver(
                         override fun onSuccess(response: Any?) {
                             showHidePlayBtn();
                             if (response is ResponseModel) {
+                                colourKeyView.setKey(response.key)
                                 // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
                                 val tx = marker?.transmitter
                                 repository.downloadFile(response.kmz,
@@ -975,7 +1124,7 @@ class PluginDropDownReceiver(
         }
     }
 
-    fun sendMultiSiteDataToServer(markerData: MultisiteRequest?) {
+    fun sendMultiSiteDataToServer(markerData: MultisiteRequest?, layerName: String = pluginContext.getString(R.string.coverage_layer)) {
         if (pluginContext.isConnected()) {
             markerData?.let {
                 repository.sendMultiSiteMarkerData(
@@ -985,23 +1134,24 @@ class PluginDropDownReceiver(
 
                         }
                         override fun onSuccess(response: Any?) {
-                            showHidePlayBtn();
+                            if (pendingRequests.decrementAndGet() == 0) showHidePlayBtn()
                             if (response is ResponseModel) {
-                                    // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
+                                colourKeyView.setKey(response.key)
+                                // Fetch the KMZ file from the JSON response and load it as a native ATAK layer
                                 val tx = markerData?.transmitters?.firstOrNull()
                                 repository.downloadFile(response.kmz,
                                     KMZ_FOLDER_PATH,
                                     kmzFileName(tx?.frq ?: 0.0, tx?.txw ?: 0.0, tx?.alt ?: 0.0),
                                     listener = { isDownloaded, filePath ->
                                         if (isDownloaded) {
-                                            loadKmzLayer(filePath, response.bounds)
+                                            loadKmzLayer(filePath, response.bounds, layerName)
                                         }
                                     })
                             }
                         }
 
                         override fun onFailed(error: String?, responseCode: Int?) {
-                            showHidePlayBtn();
+                            if (pendingRequests.decrementAndGet() == 0) showHidePlayBtn()
                             //stopTrackingLoop()
                             if (error != null) {
                                 mapView.context.showAlert("API error",error, positiveText = pluginContext.getString(R.string.ok_txt))
@@ -1090,17 +1240,16 @@ class PluginDropDownReceiver(
         }
     }
 
-    fun addLayer(filePath: String, bounds: List<Double>, bsa: Boolean) {
+    fun addLayer(filePath: String, bounds: List<Double>, bsa: Boolean, layerName: String = pluginContext.getString(R.string.coverage_layer)) {
         val file = File(filePath)
         synchronized(this@PluginDropDownReceiver) {
-            if (cloudRFLayer != null) {
-                mapView.removeLayer(MapView.RenderStack.MAP_SURFACE_OVERLAYS, cloudRFLayer)
-                cloudRFLayer = null
+            networkLayers[layerName]?.let { existing ->
+                mapView.removeLayer(MapView.RenderStack.MAP_SURFACE_OVERLAYS, existing)
                 GLLayerFactory.unregister(GLCloudRFLayer.SPI)
             }
+            networkLayers.remove(layerName)
             GLLayerFactory.register(GLCloudRFLayer.SPI)
-            val layerName = pluginContext.getString(R.string.coverage_layer)
-            cloudRFLayer =
+            networkLayers[layerName] =
                 CloudRFLayer(
                     pluginContext,
                     layerName,
@@ -1116,12 +1265,12 @@ class PluginDropDownReceiver(
                 )
         }
 
-        cloudRFLayer?.let {
+        networkLayers[layerName]?.let { layer ->
             mapView.addLayer(
                 MapView.RenderStack.MAP_SURFACE_OVERLAYS,
-                cloudRFLayer
+                layer
             )
-            cloudRFLayer?.isVisible = true
+            layer.isVisible = true
             handleLayerVisibility()
 
             refreshView()
@@ -1134,7 +1283,7 @@ class PluginDropDownReceiver(
     writes png to filename.png
     adds png to map with bounds cropping etc
      */
-    private fun loadKmzLayer(filePath: String, bounds: List<Double>) {
+    private fun loadKmzLayer(filePath: String, bounds: List<Double>, layerName: String = pluginContext.getString(R.string.coverage_layer)) {
         try {
             val pngPath = filePath.replace(".kmz", ".png", ignoreCase = true)
             val pngFile = File(pngPath)
@@ -1149,7 +1298,7 @@ class PluginDropDownReceiver(
                 }
             }
             if (pngFile.exists()) {
-                addLayer(pngFile.absolutePath, bounds, false)
+                addLayer(pngFile.absolutePath, bounds, false, layerName)
             } else {
                 Log.e(TAG, "loadKmzLayer: no PNG found inside $filePath")
             }
@@ -1192,7 +1341,7 @@ class PluginDropDownReceiver(
                                     )
                                     sharedPrefs?.set(Constant.PreferenceKey.etPassword, etPassword?.text.toString())
                                     setLoginViewVisibility(isMoveBack = false, isAfterLogin = true)
-                                    Constant.sServerUrl = etServerUrl?.text.toString()
+                                    Constant.sServerUrl = etLoginServerUrl?.text.toString() ?: ""
                                     downloadTemplatesFromApi()
                                     Constant.sUsername = etUsername?.text.toString()
                                 }
@@ -1239,6 +1388,10 @@ class PluginDropDownReceiver(
 
     private fun fetchTemplateDetail(items: TemplatesResponse){
         if (items.isEmpty()) {
+            val (_, badTemplates) = getTemplatesFromFolder()
+            if (badTemplates.isNotEmpty()) {
+                pluginContext.toast("Invalid templates skipped: ${badTemplates.joinToString()}")
+            }
             return
         }
 
@@ -1284,14 +1437,11 @@ class PluginDropDownReceiver(
                 )
                 singleSiteCloudRFLayer = null
             }
-            if (cloudRFLayer != null) {
-                mapView.removeLayer(
-                    MapView.RenderStack.MAP_SURFACE_OVERLAYS,
-                    cloudRFLayer
-                )
-                GLLayerFactory.unregister(GLCloudRFLayer.SPI)
+            networkLayers.values.filterNotNull().forEach { layer ->
+                mapView.removeLayer(MapView.RenderStack.MAP_SURFACE_OVERLAYS, layer)
             }
-            cloudRFLayer = null
+            if (networkLayers.isNotEmpty()) GLLayerFactory.unregister(GLCloudRFLayer.SPI)
+            networkLayers.clear()
         } catch (e: java.lang.Exception) {
             Log.e(TAG, "error", e)
         }
@@ -1320,6 +1470,18 @@ class PluginDropDownReceiver(
                 val l = mapOverlay.findLayer(intent.getStringExtra("uid"))
                 if (l != null) {
                     promptDelete(l)
+                }
+            }
+            LAYER_SEND -> {
+                val uid = intent.getStringExtra("uid") ?: return
+                val layer = mapOverlay.findLayer(uid) ?: return
+                val pngFile = File(layer.fileUri)
+                val kmzFile = File(pngFile.parent, pngFile.name.replace(Regex("(?i)\\.png$"), ".kmz"))
+                if (kmzFile.exists()) {
+                    MissionPackageApi.Send(kmzFile, layer.name)
+                } else {
+                    pluginContext.toast(pluginContext.getString(R.string.error_msg))
+                    Log.e(TAG, "LAYER_SEND: no KMZ found at ${kmzFile.absolutePath}")
                 }
             }
             RADIO_EDIT -> {
@@ -1386,9 +1548,7 @@ class PluginDropDownReceiver(
     }
 
     private fun handleLinkLineVisibility() {
-        val mapGroup =
-            mapView.rootGroup.findMapGroup(pluginContext.getString(R.string.drawing_objects))
-        mapGroup.visible = cbLinkLines.isChecked
+        mapOverlay.getLinkLinesGroup().setVisible(cbLinkLines.isChecked)
         refreshView()
     }
 
@@ -1410,7 +1570,7 @@ class PluginDropDownReceiver(
             }
         }
 
-        mapView.removeLinkLinesFromMap(pluginContext,marker)
+        mapView.removeLinkLinesFromMap(pluginContext, marker, lineGroup)
         removeMarkerFromList(marker)
         mapView.removeMarkerFromMap(marker)
 
@@ -1476,6 +1636,7 @@ class PluginDropDownReceiver(
         const val SHOW_PLUGIN = "com.cloudrf.android.soothsayer.SHOW_PLUGIN"
         const val LAYER_VISIBILITY = "com.cloudrf.android.soothsayer.LAYER_VISIBILITY"
         const val LAYER_DELETE = "com.cloudrf.android.soothsayer.LAYER_DELETE"
+        const val LAYER_SEND = "com.cloudrf.android.soothsayer.LAYER_SEND"
         const val GRG_DELETE = "com.atakmap.android.grg.DELETE"
         const val GRG_TOGGLE_VISIBILITY = "com.atakmap.android.grg.TOGGLE_VISIBILITY"
         const val GRG_BRIGHTNESS = "com.atakmap.android.grg.BRIGHTNESS"

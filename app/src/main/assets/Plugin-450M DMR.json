@@ -1,0 +1,71 @@
+{
+  "customIcon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACVUlEQVR4nO2ZP0scQRiHn9UT47+IXSRFjhRiioQTAn6FgI1l4CqbQBpJYSuSSps0AUmpzdVXaqdtIB8gVRpJIYh4hUExu2sxu+y67q7vzO7t7KI/GO72Zuad95l3Zm5mFuzqI3AGeIALnAI7wJxNp6RqA79QzvvBpwf8AZalRkaG4ZlQK8AS4MR+c4BZ4LnUiE2A14n2Q5AWMCo1YhPgAjV0khoLkkg2AS4TzyHMTZBEsgmQ1vugViNXasQmgMtdCCerYJ5sAbSClBUFsWwBTAKvMtrXgrIZgemMvP80YBJ7wID03nZpAMANcAJcp+RNAzNSQy3NhttAH+ho1tPRNfBvGIb3UCGvIn0r2/kXFTofpmdlAhxZANiWOCadA534g98T1tKQ073306Kkns2tRClqPIDuMnpHTpevwALwDhg3MHHh93hfxIdCAEAXmAemTA04XQ79Hh9M65sAeERDr4eKwFvMIjAAc+fBDMAlAtgq0ngZkgLMxr4nD9zfia5FINqg+UHZ+MElfmjxgY2cNldR0TnMc8wkAvGV6y/wKeaQrs6BXWAzI/8AeAP8ljhTV/XzMouuQi9RQ8hDHUR0tUF274fK/UcuCgCwXqRy0W1JIQCdxpN7nbL2U02YA1d5mWUMIS0Z9Px+XmZlETAcMlfA57wCJgDiG4OkNCHOgImHCtV5Dog6ygRAfPVdhaQAg6F6ka6fkkJ1HkIimQB4DxepTiYAtYparZwx0RNAU1Tbq0Wp2hYASr3cBXW0q8r5L1KndF9tLgI/GN4LjmNgDfUW/3HoFqsSBu7DNvLVAAAAAElFTkSuQmCC",
+  "antenna": {
+    "ant": 1,
+    "azi": "0",
+    "fbr": 1.0,
+    "hbw": 0,
+    "mode": "template",
+    "pol": "v",
+    "tlt": 0,
+    "txg": 2.0,
+    "txl": 0.0,
+    "vbw": 1
+  },
+  "coordinates": 3,
+  "engine": 1,
+  "environment": {
+    "buildings": 1,
+    "clt": "Temperate.clt",
+    "elevation": 2,
+    "landcover": 1,
+    "obstacles": 0
+  },
+  "feeder": {
+    "fcc": 0,
+    "fll": 0,
+    "flt": 1
+  },
+  "model": {
+    "ked": 2,
+    "pe": 2,
+    "pm": 4,
+    "rel": 50
+  },
+  "network": "ATAK",
+  "output": {
+    "col": "LTE.dBm",
+    "mod": 7,
+    "nf": "-105",
+    "out": 2,
+    "rad": 5.0,
+    "res": 10.0,
+    "units": "m"
+  },
+  "receiver": {
+    "alt": 1.5,
+    "lat": 45.174496,
+    "lon": -112.04872,
+    "rxg": 2.0,
+    "rxs": -105
+  },
+  "reference": "https://cloudrf.com/documentation/developer/",
+  "site": "DMR",
+  "template": {
+    "bom_value": 0,
+    "created_at": "2025-12-13T13:04:47+00:00",
+    "name": "DMR 450MHz 2W",
+    "owner": 34858,
+    "service": "CloudRF https://api.cloudrf.com"
+  },
+  "transmitter": {
+    "alt": 1.5,
+    "bwi": 0.0125,
+    "frq": 450.0,
+    "lat": 51.763657,
+    "lon": -2.375821,
+    "powerUnit": "W",
+    "txw": 2.0
+  },
+  "version": "CloudRF-API-v3.29.0"
+}

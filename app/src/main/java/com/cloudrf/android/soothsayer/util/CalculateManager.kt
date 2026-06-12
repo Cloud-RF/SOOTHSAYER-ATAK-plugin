@@ -1,6 +1,8 @@
 package com.cloudrf.android.soothsayer.util
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
@@ -67,7 +69,8 @@ class CalculationManager(
         }
 
         if (config.showLinks && markersList.size > 1) {
-            pluginDropDownReceiver.updateLinkLines(item)
+            val linksDelay = if (config.showCoverage) 1000L else 0L
+            Handler(Looper.getMainLooper()).postDelayed({ pluginDropDownReceiver.updateLinkLines(item) }, linksDelay)
         } else {
             mapView?.removeLinkLinesFromMap(pluginContext, item)
         }
@@ -142,25 +145,40 @@ class CalculationManager(
 
     private fun doMultisiteCall(item: MarkerDataModel?) {
         item?.markerDetails?.let { template ->
-            // in a multisite call, each transmitter can have its own location, frequency, altitude and antenna
-            val txlist = markersList.mapNotNull { marker ->
-                marker.markerDetails.transmitter?.run {
-                    MultiSiteTransmitter(
-                        alt, bwi, frq, lat, lon, powerUnit, txw,
-                        marker.markerDetails.antenna, false
-                    )
+            val groups = markersList
+                .groupBy { it.markerDetails.network }
+                .filter { (_, markers) -> markers.any { it.markerDetails.transmitter != null } }
+            if (groups.isEmpty()) return
+
+            pluginDropDownReceiver.setPendingRequests(groups.size)
+            pluginDropDownReceiver.showHidePlayBtn()
+
+            val handler = Handler(Looper.getMainLooper())
+            groups.entries.forEachIndexed { index, (network, markers) ->
+                val layerName = layerNameForNetwork(network)
+                val txlist = markers.mapNotNull { marker ->
+                    marker.markerDetails.transmitter?.run {
+                        MultiSiteTransmitter(
+                            alt, bwi, frq, lat, lon, powerUnit, txw,
+                            marker.markerDetails.antenna, false
+                        )
+                    }
                 }
+                val request = MultisiteRequest(
+                    template.site, network, txlist,
+                    template.receiver, template.model,
+                    template.environment, template.output
+                )
+                handler.postDelayed({ pluginDropDownReceiver.sendMultiSiteDataToServer(request, layerName) }, index * 1100L)
             }
-            val request = MultisiteRequest(
-                template.site, template.network, txlist,
-                template.receiver, template.model,
-                template.environment, template.output
-            )
-
-                pluginDropDownReceiver.showHidePlayBtn()
-                pluginDropDownReceiver.sendMultiSiteDataToServer(request)
-
         }
+    }
+
+    private fun layerNameForNetwork(network: String): String = when (network) {
+        "ATAK-RED"   -> "RED RF coverage layer"
+        "ATAK-BLUE"  -> "BLUE RF coverage layer"
+        "ATAK-GREEN" -> "GREEN RF coverage layer"
+        else         -> pluginContext.getString(R.string.coverage_layer)
     }
 
     private fun doSingleSiteCall(item: MarkerDataModel?) {

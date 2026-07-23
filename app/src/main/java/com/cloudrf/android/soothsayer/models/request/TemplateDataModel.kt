@@ -62,7 +62,7 @@ data class Model(
 data class Output(
         var col: String,
         var nf: String, // noise floor. Can be -100 or database
-        val `out`: Int,
+        var `out`: Int, // 2 = Received Power (dBm), 4 = Signal to Noise (dB)
         var rad: Double,
         var res: Double,
         var units: String, // m or m_amsl

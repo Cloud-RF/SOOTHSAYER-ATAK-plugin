@@ -195,6 +195,7 @@ class PluginDropDownReceiver(
     private var preImportTemplates: ArrayList<TemplateDataModel> = ArrayList()
     private var selectedNetwork: String = ""
     private var selectedColourKey: String = ""
+    private var selectedOutputType: Int = 2
     private var spinnerAdapter: ArrayAdapter<TemplateDataModel>?=null
     private val calcManager by lazy {
         CalculationManager(pluginContext, sharedPrefs, mapView, markersList, this)
@@ -204,6 +205,11 @@ class PluginDropDownReceiver(
     }
     private var settingsLinksController: SettingsLinksController? = null
     private var templateMenuController: TemplateMenuController? = null
+
+    // CloudRF "output.out": 2 = Received Power (dBm), 4 = Signal to Noise (dB)
+    // Must stay above the `init` block: initViews() -> initRadioSettingView() reads this
+    // during construction, and Kotlin initializes properties in textual declaration order.
+    private val unitOptions = listOf(2 to "Received Power (dBm)", 4 to "Signal to Noise (dB)")
 
     // create a single main-thread handler
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -793,6 +799,31 @@ class PluginDropDownReceiver(
         mainLayout.visibility = if (isAfterLogin) View.VISIBLE else View.GONE
     }
 
+    private fun colourKeyOptionsFor(outputType: Int): List<String> =
+        if (outputType == 4) listOf("SNR.dB", "SNR21.dB")
+        else listOf("LTE.dBm", "RAINBOW.dBm", "GREEN.dBm", "LORA.dBm")
+
+    // Defaults applied when the user switches units, per output type.
+    private fun defaultColourKeyFor(outputType: Int): String =
+        if (outputType == 4) "SNR21.dB" else "LTE.dBm"
+
+    // Receiver threshold (receiver.rxs), not exposed as a form field.
+    private fun defaultReceiverThresholdFor(outputType: Int): Int =
+        if (outputType == 4) 3 else -105
+
+    private fun updateColourKeyOptions(spinner: PluginSpinner, outputType: Int, resetToDefault: Boolean = false) {
+        val keys = colourKeyOptionsFor(outputType)
+        @Suppress("UNCHECKED_CAST")
+        val adapter = spinner.adapter as ArrayAdapter<String>
+        adapter.clear()
+        adapter.addAll(keys)
+        adapter.notifyDataSetChanged()
+        val preferredKey = if (resetToDefault) defaultColourKeyFor(outputType) else selectedColourKey
+        val idx = keys.indexOf(preferredKey).takeIf { it >= 0 } ?: 0
+        spinner.setSelection(idx)
+        selectedColourKey = keys[idx]
+    }
+
     private fun initRadioSettingView() {
         radioSettingView.apply {
             val radioName: EditText = findViewById(R.id.etRadioTitle)
@@ -816,14 +847,25 @@ class PluginDropDownReceiver(
             btnColorBlue.setOnClickListener { selectedNetwork = "ATAK-BLUE"; applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen) }
             btnColorGreen.setOnClickListener { selectedNetwork = "ATAK-GREEN"; applyNetworkSwatches(btnColorRed, btnColorBlue, btnColorGreen) }
 
-            val colourKeys = listOf("LTE.dBm" to "LTE.dBm", "RAINBOW.dBm" to "RAINBOW.dBm", "4" to "BLUE", "3" to "GREEN", "2" to "RED")
             val colourKeySpinner = findViewById<PluginSpinner>(R.id.spinnerColourKey)
-            val colourKeyAdapter = ArrayAdapter(pluginContext, android.R.layout.simple_spinner_item, colourKeys.map { it.second })
+            val colourKeyAdapter = ArrayAdapter(pluginContext, android.R.layout.simple_spinner_item, colourKeyOptionsFor(selectedOutputType).toMutableList())
             colourKeyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             colourKeySpinner.adapter = colourKeyAdapter
             colourKeySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                    selectedColourKey = colourKeys[position].first
+                    selectedColourKey = (parent.adapter as ArrayAdapter<String>).getItem(position) ?: selectedColourKey
+                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+
+            val unitsSpinner = findViewById<PluginSpinner>(R.id.spinnerUnits)
+            val unitsAdapter = ArrayAdapter(pluginContext, android.R.layout.simple_spinner_item, unitOptions.map { it.second })
+            unitsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            unitsSpinner.adapter = unitsAdapter
+            unitsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    selectedOutputType = unitOptions[position].first
+                    updateColourKeyOptions(colourKeySpinner, selectedOutputType, resetToDefault = true)
                 }
                 override fun onNothingSelected(parent: AdapterView<*>) {}
             }
@@ -850,7 +892,8 @@ class PluginDropDownReceiver(
                                 (marker.transmitter?.lat.toString() != etLatitude.text.toString() && etLatitude.text.isNotEmpty()) ||
                                 (marker.transmitter?.lon.toString() != etLongitude.text.toString() && etLongitude.text.isNotEmpty()) ||
                                 (selectedNetwork.isNotEmpty() && marker.network != selectedNetwork) ||
-                                (selectedColourKey.isNotEmpty() && marker.output.col != selectedColourKey)
+                                (selectedColourKey.isNotEmpty() && marker.output.col != selectedColourKey) ||
+                                (marker.output.out != selectedOutputType)
 
                     if (isEdit) {
                         // Rename the marker in our list
@@ -895,6 +938,8 @@ class PluginDropDownReceiver(
                         etAntennaAzimuth.text.toString().let { marker.antenna.azi = it }
                         if (selectedNetwork.isNotEmpty()) { marker.network = selectedNetwork }
                         if (selectedColourKey.isNotEmpty()) { marker.output.col = selectedColourKey }
+                        marker.output.out = selectedOutputType
+                        marker.receiver.rxs = defaultReceiverThresholdFor(selectedOutputType)
                         Log.d(TAG, "initRadioSettingView : after update ${markersList[itemPositionForEdit]}")
                         markerAdapter?.notifyDataSetChanged()
 
@@ -954,11 +999,14 @@ class PluginDropDownReceiver(
             radioSettingView.findViewById(R.id.btnColorBlue),
             radioSettingView.findViewById(R.id.btnColorGreen)
         )
+        selectedOutputType = item.markerDetails.output.out
+        val unitsIdx = unitOptions.indexOfFirst { it.first == selectedOutputType }.takeIf { it >= 0 } ?: 0
+        // setSelection fires onItemSelected, which would reset the colour key to the per-unit
+        // default; the marker's actual saved colour key is re-applied below afterwards.
+        radioSettingView.findViewById<PluginSpinner>(R.id.spinnerUnits).setSelection(unitsIdx)
+
         selectedColourKey = item.markerDetails.output.col
-        val colourKeys = listOf("LTE.dBm" to "LTE.dBm", "RAINBOW.dBm" to "RAINBOW.dBm", "4" to "BLUE", "3" to "GREEN", "2" to "RED")
-        val spinner = radioSettingView.findViewById<PluginSpinner>(R.id.spinnerColourKey)
-        val idx = colourKeys.indexOfFirst { it.first == selectedColourKey }.takeIf { it >= 0 } ?: 0
-        spinner.setSelection(idx)
+        updateColourKeyOptions(radioSettingView.findViewById(R.id.spinnerColourKey), selectedOutputType)
     }
 
     private fun applyNetworkSwatches(red: View, blue: View, green: View) {

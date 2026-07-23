@@ -61,7 +61,7 @@ data class Model(
 
 data class Output(
         var col: String,
-        var nf: String, // noise floor. Can be -100 or database
+        var nf: String, // noise floor. Can be -114 or database
         var `out`: Int, // 2 = Received Power (dBm), 4 = Signal to Noise (dB)
         var rad: Double,
         var res: Double,

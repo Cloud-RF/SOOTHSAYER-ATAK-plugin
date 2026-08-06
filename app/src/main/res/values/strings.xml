@@ -46,6 +46,7 @@
         \n\nCoverage:\nTo model a heatmap of RF coverage, check the coverage box in the settings and add a radio. Drag the marker to model coverage or click the play button. Colours are set in the template.
         \n\nBounds box:\nTo focus output on a user defined area, click the polygon button and draw a shape. Coverage calculations OR Best Site Analysis will focus effort on the polygon.
         \n\nCo-opt feature:\nTo model live data taken from the map in ATAK, click the deputy badge and then assign templates to the callsigns in the list. Only data with altitude will be shown. Click start to automatically model the data after an interval or when it moves.
+        \n\nSatellite coverage:\nSet the direction of the satellite as seen from the terminal. You can use a number of apps to get these angles. Use either the polygon tool or the radius slider to set the study area then click the button.
         \n\nBest Site Analysis:\nTo find the most efficient sites in an area, draw a polygon and click the magnifying glass button. Radio settings will come from the active template and the heatmap will show you where to place a radio for maximum coverage.
         \n\nRadio templates are downloaded automatically from your account or can be added as .json files to the SD card atak/SOOTHSAYER/templates folder.\nDocs, videos and templates are available at https://cloudrf.com/atak
         \n\nKMZ files can be found in the plugin KMZ folder and shared with team mates via the data package tool

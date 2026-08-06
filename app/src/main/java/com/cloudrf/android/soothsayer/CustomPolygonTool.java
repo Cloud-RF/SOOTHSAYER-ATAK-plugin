@@ -58,6 +58,15 @@ public class CustomPolygonTool {
         return (DrawingShape) MapView.getMapView().getRootGroup().deepFindItem(FLAG, "1");
     }
 
+    public static void setDrawnPolygonSuppressed(boolean suppressed) {
+        String current = suppressed ? "1" : "0";
+        DrawingShape shape =
+                (DrawingShape) MapView.getMapView().getRootGroup().deepFindItem(FLAG, current);
+        if (shape != null) {
+            shape.setMetaString(FLAG, suppressed ? "0" : "1");
+        }
+    }
+
     /**
      * Initiates the polygon creation process on the map using the defined callbacks.
      */

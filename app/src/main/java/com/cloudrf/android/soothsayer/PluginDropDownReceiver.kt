@@ -218,9 +218,17 @@ class PluginDropDownReceiver(
         private set
     private var satelliteBoxListener: AtakMapView.OnMapMovedListener? = null
 
-    private var satelliteBoxAlreadyExists = false
+    /** True when the drawn polygon is the study area, false when the range box is. */
+    private var satelliteUsePolygon = false
+
+    /** True while a range box we created is on the map - the only one we may delete. */
+    private var satelliteBoxLive = false
+
     private val satelliteRangeGroup: View by lazy {
         satelliteView.findViewById(R.id.satellite_range_group)
+    }
+    private val satellitePolygonSwitch: Switch by lazy {
+        satelliteView.findViewById(R.id.satellite_use_polygon_switch)
     }
     private val trackingHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var trackingRunnable: Runnable? = null
@@ -1393,14 +1401,30 @@ class PluginDropDownReceiver(
                     entry = zip.nextEntry
                 }
             }
-            if (pngFile.exists()) {
+            // A zero-length file means the entry was there but empty, which decodes to a
+            // null bitmap further down and fails in a much less obvious place.
+            if (pngFile.exists() && pngFile.length() > 0) {
                 addLayer(pngFile.absolutePath, bounds, false, layerName)
             } else {
-                Log.e(TAG, "loadKmzLayer: no PNG found inside $filePath")
+                reportProblem(pluginContext.getString(R.string.coverage_no_image))
             }
         } catch (e: Exception) {
-            Log.e(TAG, "loadKmzLayer: failed to extract PNG from KMZ", e)
+            // Covers the extract and everything addLayer does: a bitmap that will not decode,
+            // and the masker rejecting an unclosed polygon, both land here.
+            reportProblem(
+                pluginContext.getString(R.string.coverage_layer_error, e.message ?: e.javaClass.simpleName),
+                e
+            )
         }
+    }
+
+    /**
+     * Surfaces a failure that would otherwise only exist in logcat. Safe to call from the
+     * download and API callback threads, which is where most of these arise.
+     */
+    private fun reportProblem(message: String, error: Throwable? = null) {
+        if (error != null) Log.e(TAG, message, error) else Log.e(TAG, message)
+        mainHandler.post { pluginContext.toast(message) }
     }
 
     private fun loginUser(){
@@ -1882,6 +1906,11 @@ class PluginDropDownReceiver(
         val rangeValue = satelliteView.findViewById<TextView>(R.id.satellite_range_value)
         val resSpinner = satelliteView.findViewById<Spinner>(R.id.satellite_res_spinner)
 
+        satellitePolygonSwitch.setOnCheckedChangeListener { _, isChecked ->
+            satelliteUsePolygon = isChecked
+            applySatelliteAreaMode()
+        }
+
         resSpinner.adapter = ArrayAdapter(
             pluginContext, R.layout.spinner_item_layout, satelliteResolutions
         ).apply { setDropDownViewResource(R.layout.spinner_dropdown_item_layout) }
@@ -1947,24 +1976,33 @@ class PluginDropDownReceiver(
             // text has not been committed yet.
             commitAzimuth()
             commitElevation()
+
             sendSatelliteRequest()
         }
     }
 
-    private fun sendSatelliteRequest() {
+    /**
+     * Posts the satellite panel's settings to /spotbeam and loads the returned coverage.
+     *
+     * @return true if the request was dispatched, so the caller knows whether there is
+     *         anything to wait for.
+     */
+    private fun sendSatelliteRequest(): Boolean {
         if (!pluginContext.isConnected()) {
             pluginContext.toast(pluginContext.getString(R.string.internet_error))
-            return
+            return false
         }
 
         val template = selectedMarkerType
-        val tx = template?.transmitter
-        if (template == null || tx == null) {
+        if (template == null) {
             pluginContext.toast("Select a template first")
-            return
+            return false
         }
 
-        val centre = mapView?.centerPoint?.get() ?: return
+        val centre = mapView?.centerPoint?.get() ?: run {
+            reportProblem("No map centre to place the beam on")
+            return false
+        }
 
         val request = SatelliteRequest(
             receiver = template.receiver.copy(
@@ -1972,36 +2010,46 @@ class PluginDropDownReceiver(
                 lon = centre.longitude,
                 alt = 2.0,
                 units = "m",
-                rxg = 0.0,
-                rxs = -112
+                rxg = 6.0,
+                rxs = -110
             ),
             satellite = SatelliteModel(
                 az = satelliteAzimuth,
                 el = satelliteElevation,
-                alt = satelliteAltitudeKm,
-                frq = tx.frq,
-                txw = tx.txw,
-                txg = template.antenna.txg
+                alt = satelliteAltitudeKm * 1000,
+                frq = 1500.0,
+                txw = 50.0,
+                txg = 50.0
             ),
             output = template.output.copy(
                 rad = satelliteRangeKm.toDouble(),
                 res = satelliteResolution.toDouble(),
-                col = "RAINBOW.dBm"
+                col = "SATCOM.dBm"
             )
         )
+
+        setSatelliteBusy(true)
+
+        pluginContext.toast(pluginContext.getString(R.string.satellite_calculating))
 
         repository.sendSatelliteData(request, object : PluginRepository.ApiCallBacks {
             override fun onLoading() {}
 
             override fun onSuccess(response: Any?) {
-                if (response !is ResponseModel) return
+                if (response !is ResponseModel) {
+                    reportProblem(pluginContext.getString(R.string.satellite_bad_response))
+                    setSatelliteBusy(false)
+                    return
+                }
 
                 colourKeyView.setKey(response.key)
 
+                // Still busy: the coverage is not on the map until the KMZ has come down
+                // and been turned into a layer, which is the part worth waiting for.
                 repository.downloadFile(
                     response.kmz,
                     KMZ_FOLDER_PATH,
-                    satelliteKmzFileName(tx.frq, tx.txw),
+                    satelliteKmzFileName(1500.0, 50.0),
                     listener = { isDownloaded, filePath ->
                         if (isDownloaded) {
                             loadKmzLayer(
@@ -2009,17 +2057,47 @@ class PluginDropDownReceiver(
                                 response.bounds,
                                 pluginContext.getString(R.string.satellite_layer)
                             )
+                            // A layer that is switched off looks exactly like one that never
+                            // arrived, so say so rather than leave an empty map.
+                            if (!cbCoverageLayer.isChecked) {
+                                reportProblem(pluginContext.getString(R.string.coverage_layer_hidden))
+                            }
+                        } else {
+                            Log.e(TAG, "satellite: KMZ download failed")
+                            // This callback is on OkHttp's thread; Context.toast is not.
+                            mainHandler.post {
+                                pluginContext.toast(pluginContext.getString(R.string.satellite_failed))
+                            }
                         }
+                        setSatelliteBusy(false)
                     })
             }
 
             override fun onFailed(error: String?, responseCode: Int?) {
+                setSatelliteBusy(false)
                 mapView.context.showAlert(
                     "API error", error,
                     positiveText = pluginContext.getString(R.string.ok_txt)
                 )
             }
         })
+        return true
+    }
+
+    /**
+     * Shows the spinner in place of the play button while a satellite request is in flight.
+     *
+     * Deliberately not [showHidePlayBtn]: that one toggles whatever it finds, which is not
+     * safe to call from the download callback's thread, and the panel is closed by then so
+     * this spinner is the only sign anything is still happening.
+     */
+    private fun setSatelliteBusy(busy: Boolean) {
+        mainHandler.post {
+            templateView.findViewById<ImageButton>(R.id.satellite_go_button).visibility =
+                if (busy) View.GONE else View.VISIBLE
+            templateView.findViewById<ProgressBar>(R.id.progress_bar_sat).visibility =
+                if (busy) View.VISIBLE else View.GONE
+        }
     }
 
     private fun satelliteKmzFileName(freqMHz: Double, powerW: Double): String {
@@ -2091,34 +2169,84 @@ class PluginDropDownReceiver(
         }
     }
 
+    /**
+     * Opens the panel on whichever study area makes sense: a polygon the user drew wins and
+     * ticks the switch, otherwise the range box takes over and follows the screen.
+     */
     private fun startSatelliteBoxTracking() {
-        satelliteBoxAlreadyExists = CustomPolygonTool.getMaskingPolygon() != null
-        satelliteRangeGroup.visibility = if (!satelliteBoxAlreadyExists) View.VISIBLE else View.GONE
-        if (satelliteBoxAlreadyExists) return
+        satelliteUsePolygon = CustomPolygonTool.getMaskingPolygon() != null
+        satellitePolygonSwitch.isChecked = satelliteUsePolygon
+        applySatelliteAreaMode()
+    }
 
-        updateSatelliteBox()
+    /**
+     * Puts the chosen study area on the map and matches the panel to it.
+     *
+     * Only one shape may be live at a time or the mask would pick between them arbitrarily,
+     * which is why the order matters here: suppress before creating a box, restore only
+     * after removing one. That ordering is also what keeps [CustomPolygonTool.setAutoBox]
+     * off the drawn polygon - with the polygon suppressed, the only box it can find is ours.
+     */
+    private fun applySatelliteAreaMode() {
+        if (satelliteUsePolygon) {
+            stopSatelliteBoxFollowing()
+            removeSatelliteBox()
+            CustomPolygonTool.setDrawnPolygonSuppressed(false)
+        } else {
+            CustomPolygonTool.setDrawnPolygonSuppressed(true)
+            updateSatelliteBox()
+            startSatelliteBoxFollowing()
+        }
+        setSatelliteRangeEnabled(!satelliteUsePolygon)
+    }
+
+    /**
+     * Removes the range box, and only ever the range box.
+     *
+     * [CustomPolygonTool.removeAutoBox] deletes whichever RF box is live, so it must not be
+     * called unless we know the live one is ours - with a polygon drawn and no box of our
+     * own on the map, the live box is the user's and it would be deleted.
+     */
+    private fun removeSatelliteBox() {
+        if (!satelliteBoxLive) return
+        CustomPolygonTool.removeAutoBox()
+        satelliteBoxLive = false
+    }
+
+    /** Greys the range controls out when the polygon, not the slider, sets the area. */
+    private fun setSatelliteRangeEnabled(enabled: Boolean) {
+        satelliteRangeGroup.alpha = if (enabled) 1f else 0.4f
+        satelliteView.findViewById<SeekBar>(R.id.satellite_range_bar).isEnabled = enabled
+    }
+
+    private fun startSatelliteBoxFollowing() {
         if (satelliteBoxListener != null) return
-
         val view = mapView ?: return
         val listener = AtakMapView.OnMapMovedListener { _, _ -> updateSatelliteBox() }
         view.addOnMapMovedListener(listener)
         satelliteBoxListener = listener
     }
 
-    private fun stopSatelliteBoxTracking() {
-        val wasTracking = satelliteBoxListener != null
+    private fun stopSatelliteBoxFollowing() {
         satelliteBoxListener?.let { mapView?.removeOnMapMovedListener(it) }
         satelliteBoxListener = null
-        // Only clear away a box we put there. A hand-drawn one outlives the panel.
-        if (wasTracking && !satelliteBoxAlreadyExists) CustomPolygonTool.removeAutoBox()
-        satelliteBoxAlreadyExists = false
+    }
+
+    /** Clears our box away as the panel closes, and gives the polygon back to the plugin. */
+    private fun stopSatelliteBoxTracking() {
+        stopSatelliteBoxFollowing()
+        removeSatelliteBox()
+        CustomPolygonTool.setDrawnPolygonSuppressed(false)
+        satelliteUsePolygon = false
     }
 
     /** Re-centres the box on the middle of the screen and re-sizes it to the range. */
     private fun updateSatelliteBox() {
-        if (satelliteBoxAlreadyExists) return
+        if (satelliteUsePolygon) return
         val centre = mapView?.centerPoint?.get() ?: return
-        CustomPolygonTool.setAutoBox(centre, satelliteRangeKm * 1000.0)
+        if (CustomPolygonTool.setAutoBox(centre, satelliteRangeKm * 1000.0) != null) {
+            satelliteBoxLive = true
+        }
     }
 
     private fun showCoOptView(show: Boolean) {

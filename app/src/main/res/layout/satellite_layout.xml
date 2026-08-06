@@ -100,13 +100,26 @@
 
     </LinearLayout>
 
-    <!-- Hidden when an RF box already exists on the map: that polygon defines the
-         study area, so there is no range for this slider to drive. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_12"
+        android:orientation="horizontal">
+
+        <Switch
+            android:id="@+id/satellite_use_polygon_switch"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.4"
+            android:text="@string/use_drawn_polygon" />
+
+    </LinearLayout>
+
+    <!-- Greyed out while the polygon is in charge: nothing for the slider to drive. -->
     <LinearLayout
         android:id="@+id/satellite_range_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp_12"
         android:orientation="vertical">
 
         <LinearLayout
@@ -169,5 +182,16 @@
         android:padding="6dp"
         android:layout_gravity="center"
         android:src="@drawable/spotbeam_marker_icon" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar_sat"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="60dp"
+        android:contentDescription="@string/satellite_go"
+        android:padding="6dp"
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
 </LinearLayout>

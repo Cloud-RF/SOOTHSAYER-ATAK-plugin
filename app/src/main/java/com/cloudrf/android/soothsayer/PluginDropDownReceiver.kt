@@ -1046,6 +1046,7 @@ class PluginDropDownReceiver(
             radioSettingView.findViewById(R.id.btnColorBlue),
             radioSettingView.findViewById(R.id.btnColorGreen)
         )
+
         selectedOutputType = item.markerDetails.output.out
         val unitsIdx = unitOptions.indexOfFirst { it.first == selectedOutputType }.takeIf { it >= 0 } ?: 0
         // setSelection fires onItemSelected, which would reset the colour key to the per-unit

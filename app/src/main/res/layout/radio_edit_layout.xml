@@ -513,11 +513,34 @@
                 android:textColor="@color/darker_gray"
                 android:textCursorDrawable="@null"
                 android:textSize="@dimen/sp_14"
-                tools:text="-100" />
+                tools:text="-115" />
         </LinearLayout>
 
     </LinearLayout>
 
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Units"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_14" />
+
+        <com.atakmap.android.gui.PluginSpinner
+            android:id="@+id/spinnerUnits"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

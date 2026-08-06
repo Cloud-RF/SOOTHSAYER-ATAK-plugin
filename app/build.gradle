@@ -108,7 +108,7 @@ ext.getDebugApiKey = {
 }
 
 android {
-    compileSdkVersion 35
+    compileSdkVersion 36
 
     dexOptions {
         jumboMode = true

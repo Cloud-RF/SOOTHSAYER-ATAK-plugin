@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
@@ -121,6 +122,7 @@ import com.cloudrf.android.soothsayer.util.showAlert
 import com.cloudrf.android.soothsayer.util.sortMarkersWithCheckedFirst
 import com.cloudrf.android.soothsayer.util.toBase64String
 import com.cloudrf.android.soothsayer.util.toLinkDataModel
+import com.cloudrf.android.soothsayer.util.megapixelCalculator
 import com.cloudrf.android.soothsayer.util.toast
 import com.cloudrf.android.soothsayer.util.BestSiteManager
 import com.cloudrf.android.soothsayer.interfaces.CustomPolygonInterface
@@ -200,21 +202,21 @@ class PluginDropDownReceiver(
     private var allContacts: MutableList<Contact> = mutableListOf()
     private val coOptedMarkers = HashMap<String, CoOptedMarkerSettings>()
 
-    private val satelliteResolutions = arrayOf("Low (10m)", "Medium (5m)", "High (2m)")
-    private val satelliteResolutionValues = intArrayOf(10, 5, 2)
-    private val satelliteMaxRangeKm = 10
-    private val satelliteAzimuthRange = -180.0..180.0
-    private val satelliteElevationRange = 0.0..90.0
+    private val satelliteResolutions = arrayOf("Low (1MP)", "Medium (4MP)", "High (16MP)")
+    private val satelliteResolutionValues = doubleArrayOf(1.0, 4.0, 16.0)
+    private val satelliteMaxRangeKm = 30
+    private val satelliteAzimuthRange = 0.0..360.0
+    private val satelliteElevationRange = 5.0..90.0
 
     private val satelliteAltitudeKm = 20000.0
 
-    var satelliteAzimuth: Double = -123.0
+    var satelliteAzimuth: Double = 180.0
         private set
-    var satelliteElevation: Double = 45.0
+    var satelliteElevation: Double = 30.0
         private set
     var satelliteRangeKm: Int = 5
         private set
-    var satelliteResolution: Int = 5
+    var satelliteResolution: Double = 4.0
         private set
     private var satelliteBoxListener: AtakMapView.OnMapMovedListener? = null
 
@@ -1855,11 +1857,16 @@ class PluginDropDownReceiver(
         val marker = Marker(location, uid)
         marker.title = "Satellite coverage"
 
-        val icon = pluginContext.getBitmap(R.drawable.spotbeam_marker_icon)
+        val drawable = ContextCompat.getDrawable(pluginContext, R.drawable.spotbeam_marker_icon)
+        val iconSize = 64
+        val iconBitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888)
+        drawable?.let {
+            it.setBounds(0, 0, iconSize, iconSize)
+            it.draw(Canvas(iconBitmap))
+        }
         val outputStream = ByteArrayOutputStream()
-        icon?.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-        val b = outputStream.toByteArray()
-        val encoded = "base64://" + Base64.encodeToString(b, Base64.NO_WRAP or Base64.URL_SAFE)
+        iconBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        val encoded = "base64://" + Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP or Base64.URL_SAFE)
         val markerIconBuilder = Icon.Builder().setImageUri(0, encoded)
         marker.setMetaBoolean("CLOUDRF", true)
         marker.icon = markerIconBuilder.build()
@@ -1913,7 +1920,8 @@ class PluginDropDownReceiver(
 
         resSpinner.adapter = ArrayAdapter(
             pluginContext, R.layout.spinner_item_layout, satelliteResolutions
-        ).apply { setDropDownViewResource(R.layout.spinner_dropdown_item_layout) }
+        )
+
         rangeBar.max = satelliteMaxRangeKm
 
         satelliteAzimuth = (sharedPrefs?.get(Constant.PreferenceKey.sSatelliteAzimuth, satelliteAzimuth)
@@ -1929,7 +1937,7 @@ class PluginDropDownReceiver(
         elInput.setText(satelliteElevation.to2dp())
         rangeBar.progress = satelliteRangeKm.coerceIn(1, satelliteMaxRangeKm)
         rangeValue.text = pluginContext.getString(R.string.satellite_range_value_fmt, satelliteRangeKm)
-        resSpinner.setSelection(satelliteResolutionValues.indexOf(satelliteResolution).coerceAtLeast(0))
+        resSpinner.setSelection(satelliteResolutionValues.indexOfFirst { it == satelliteResolution }.coerceAtLeast(0))
 
         resSpinner.onItemSelectedListener = object : SimpleItemSelectedListener() {
             override fun onItemSelected(
@@ -2017,7 +2025,7 @@ class PluginDropDownReceiver(
             receiver = template.receiver.copy(
                 lat = centre.latitude,
                 lon = centre.longitude,
-                alt = 2.0,
+                alt = 1.0,
                 units = "m",
                 rxg = 6.0,
                 rxs = -110
@@ -2032,7 +2040,7 @@ class PluginDropDownReceiver(
             ),
             output = template.output.copy(
                 rad = radiusKm,
-                res = satelliteResolution.toDouble(),
+                res = megapixelCalculator(radiusKm, satelliteResolution),
                 col = "SATCOM.dBm"
             )
         )
@@ -2332,6 +2340,9 @@ class PluginDropDownReceiver(
             }
         })
 
+        coOptView.findViewById<ImageView>(R.id.coOptBack).setOnClickListener {
+            showCoOptView(false)
+        }
         coOptView.findViewById<Button>(R.id.co_opt_cancel_button).setOnClickListener {
             showCoOptView(false)
         }

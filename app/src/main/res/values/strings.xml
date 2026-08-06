@@ -108,6 +108,7 @@
 
     <string name="settings_layers_button">Layers</string>
     <string name="settings_coopt_button">Co-Opt</string>
+    <string name="coopt_title">Co-Opt live data</string>
     <string name="settings_options_button">Options</string>
     <string name="settings_links_button">Links</string>
     <string name="settings_layers_title">Settings - Layers</string>
@@ -136,10 +137,13 @@
     <string name="range">Range</string>
     <string name="_45">45</string>
     <string name="el">Elevation</string>
-    <string name="_123">-123</string>
+    <string name="_180">180</string>
     <string name="az">Azimuth</string>
+    <string name="az_short">Az</string>
+    <string name="el_short">El</string>
+    <string name="degree">°</string>
     <string name="type">Type</string>
-    <string name="satellite">Satellite</string>
+    <string name="satellite">Satellite coverage</string>
     <string name="satellite_range_value">10 km</string>
     <string name="satellite_range_value_fmt">%1$d km</string>
     <string name="satellite_go">Go</string>
@@ -150,5 +154,5 @@
     <string name="coverage_no_image">No coverage image in the server response</string>
     <string name="coverage_layer_error">Could not draw the coverage layer: %1$s</string>
     <string name="coverage_layer_hidden">Layer added but hidden. Turn Coverage on in Settings &gt; Layers</string>
-    <string name="use_drawn_polygon">Use Drawn Polygon</string>
+    <string name="use_drawn_polygon">User defined polygon</string>
 </resources>

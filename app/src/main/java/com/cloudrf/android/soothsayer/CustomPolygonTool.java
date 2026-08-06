@@ -41,12 +41,10 @@ public class CustomPolygonTool {
     }
 
     /**
-     * Error handler.
+     * Error handler — returns null on cancellation rather than crashing.
      */
     private static <A> ShapeToolUtils.Callback<Error, A> errorHandler() {
-        return x -> {
-            throw x;
-        };
+        return x -> null;
     }
 
     /**

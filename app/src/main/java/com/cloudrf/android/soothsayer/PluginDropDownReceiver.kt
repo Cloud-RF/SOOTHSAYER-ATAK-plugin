@@ -1999,10 +1999,19 @@ class PluginDropDownReceiver(
             return false
         }
 
-        val centre = mapView?.centerPoint?.get() ?: run {
+        val mapCentre = mapView?.centerPoint?.get() ?: run {
             reportProblem("No map centre to place the beam on")
             return false
         }
+
+        val polygon = if (satelliteUsePolygon) CustomPolygonTool.getMaskingPolygon() else null
+        val area = polygon?.points?.let { GeoImageMasker.getBounds(it) }
+        val centre = if (area != null) {
+            GeoPoint((area.north + area.south) / 2, (area.east + area.west) / 2)
+        } else {
+            mapCentre
+        }
+        val radiusKm = if (area != null) radiusKmToCover(area, centre) else satelliteRangeKm.toDouble()
 
         val request = SatelliteRequest(
             receiver = template.receiver.copy(
@@ -2022,7 +2031,7 @@ class PluginDropDownReceiver(
                 txg = 50.0
             ),
             output = template.output.copy(
-                rad = satelliteRangeKm.toDouble(),
+                rad = radiusKm,
                 res = satelliteResolution.toDouble(),
                 col = "SATCOM.dBm"
             )
@@ -2098,6 +2107,17 @@ class PluginDropDownReceiver(
             templateView.findViewById<ProgressBar>(R.id.progress_bar_sat).visibility =
                 if (busy) View.VISIBLE else View.GONE
         }
+    }
+
+    /** Radius in km reaching every edge of [area] from a receiver at [centre], plus a little. */
+    private fun radiusKmToCover(area: GeoImageMasker.Bounds, centre: GeoPoint): Double {
+        val furthestMetres = maxOf(
+            centre.distanceTo(GeoPoint(area.north, centre.longitude)),
+            centre.distanceTo(GeoPoint(area.south, centre.longitude)),
+            centre.distanceTo(GeoPoint(centre.latitude, area.east)),
+            centre.distanceTo(GeoPoint(centre.latitude, area.west))
+        )
+        return (furthestMetres / 1000.0 * 1.05).coerceAtLeast(1.0)
     }
 
     private fun satelliteKmzFileName(freqMHz: Double, powerW: Double): String {
@@ -2176,7 +2196,21 @@ class PluginDropDownReceiver(
     private fun startSatelliteBoxTracking() {
         satelliteUsePolygon = CustomPolygonTool.getMaskingPolygon() != null
         satellitePolygonSwitch.isChecked = satelliteUsePolygon
+        if (satelliteUsePolygon) centreOnSatelliteArea()
         applySatelliteAreaMode()
+    }
+
+    /**
+     * Brings the polygon into view when it is the one about to be used, so the panel opens
+     * looking at the area it is going to calculate rather than wherever the map was left.
+     */
+    private fun centreOnSatelliteArea() {
+        val points = CustomPolygonTool.getMaskingPolygon()?.points ?: return
+        val area = GeoImageMasker.getBounds(points)
+        mapView?.mapController?.panTo(
+            GeoPoint((area.north + area.south) / 2, (area.east + area.west) / 2),
+            true
+        )
     }
 
     /**

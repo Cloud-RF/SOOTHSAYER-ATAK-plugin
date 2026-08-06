@@ -109,6 +109,11 @@ public class GLCloudRFLayer extends GLAbstractLayer {
                 } finally {
                     // cleanup the bitmap
                     bitmap.recycle();
+                    // The texture only reaches the GPU here, which is after the frame that
+                    // queued this event has already been drawn. Without asking for another
+                    // pass the layer stays blank until something else dirties the map - a
+                    // pan or a zoom - which looks like the coverage failing to appear.
+                    renderContext.requestRefresh();
                 }
             }
         });

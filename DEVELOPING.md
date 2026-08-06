@@ -35,6 +35,20 @@ You can follow these notes to complete a build of the plugin and have it working
 21. If all is working as expected then ATAK should be loaded and it should show "DEVELOPER BUILD" in red letters at the bottom of the viewer.
 22. In Android Studio select "Run" > "Run app". This will build and compile the plugin. After a successful build you will be prompted on ATAK "Load plugin: SOOTHSAYER. Would you like to load this installed plugin into ATAK? SOOTHSAYER".
 
+### Debug API key
+
+To skip the login screen on every fresh install, copy `apikey.properties.example` to
+`apikey.properties` at the repo root and paste in your own API key:
+
+```
+cloudrf.apikey=your-key-here
+```
+
+Debug builds compile that key in and use it when no key has been saved yet; logging in,
+or a key already stored, takes precedence. Release builds ignore the file. It is
+gitignored, but the key does end up inside the debug APK, so keep those to yourself and
+rebuild after changing it.
+
 ### Third-Party Signing
 
 The tak.gov documentation has a bug at the time of writing which assumes the public have access to the maven repo.

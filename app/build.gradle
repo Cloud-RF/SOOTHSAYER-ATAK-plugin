@@ -98,6 +98,15 @@ ext.getBuildNumber = {
     return Integer.parseInt(props.getProperty('BUILD_NUMBER', '0'))
 }
 
+// Developer API key for debugging, ignored if not found or empty.
+ext.getDebugApiKey = {
+    def propsFile = rootProject.file('apikey.properties')
+    if (!propsFile.exists()) return ""
+    def props = new Properties()
+    propsFile.withReader { props.load(it) }
+    return props.getProperty('cloudrf.apikey', '').trim()
+}
+
 android {
     compileSdkVersion 35
 
@@ -144,12 +153,18 @@ android {
         debug {
             debuggable true
             matchingFallbacks = ['sdk']
+            // Debugging convenience: a key in apikey.properties (repo root, gitignored)
+            // is compiled in so a debug build can call the API without logging in first.
+            // No file, no key - the plugin just falls back to the login screen.
+            buildConfigField "String", "DEBUG_API_KEY", "\"${getDebugApiKey()}\""
         }
         release {
             minifyEnabled true
             proguardFile 'proguard-gradle.txt'
             signingConfig signingConfigs.release
             matchingFallbacks = ['odk']
+            // Declared for both types so the code compiles; never carries a key.
+            buildConfigField "String", "DEBUG_API_KEY", "\"\""
         }
     }
 

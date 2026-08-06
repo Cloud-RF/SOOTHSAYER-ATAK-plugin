@@ -83,3 +83,6 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+
+# Developer API key for debug builds - never commit
+apikey.properties

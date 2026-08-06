@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    This layout defines the Satellite panel.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/satelliteBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/app_name"
+            android:padding="@dimen/dp_4"
+            android:src="@drawable/back_arrow" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/satellite"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_18" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:layout_margin="3dp"
+        android:background="@android:color/white" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_12"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/satellite_az"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.4"
+            android:text="@string/az" />
+
+        <EditText
+            android:id="@+id/satellite_az_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:autofillHints="-123"
+            android:background="@drawable/et_background"
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="numberDecimal|numberSigned"
+            android:padding="4dp"
+            android:text="@string/_123"
+            android:textColor="@color/darker_gray"
+            android:textSize="16sp"
+            tools:ignore="LabelFor" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_12"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/satellite_el"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.4"
+            android:text="@string/el" />
+
+        <!-- Elevation is 0..90, so no minus key is offered. -->
+        <EditText
+            android:id="@+id/satellite_el_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:autofillHints="45"
+            android:background="@drawable/et_background"
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="numberDecimal"
+            android:padding="4dp"
+            android:text="@string/_45"
+            android:textColor="@color/darker_gray"
+            android:textSize="16sp"
+            tools:ignore="LabelFor" />
+
+    </LinearLayout>
+
+    <!-- Hidden when an RF box already exists on the map: that polygon defines the
+         study area, so there is no range for this slider to drive. -->
+    <LinearLayout
+        android:id="@+id/satellite_range_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_12"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/satellite_range"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:text="@string/range" />
+
+            <TextView
+                android:id="@+id/satellite_range_value"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:text="@string/satellite_range_value" />
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/satellite_range_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_12"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/satellite_res"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.4"
+            android:text="@string/resolution" />
+
+        <Spinner
+            android:id="@+id/satellite_res_spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:background="@drawable/et_background"
+            android:popupBackground="@color/light_gray"
+            android:spinnerMode="dropdown" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/satellite_go_button"
+        style="@style/darkButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="60dp"
+        android:contentDescription="@string/satellite_go"
+        android:padding="6dp"
+        android:layout_gravity="center"
+        android:src="@drawable/spotbeam_marker_icon" />
+
+</LinearLayout>

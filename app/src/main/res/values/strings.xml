@@ -55,6 +55,7 @@
     <string name="layer">%1$s Layer</string>
     <string name="coverage_layer">RF coverage layer</string>
     <string name="best_site_layer">Best Site Analysis</string>
+    <string name="satellite_layer">Satellite beam</string>
 
     <!--Prompt Dialog strings-->
     <string name="civ_delete_layer">Delete layer</string>
@@ -130,4 +131,17 @@
     <string name="choose_file">"Please choose file and icon both to import."</string>
     <string name="all_txt">ALL</string>
     <string name="file_path_message">"Your file has been saved in: \n \n%1$s\n \nYou can open this folder in a file manager to share the file."</string>
+
+    <string name="resolution">Resolution</string>
+    <string name="range">Range</string>
+    <string name="_45">45</string>
+    <string name="el">EL</string>
+    <string name="_123">-123</string>
+    <string name="az">AZ</string>
+    <string name="type">Type</string>
+    <string name="satellite">Satellite</string>
+    <string name="satellite_range_value">10 km</string>
+    <string name="satellite_range_value_fmt">%1$d km</string>
+    <string name="satellite_go">Go</string>
+    <string name="satellite_bounds_error">Must be between %1$s and %2$s</string>
 </resources>

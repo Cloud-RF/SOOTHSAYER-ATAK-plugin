@@ -67,7 +67,7 @@
                     android:layout_marginTop="3dp"
                     android:layout_marginEnd="0dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_toRightOf="@id/btnAddPolygon"
+                    android:layout_toRightOf="@id/satelliteButton"
                     android:padding="6dp"
                     android:src="@drawable/analysis"
                     android:enabled="false"
@@ -118,6 +118,19 @@
                     android:contentDescription="@string/app_name"
                     android:padding="7dp"
                     android:src="@drawable/ic_settings" />
+
+                <ImageButton
+                    android:id="@+id/satelliteButton"
+                    style="@style/darkButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginEnd="0dp"
+                    android:layout_toRightOf="@id/btnAddPolygon"
+                    android:contentDescription="@string/satellite"
+                    android:padding="6dp"
+                    android:src="@drawable/spotbeam_marker_icon" />
 
                 <ImageButton
                     android:id="@+id/btnPlayBtn"
@@ -199,6 +212,11 @@
         <include
             android:id="@+id/ilCoOpt"
             layout="@layout/co_opt_layout"
+            android:visibility="gone" />
+
+        <include
+            android:id="@+id/ilSatellite"
+            layout="@layout/satellite_layout"
             android:visibility="gone" />
 
         <include

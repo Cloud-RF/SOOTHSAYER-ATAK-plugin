@@ -6,6 +6,7 @@ import com.cloudrf.android.soothsayer.PluginDropDownReceiver
 import com.cloudrf.android.soothsayer.models.linksmodel.LinkRequest
 import com.cloudrf.android.soothsayer.models.linksmodel.LinkResponse
 import com.cloudrf.android.soothsayer.models.request.MultisiteRequest
+import com.cloudrf.android.soothsayer.models.request.SatelliteRequest
 import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
 import com.cloudrf.android.soothsayer.models.response.LoginResponse
 import com.cloudrf.android.soothsayer.models.response.ResponseModel
@@ -464,6 +465,47 @@ class PluginRepository {
                                 Log.d(
                                     TAG,
                                     "performBestSiteAnalysis override fun onFailure called Request ${call.request()}  \n Error: ${t.localizedMessage}"
+                                )
+                                callback?.onFailed(t.message)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                callback?.onFailed(e.printStackTrace().toString())
+                            }
+                        }
+                    })
+            } else {
+                callback?.onFailed("", Constant.ApiErrorCodes.sForbidden)
+            }
+        }
+    }
+
+    fun sendSatelliteData(request: SatelliteRequest, callback: ApiCallBacks? = null) {
+        callback?.onLoading()
+        delayedRequest {
+            if (URLUtil.isValidUrl(RetrofitClient.BASE_URL)) {
+                Log.d(TAG, "sendSatelliteData request ${Gson().toJson(request)}")
+                RetrofitClient.apiService()?.sendSatelliteDataToServer(request = request)
+                    ?.enqueue(object : Callback<ResponseModel> {
+                        override fun onResponse(
+                            call: Call<ResponseModel>, response: Response<ResponseModel>
+                        ) {
+                            if (response.isSuccessful) {
+                                Log.d(TAG, "sendSatelliteData success :${response.raw()}")
+                                callback?.onSuccess(response.body())
+                            } else {
+                                Log.d(
+                                    TAG,
+                                    "sendSatelliteData onFailed called ${response.code()} ${response.raw()}"
+                                )
+                                callback?.onFailed(response.errorBody()?.string(), response.code())
+                            }
+                        }
+
+                        override fun onFailure(call: Call<ResponseModel>, t: Throwable) {
+                            try {
+                                Log.d(
+                                    TAG,
+                                    "sendSatelliteData onFailure called Request ${call.request()}  \n Error: ${t.localizedMessage}"
                                 )
                                 callback?.onFailed(t.message)
                             } catch (e: Exception) {

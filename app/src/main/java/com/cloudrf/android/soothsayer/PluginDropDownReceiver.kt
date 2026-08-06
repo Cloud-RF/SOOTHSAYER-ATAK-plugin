@@ -31,6 +31,8 @@ import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.ScrollView
 import android.widget.ProgressBar
+
+import android.widget.SeekBar
 import android.widget.Spinner
 import com.atakmap.android.gui.PluginSpinner
 import android.widget.Switch
@@ -70,7 +72,10 @@ import com.cloudrf.android.soothsayer.models.common.CoOptedMarkerSettings
 import com.cloudrf.android.soothsayer.models.common.MarkerDataModel
 import com.cloudrf.android.soothsayer.models.linksmodel.LinkDataModel
 import com.cloudrf.android.soothsayer.models.linksmodel.LinkResponse
+import com.cloudrf.android.soothsayer.models.request.Bounds
 import com.cloudrf.android.soothsayer.models.request.MultisiteRequest
+import com.cloudrf.android.soothsayer.models.request.SatelliteModel
+import com.cloudrf.android.soothsayer.models.request.SatelliteRequest
 import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
 import com.cloudrf.android.soothsayer.models.response.LoginResponse
 import com.cloudrf.android.soothsayer.models.response.ResponseModel
@@ -78,6 +83,7 @@ import com.cloudrf.android.soothsayer.models.response.TemplatesResponse
 import com.cloudrf.android.soothsayer.models.response.TemplatesResponseItem
 import com.cloudrf.android.soothsayer.network.remote.RetrofitClient
 import com.cloudrf.android.soothsayer.network.repository.PluginRepository
+import com.cloudrf.android.soothsayer.plugin.BuildConfig
 import com.cloudrf.android.soothsayer.plugin.R
 import com.cloudrf.android.soothsayer.recyclerview.CoOptAdapter
 import com.cloudrf.android.soothsayer.recyclerview.RecyclerViewAdapter
@@ -121,6 +127,7 @@ import com.cloudrf.android.soothsayer.interfaces.CustomPolygonInterface
 import com.atakmap.android.util.SimpleItemSelectedListener
 import com.atakmap.coremap.maps.assets.Icon
 import com.atakmap.coremap.maps.coords.GeoPoint
+import com.atakmap.map.AtakMapView
 import com.atakmap.map.layer.opengl.GLLayerFactory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -130,6 +137,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 
@@ -147,6 +155,7 @@ class PluginDropDownReceiver(
     private val settingView = templateView.findViewById<LinearLayout>(R.id.ilSettings)
     private val radioSettingView = templateView.findViewById<ScrollView>(R.id.ilRadioSetting)
     private val coOptView: View = templateView.findViewById(R.id.ilCoOpt)
+    private val satelliteView: View = templateView.findViewById(R.id.ilSatellite)
 
     private val settingsCooptView = templateView.findViewById<LinearLayout>(R.id.settingsCoOptLayout)
     private val settingsLayersView = templateView.findViewById<LinearLayout>(R.id.settingsLayersLayout)
@@ -190,6 +199,29 @@ class PluginDropDownReceiver(
     private val serverTypes: ArrayList<String> = ArrayList()
     private var allContacts: MutableList<Contact> = mutableListOf()
     private val coOptedMarkers = HashMap<String, CoOptedMarkerSettings>()
+
+    private val satelliteResolutions = arrayOf("Low (10m)", "Medium (5m)", "High (2m)")
+    private val satelliteResolutionValues = intArrayOf(10, 5, 2)
+    private val satelliteMaxRangeKm = 10
+    private val satelliteAzimuthRange = -180.0..180.0
+    private val satelliteElevationRange = 0.0..90.0
+
+    private val satelliteAltitudeKm = 20000.0
+
+    var satelliteAzimuth: Double = -123.0
+        private set
+    var satelliteElevation: Double = 45.0
+        private set
+    var satelliteRangeKm: Int = 5
+        private set
+    var satelliteResolution: Int = 5
+        private set
+    private var satelliteBoxListener: AtakMapView.OnMapMovedListener? = null
+
+    private var satelliteBoxAlreadyExists = false
+    private val satelliteRangeGroup: View by lazy {
+        satelliteView.findViewById(R.id.satellite_range_group)
+    }
     private val trackingHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var trackingRunnable: Runnable? = null
     private var preImportTemplates: ArrayList<TemplateDataModel> = ArrayList()
@@ -244,6 +276,7 @@ class PluginDropDownReceiver(
         initViews()
         initListeners()
         initSpotBeam()
+        initSatellite()
         Contacts.getInstance().addListener(this)
         onContactsSizeChange(null)
         // Register for map events to capture marker taps
@@ -262,6 +295,7 @@ class PluginDropDownReceiver(
         initTemplateSpinner()
         initMegapixelSpinner()
         initKmzExportSpinner()
+        seedDebugApiKey()
         initLoginView()
         initRecyclerview()
         initSettingRecyclerview()
@@ -689,6 +723,17 @@ class PluginDropDownReceiver(
         sharedPrefs?.set(Constant.PreferenceKey.sLoginProfiles, Gson().toJson(profiles))
     }
 
+
+    // Debug builds can use key from apikey.properties.
+    private fun seedDebugApiKey() {
+        if (!BuildConfig.DEBUG || BuildConfig.DEBUG_API_KEY.isEmpty()) return
+        if ((sharedPrefs?.get(Constant.PreferenceKey.sApiKey, "") ?: "").isNotEmpty()) return
+
+        sharedPrefs?.set(Constant.PreferenceKey.sApiKey, BuildConfig.DEBUG_API_KEY)
+        Constant.sAccessToken = BuildConfig.DEBUG_API_KEY
+        Log.d(TAG, "Seeded API key from apikey.properties")
+    }
+
     private fun initLoginView() {
         etLoginServerUrl = loginView.findViewById(R.id.etLoginServerUrl)
         etUsername = loginView.findViewById(R.id.etUserName)
@@ -919,6 +964,8 @@ class PluginDropDownReceiver(
         mainLayout.visibility = View.VISIBLE
         settingView.visibility = View.GONE
         spotBeamView.visibility = View.GONE
+        satelliteView.visibility = View.GONE
+        stopSatelliteBoxTracking()
     }
 
     private fun setEditViewVisibility(isEdit: Boolean) {
@@ -1429,6 +1476,7 @@ class PluginDropDownReceiver(
         // Clean up map event listener
         mapView?.mapEventDispatcher?.removeMapEventListener(MapEvent.ITEM_CLICK, this)
         stopTrackingLoop()
+        stopSatelliteBoxTracking()
         try {
             if (singleSiteCloudRFLayer != null) {
                 mapView.removeLayer(
@@ -1768,6 +1816,260 @@ class PluginDropDownReceiver(
         for (it in mapView.rootGroup.items)
             if (it.title == "AZIMUTH")
                 mapView.rootGroup.removeItem(it)
+    }
+
+
+    private fun initSatellite() {
+        templateView.findViewById<ImageButton>(R.id.satelliteButton).setOnClickListener {
+            showSatelliteView(true)
+        }
+        satelliteView.findViewById<ImageView>(R.id.satelliteBack).setOnClickListener {
+            showSatelliteView(false)
+        }
+
+        val azInput = satelliteView.findViewById<EditText>(R.id.satellite_az_input)
+        val elInput = satelliteView.findViewById<EditText>(R.id.satellite_el_input)
+        val rangeBar = satelliteView.findViewById<SeekBar>(R.id.satellite_range_bar)
+        val rangeValue = satelliteView.findViewById<TextView>(R.id.satellite_range_value)
+        val resSpinner = satelliteView.findViewById<Spinner>(R.id.satellite_res_spinner)
+
+        resSpinner.adapter = ArrayAdapter(
+            pluginContext, R.layout.spinner_item_layout, satelliteResolutions
+        ).apply { setDropDownViewResource(R.layout.spinner_dropdown_item_layout) }
+        rangeBar.max = satelliteMaxRangeKm
+
+        satelliteAzimuth = (sharedPrefs?.get(Constant.PreferenceKey.sSatelliteAzimuth, satelliteAzimuth)
+            ?: satelliteAzimuth).coerceIn(satelliteAzimuthRange)
+        satelliteElevation = (sharedPrefs?.get(Constant.PreferenceKey.sSatelliteElevation, satelliteElevation)
+            ?: satelliteElevation).coerceIn(satelliteElevationRange)
+        satelliteRangeKm = sharedPrefs?.get(Constant.PreferenceKey.sSatelliteRange, satelliteRangeKm)
+            ?: satelliteRangeKm
+        satelliteResolution = sharedPrefs?.get(Constant.PreferenceKey.sSatelliteResolution, satelliteResolution)
+            ?: satelliteResolution
+
+        azInput.setText(satelliteAzimuth.to2dp())
+        elInput.setText(satelliteElevation.to2dp())
+        rangeBar.progress = satelliteRangeKm.coerceIn(1, satelliteMaxRangeKm)
+        rangeValue.text = pluginContext.getString(R.string.satellite_range_value_fmt, satelliteRangeKm)
+        resSpinner.setSelection(satelliteResolutionValues.indexOf(satelliteResolution).coerceAtLeast(0))
+
+        resSpinner.onItemSelectedListener = object : SimpleItemSelectedListener() {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View,
+                position: Int, id: Long
+            ) {
+                satelliteResolution = satelliteResolutionValues[position]
+                sharedPrefs?.set(Constant.PreferenceKey.sSatelliteResolution, satelliteResolution)
+            }
+        }
+
+        val commitAzimuth = bindBoundedInput(
+            azInput,
+            satelliteAzimuthRange,
+            Constant.PreferenceKey.sSatelliteAzimuth,
+            { satelliteAzimuth }
+        ) { satelliteAzimuth = it }
+
+        val commitElevation = bindBoundedInput(
+            elInput,
+            satelliteElevationRange,
+            Constant.PreferenceKey.sSatelliteElevation,
+            { satelliteElevation }
+        ) { satelliteElevation = it }
+
+        rangeBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
+                satelliteRangeKm = progress.coerceAtLeast(1)
+                rangeValue.text =
+                    pluginContext.getString(R.string.satellite_range_value_fmt, satelliteRangeKm)
+                updateSatelliteBox()
+            }
+
+            override fun onStartTrackingTouch(sb: SeekBar?) {}
+
+            override fun onStopTrackingTouch(sb: SeekBar?) {
+                sharedPrefs?.set(Constant.PreferenceKey.sSatelliteRange, satelliteRangeKm)
+            }
+        })
+
+         satelliteView.findViewById<ImageButton>(R.id.satellite_go_button).setOnClickListener {
+            // Force the clamp first: a field that is still focused with out-of-range
+            // text has not been committed yet.
+            commitAzimuth()
+            commitElevation()
+            sendSatelliteRequest()
+        }
+    }
+
+    private fun sendSatelliteRequest() {
+        if (!pluginContext.isConnected()) {
+            pluginContext.toast(pluginContext.getString(R.string.internet_error))
+            return
+        }
+
+        val template = selectedMarkerType
+        val tx = template?.transmitter
+        if (template == null || tx == null) {
+            pluginContext.toast("Select a template first")
+            return
+        }
+
+        val centre = mapView?.centerPoint?.get() ?: return
+
+        val request = SatelliteRequest(
+            receiver = template.receiver.copy(
+                lat = centre.latitude,
+                lon = centre.longitude,
+                alt = 2.0,
+                units = "m",
+                rxg = 0.0,
+                rxs = -112
+            ),
+            satellite = SatelliteModel(
+                az = satelliteAzimuth,
+                el = satelliteElevation,
+                alt = satelliteAltitudeKm,
+                frq = tx.frq,
+                txw = tx.txw,
+                txg = template.antenna.txg
+            ),
+            output = template.output.copy(
+                rad = satelliteRangeKm.toDouble(),
+                res = satelliteResolution.toDouble(),
+                col = "RAINBOW.dBm"
+            )
+        )
+
+        repository.sendSatelliteData(request, object : PluginRepository.ApiCallBacks {
+            override fun onLoading() {}
+
+            override fun onSuccess(response: Any?) {
+                if (response !is ResponseModel) return
+
+                colourKeyView.setKey(response.key)
+
+                repository.downloadFile(
+                    response.kmz,
+                    KMZ_FOLDER_PATH,
+                    satelliteKmzFileName(tx.frq, tx.txw),
+                    listener = { isDownloaded, filePath ->
+                        if (isDownloaded) {
+                            loadKmzLayer(
+                                filePath,
+                                response.bounds,
+                                pluginContext.getString(R.string.satellite_layer)
+                            )
+                        }
+                    })
+            }
+
+            override fun onFailed(error: String?, responseCode: Int?) {
+                mapView.context.showAlert(
+                    "API error", error,
+                    positiveText = pluginContext.getString(R.string.ok_txt)
+                )
+            }
+        })
+    }
+
+    private fun satelliteKmzFileName(freqMHz: Double, powerW: Double): String {
+        val ts = SimpleDateFormat("dd_HHmm.ss", Locale.US).format(Date())
+        val freq = String.format(Locale.US, "%.0f", freqMHz)
+        val power = String.format(Locale.US, "%.0f", powerW)
+        return "${ts}_satellite_${freq}MHz_${power}W$KMZ_FILE"
+    }
+
+    private fun bindBoundedInput(
+        input: EditText,
+        range: ClosedFloatingPointRange<Double>,
+        prefKey: String,
+        current: () -> Double,
+        assign: (Double) -> Unit
+    ): () -> Unit {
+        val boundsError = pluginContext.getString(
+            R.string.satellite_bounds_error,
+            range.start.toBoundLabel(),
+            range.endInclusive.toBoundLabel()
+        )
+
+        val accept: (Double) -> Unit = { value ->
+            assign(value)
+            sharedPrefs?.set(prefKey, value)
+        }
+
+        input.addTextChangedListener {
+            val value = it.toString().toDoubleOrNull()
+            if (value == null || value !in range) {
+                input.error = boundsError
+            } else {
+                input.error = null
+                accept(value)
+            }
+        }
+
+        val commit = {
+            // Settle on the displayed 2dp value so the field and the stored value agree.
+            val text = (input.text.toString().toDoubleOrNull() ?: current()).coerceIn(range).to2dp()
+            accept(text.toDouble())
+            if (input.text.toString() != text) input.setText(text)
+            input.error = null
+        }
+
+        input.setOnFocusChangeListener { _, hasFocus -> if (!hasFocus) commit() }
+        return commit
+    }
+
+    /** Drops the trailing ".0" so bounds read as "-180" / "90" in the error message. */
+    private fun Double.toBoundLabel(): String =
+        if (this == toLong().toDouble()) toLong().toString() else toString()
+
+    /** AZ/EL are shown to 2dp. Locale.US so the decimal separator matches what parses back. */
+    private fun Double.to2dp(): String = String.format(Locale.US, "%.2f", this)
+
+    private fun showSatelliteView(show: Boolean) {
+        if (show) {
+            mainLayout.visibility = View.GONE
+            settingView.visibility = View.GONE
+            radioSettingView.visibility = View.GONE
+            loginView.visibility = View.GONE
+            satelliteView.visibility = View.VISIBLE
+            startSatelliteBoxTracking()
+        } else {
+            satelliteView.visibility = View.GONE
+            mainLayout.visibility = View.VISIBLE
+            stopSatelliteBoxTracking()
+        }
+    }
+
+    private fun startSatelliteBoxTracking() {
+        satelliteBoxAlreadyExists = CustomPolygonTool.getMaskingPolygon() != null
+        satelliteRangeGroup.visibility = if (!satelliteBoxAlreadyExists) View.VISIBLE else View.GONE
+        if (satelliteBoxAlreadyExists) return
+
+        updateSatelliteBox()
+        if (satelliteBoxListener != null) return
+
+        val view = mapView ?: return
+        val listener = AtakMapView.OnMapMovedListener { _, _ -> updateSatelliteBox() }
+        view.addOnMapMovedListener(listener)
+        satelliteBoxListener = listener
+    }
+
+    private fun stopSatelliteBoxTracking() {
+        val wasTracking = satelliteBoxListener != null
+        satelliteBoxListener?.let { mapView?.removeOnMapMovedListener(it) }
+        satelliteBoxListener = null
+        // Only clear away a box we put there. A hand-drawn one outlives the panel.
+        if (wasTracking && !satelliteBoxAlreadyExists) CustomPolygonTool.removeAutoBox()
+        satelliteBoxAlreadyExists = false
+    }
+
+    /** Re-centres the box on the middle of the screen and re-sizes it to the range. */
+    private fun updateSatelliteBox() {
+        if (satelliteBoxAlreadyExists) return
+        val centre = mapView?.centerPoint?.get() ?: return
+        CustomPolygonTool.setAutoBox(centre, satelliteRangeKm * 1000.0)
     }
 
     private fun showCoOptView(show: Boolean) {

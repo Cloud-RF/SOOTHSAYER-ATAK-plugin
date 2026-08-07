@@ -507,7 +507,7 @@ fun MapView.drawLinksForResponse(
                     powerLevel = data.signalPowerAtReceiverDBm
                 }
                 var distance = data.distanceToReceiverKm
-                if (distanceUnit == "miles") {
+                if (distanceUnit == "mi") {
                     distance = data.distanceToReceiverKm / 1.602
                 }
                 getLineColour(powerLevel)?.let { color ->

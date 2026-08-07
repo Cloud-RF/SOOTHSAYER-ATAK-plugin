@@ -133,7 +133,7 @@ class SettingsLinksController(
         }
 
         optionsDistanceUnitSwitch.setOnCheckedChangeListener { _, checked ->
-            distanceUnit = if (checked) "miles" else "km"
+            distanceUnit = if (checked) "mi" else "km"
         }
     }
 

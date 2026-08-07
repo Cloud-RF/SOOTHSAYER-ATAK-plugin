@@ -74,7 +74,7 @@
                 android:layout_weight="1"
                 android:text="        "
                 android:textOff="km"
-                android:textOn="miles" />
+                android:textOn="mi" />
         </LinearLayout>
 
     </LinearLayout>

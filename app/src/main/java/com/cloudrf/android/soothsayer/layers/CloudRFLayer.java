@@ -69,15 +69,15 @@ public class CloudRFLayer extends AbstractLayer {
         DrawingShape polygon = CustomPolygonTool.getMaskingPolygon();
 
         if(polygon != null) {
-            GeoImageMasker.Bounds newbounds = GeoImageMasker.getBounds(polygon.getPoints());
-
-            // Replace polygon bounds with response bounds as BSA dimensions != Area dimensions
-            if(bsa) {
-                newbounds.north = bounds.get(0);
-                newbounds.east = bounds.get(1);
-                newbounds.south = bounds.get(2);
-                newbounds.west = bounds.get(3);
-            }
+            // The mask converts lat/lon to pixels, so it has to be built in the image's own
+            // frame - and the response bounds are what that frame is, for BSA and area alike.
+            // The polygon's bounding box only coincides with it when the API honours the
+            // requested bounds exactly; the rest of the time the mask gets stretched to fill
+            // the image, which distorts a non-square polygon and clips the edges that land
+            // outside the bitmap.
+            GeoImageMasker.Bounds newbounds = (bounds != null && bounds.size() == 4)
+                    ? new GeoImageMasker.Bounds(bounds.get(0), bounds.get(2), bounds.get(1), bounds.get(3))
+                    : GeoImageMasker.getBounds(polygon.getPoints());
 
             bitmap = GeoImageMasker.cropImage(BitmapFactory.decodeFile(uri),newbounds,polygon,bsa);
         }else{

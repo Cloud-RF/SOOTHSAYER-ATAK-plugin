@@ -46,6 +46,7 @@
         \n\nCoverage:\nTo model a heatmap of RF coverage, check the coverage box in the settings and add a radio. Drag the marker to model coverage or click the play button. Colours are set in the template.
         \n\nBounds box:\nTo focus output on a user defined area, click the polygon button and draw a shape. Coverage calculations OR Best Site Analysis will focus effort on the polygon.
         \n\nCo-opt feature:\nTo model live data taken from the map in ATAK, click the deputy badge and then assign templates to the callsigns in the list. Only data with altitude will be shown. Click start to automatically model the data after an interval or when it moves.
+        \n\nSatellite coverage:\nSet the direction of the satellite as seen from the terminal. You can use a number of apps to get these angles. Use either the polygon tool or the radius slider to set the study area then click the button.
         \n\nBest Site Analysis:\nTo find the most efficient sites in an area, draw a polygon and click the magnifying glass button. Radio settings will come from the active template and the heatmap will show you where to place a radio for maximum coverage.
         \n\nRadio templates are downloaded automatically from your account or can be added as .json files to the SD card atak/SOOTHSAYER/templates folder.\nDocs, videos and templates are available at https://cloudrf.com/atak
         \n\nKMZ files can be found in the plugin KMZ folder and shared with team mates via the data package tool
@@ -55,6 +56,7 @@
     <string name="layer">%1$s Layer</string>
     <string name="coverage_layer">RF coverage layer</string>
     <string name="best_site_layer">Best Site Analysis</string>
+    <string name="satellite_layer">Satellite beam</string>
 
     <!--Prompt Dialog strings-->
     <string name="civ_delete_layer">Delete layer</string>
@@ -107,6 +109,7 @@
 
     <string name="settings_layers_button">Layers</string>
     <string name="settings_coopt_button">Co-Opt</string>
+    <string name="coopt_title">Co-Opt live data</string>
     <string name="settings_options_button">Options</string>
     <string name="settings_links_button">Links</string>
     <string name="settings_layers_title">Settings - Layers</string>
@@ -130,4 +133,27 @@
     <string name="choose_file">"Please choose file and icon both to import."</string>
     <string name="all_txt">ALL</string>
     <string name="file_path_message">"Your file has been saved in: \n \n%1$s\n \nYou can open this folder in a file manager to share the file."</string>
+
+    <string name="resolution">Resolution</string>
+    <string name="range">Range</string>
+    <string name="_45">45</string>
+    <string name="el">Elevation</string>
+    <string name="_180">180</string>
+    <string name="az">Azimuth</string>
+    <string name="az_short">Az</string>
+    <string name="el_short">El</string>
+    <string name="degree">°</string>
+    <string name="type">Type</string>
+    <string name="satellite">Satellite coverage</string>
+    <string name="satellite_range_value">10 km</string>
+    <string name="satellite_range_value_fmt">%1$d km</string>
+    <string name="satellite_go">Go</string>
+    <string name="satellite_bounds_error">Must be between %1$s and %2$s</string>
+    <string name="satellite_calculating">Calculating satellite coverage at %1$dm res…</string>
+    <string name="satellite_failed">Satellite coverage download failed</string>
+    <string name="satellite_bad_response">Server sent an unexpected response</string>
+    <string name="coverage_no_image">No coverage image in the server response</string>
+    <string name="coverage_layer_error">Could not draw the coverage layer: %1$s</string>
+    <string name="coverage_layer_hidden">Layer added but hidden. Turn Coverage on in Settings &gt; Layers</string>
+    <string name="use_drawn_polygon">User defined polygon</string>
 </resources>

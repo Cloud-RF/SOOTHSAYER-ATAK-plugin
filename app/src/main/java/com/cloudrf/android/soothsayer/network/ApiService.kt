@@ -4,6 +4,7 @@ import com.cloudrf.android.soothsayer.models.linksmodel.LinkRequest
 import com.cloudrf.android.soothsayer.models.linksmodel.LinkResponse
 import com.cloudrf.android.soothsayer.models.request.BestSiteRequestModel
 import com.cloudrf.android.soothsayer.models.request.MultisiteRequest
+import com.cloudrf.android.soothsayer.models.request.SatelliteRequest
 import com.cloudrf.android.soothsayer.models.request.TemplateDataModel
 import com.cloudrf.android.soothsayer.models.response.BestSiteResponse
 import com.cloudrf.android.soothsayer.models.response.LoginResponse
@@ -53,4 +54,9 @@ interface ApiService {
     fun bestSiteAnalysis(
         @Body request: BestSiteRequestModel? = null
     ): Call<BestSiteResponse>
+
+    @POST("/spotbeam")
+    fun sendSatelliteDataToServer(
+        @Body request: SatelliteRequest? = null
+    ): Call<ResponseModel>
 }

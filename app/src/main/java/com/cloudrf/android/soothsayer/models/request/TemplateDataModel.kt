@@ -60,13 +60,13 @@ data class Model(
 ): Serializable
 
 data class Output(
-        var col: String,
-        var nf: String, // noise floor. Can be -100 or database
-        val `out`: Int,
-        var rad: Double,
-        var res: Double,
-        var units: String, // m or m_amsl
-        var bounds: Bounds?
+    var col: String,
+    var nf: String?, // noise floor. Can be -114 or database
+    var `out`: Int, // 2 = Received Power (dBm), 4 = Signal to Noise (dB)
+    var rad: Double,
+    var res: Double,
+    var units: String?, // m or m_amsl
+    var bounds: Bounds?
 ): Serializable
 
 data class Bounds (
@@ -81,7 +81,17 @@ data class Receiver(
     var lat: Double,
     var lon: Double,
     var rxg: Double,
-    var rxs: Int
+    var rxs: Int,
+    var units: String? = null
+): Serializable
+
+data class SatelliteModel(
+    var az: Double,
+    var el: Double,
+    var alt: Double,
+    var frq: Double,
+    var txw: Double,
+    var txg: Double
 ): Serializable
 
 data class Template(

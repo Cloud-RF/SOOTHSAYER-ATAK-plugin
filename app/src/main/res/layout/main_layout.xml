@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:layout_weight="19"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp">
+        android:paddingHorizontal="5dp">
 
         <LinearLayout
             android:id="@+id/llMain"
@@ -36,7 +36,7 @@
                     android:layout_marginEnd="0dp"
                     android:layout_marginBottom="0dp"
                     android:background="@drawable/new_dark_button_bg"
-                    android:padding="6dp"
+                    android:padding="4dp"
                     android:src="@drawable/marker_icon_svg" />
 
                 <!--
@@ -50,7 +50,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="10dp"
-                    android:layout_marginLeft="5dp"
+                    android:layout_marginLeft="2dp"
                     android:layout_marginTop="3dp"
                     android:layout_marginEnd="0dp"
                     android:layout_marginBottom="0dp"
@@ -63,15 +63,15 @@
                     style="@style/darkButton"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:layout_marginLeft="5dp"
+                    android:layout_marginLeft="2dp"
                     android:layout_marginTop="3dp"
                     android:layout_marginEnd="0dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_toRightOf="@id/btnAddPolygon"
+                    android:layout_toRightOf="@id/satelliteButton"
+                    android:alpha="0.4"
+                    android:enabled="false"
                     android:padding="6dp"
                     android:src="@drawable/analysis"
-                    android:enabled="false"
-                    android:alpha="0.4"
                     android:visibility="visible"
                     tools:visibility="visible" />
 
@@ -82,12 +82,13 @@
                     android:layout_height="40dp"
                     android:layout_centerHorizontal="false"
                     android:layout_marginStart="10dp"
-                    android:layout_marginLeft="45dp"
+                    android:layout_marginLeft="2dp"
                     android:layout_marginTop="3dp"
                     android:layout_marginEnd="0dp"
                     android:layout_marginBottom="0dp"
+                    android:layout_toRightOf="@id/btnAddMarker"
                     android:contentDescription="Co-Opt a callsign"
-                    android:padding="6dp"
+                    android:padding="4dp"
                     android:src="@drawable/ic_sheriff_badge" />
 
                 <ImageButton
@@ -120,6 +121,19 @@
                     android:src="@drawable/ic_settings" />
 
                 <ImageButton
+                    android:id="@+id/satelliteButton"
+                    style="@style/darkButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginEnd="0dp"
+                    android:layout_toRightOf="@id/btnAddPolygon"
+                    android:contentDescription="@string/satellite"
+                    android:padding="4dp"
+                    android:src="@drawable/spotbeam_marker_icon" />
+
+                <ImageButton
                     android:id="@+id/btnPlayBtn"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
@@ -139,8 +153,8 @@
                     style="?android:attr/progressBarStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@id/btnBestSiteAnalysis"
                     android:layout_centerHorizontal="true"
+                    android:layout_toRightOf="@id/btnBestSiteAnalysis"
                     android:maxWidth="40dp"
                     android:maxHeight="40dp"
                     android:minWidth="40dp"
@@ -202,6 +216,11 @@
             android:visibility="gone" />
 
         <include
+            android:id="@+id/ilSatellite"
+            layout="@layout/satellite_layout"
+            android:visibility="gone" />
+
+        <include
             android:id="@+id/settingsCoOptLayout"
             layout="@layout/settings_co_opt_layout"
             android:visibility="gone" />
@@ -219,21 +238,22 @@
         <include
             android:id="@+id/colourPickerLayout"
             layout="@layout/colour_picker"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <include
             android:id="@+id/templatesMenuLayout"
             layout="@layout/templates_layout"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <include
             android:id="@+id/newTemplateMenuLayout"
             layout="@layout/new_template_layout"
-            android:visibility="gone"/>
+            android:visibility="gone" />
+
         <include
             android:id="@+id/pickIconLayout"
             layout="@layout/pick_icon_layout"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/co_opt_next_update_textview"
@@ -242,7 +262,7 @@
             android:gravity="end"
             android:padding="8dp"
             android:text=""
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <View
             android:layout_width="match_parent"
@@ -256,9 +276,9 @@
             android:gravity="end"
             android:paddingEnd="6dp"
             android:paddingBottom="4dp"
-            android:textSize="9sp"
+            android:text="@string/plugin_version"
             android:textColor="#555555"
-            android:text="@string/plugin_version" />
+            android:textSize="9sp" />
 
     </LinearLayout>
 

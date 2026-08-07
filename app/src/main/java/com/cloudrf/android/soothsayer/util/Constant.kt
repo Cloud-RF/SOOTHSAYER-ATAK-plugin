@@ -33,5 +33,9 @@ object Constant {
         const val sCoOptDistanceRefreshEnabled = "Co-Opt Distance Refresh Enabled"
         const val sCoOptDistanceRefreshThreshold = "Co-Opt Distance Refresh Threshold"
         const val sLoginProfiles = "Login Profiles"
+        const val sSatelliteAzimuth = "Satellite Azimuth"
+        const val sSatelliteElevation = "Satellite Elevation"
+        const val sSatelliteRange = "Satellite Range"
+        const val sSatelliteResolution = "Satellite Resolution"
     }
 }

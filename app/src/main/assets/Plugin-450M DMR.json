@@ -4,7 +4,7 @@
     "ant": 1,
     "azi": "0",
     "fbr": 1.0,
-    "hbw": 0,
+    "hbw": 1,
     "mode": "template",
     "pol": "v",
     "tlt": 0,
@@ -30,13 +30,13 @@
     "ked": 2,
     "pe": 2,
     "pm": 4,
-    "rel": 50
+    "rel": 70
   },
   "network": "ATAK",
   "output": {
     "col": "LTE.dBm",
     "mod": 7,
-    "nf": "-105",
+    "nf": "-115",
     "out": 2,
     "rad": 5.0,
     "res": 10.0,

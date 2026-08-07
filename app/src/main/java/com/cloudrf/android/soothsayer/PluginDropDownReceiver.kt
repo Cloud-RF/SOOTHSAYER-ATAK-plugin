@@ -202,9 +202,9 @@ class PluginDropDownReceiver(
     private var allContacts: MutableList<Contact> = mutableListOf()
     private val coOptedMarkers = HashMap<String, CoOptedMarkerSettings>()
 
-    private val satelliteResolutions = arrayOf("Low (1MP)", "Medium (4MP)", "High (16MP)")
-    private val satelliteResolutionValues = doubleArrayOf(1.0, 4.0, 16.0)
-    private val satelliteMaxRangeKm = 30
+    private val satelliteResolutions = arrayOf("Low (1MP)", "Medium (4MP)", "High (8MP)")
+    private val satelliteResolutionValues = doubleArrayOf(1.0, 4.0, 8.0)
+    private val satelliteMaxRangeKm = 10
     private val satelliteAzimuthRange = 0.0..360.0
     private val satelliteElevationRange = 5.0..90.0
 
@@ -2020,6 +2020,7 @@ class PluginDropDownReceiver(
             mapCentre
         }
         val radiusKm = if (area != null) radiusKmToCover(area, centre) else satelliteRangeKm.toDouble()
+        val resolutionM = megapixelCalculator(radiusKm, satelliteResolution)
 
         val request = SatelliteRequest(
             receiver = template.receiver.copy(
@@ -2040,14 +2041,16 @@ class PluginDropDownReceiver(
             ),
             output = template.output.copy(
                 rad = radiusKm,
-                res = megapixelCalculator(radiusKm, satelliteResolution),
+                res = resolutionM,
                 col = "SATCOM.dBm"
             )
         )
 
         setSatelliteBusy(true)
 
-        pluginContext.toast(pluginContext.getString(R.string.satellite_calculating))
+        pluginContext.toast(
+            pluginContext.getString(R.string.satellite_calculating, Math.round(resolutionM).toInt())
+        )
 
         repository.sendSatelliteData(request, object : PluginRepository.ApiCallBacks {
             override fun onLoading() {}

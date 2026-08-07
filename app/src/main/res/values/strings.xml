@@ -149,7 +149,7 @@
     <string name="satellite_range_value_fmt">%1$d km</string>
     <string name="satellite_go">Go</string>
     <string name="satellite_bounds_error">Must be between %1$s and %2$s</string>
-    <string name="satellite_calculating">Calculating satellite coverage…</string>
+    <string name="satellite_calculating">Calculating satellite coverage at %1$dm res…</string>
     <string name="satellite_failed">Satellite coverage download failed</string>
     <string name="satellite_bad_response">Server sent an unexpected response</string>
     <string name="coverage_no_image">No coverage image in the server response</string>

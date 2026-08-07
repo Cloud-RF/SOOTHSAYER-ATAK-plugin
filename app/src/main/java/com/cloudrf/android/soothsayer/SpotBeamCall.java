@@ -237,6 +237,16 @@ public class SpotBeamCall {
 
             int responseCode = con.getResponseCode();
 
+            if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                receiver.getSpotBeamView().post(() -> ExtensionsKt.showAlert(
+                        receiver.getMapView().getContext(),
+                        "Unsupported server",
+                        "This feature requires a CloudRF/SOOTHSAYER server with API version 3.35 or greater.",
+                        "OK", null, null, null, null));
+
+                return "ERROR";
+            }
+
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                 String inputLine;

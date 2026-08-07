@@ -49,8 +49,13 @@ import com.google.gson.reflect.TypeToken
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
+import java.util.Locale
 import java.util.UUID
 
+
+private fun linkLabel(snr: Int, linkUnits: String, distance: Double, distanceUnit: String): String {
+    return String.format(Locale.US, "%d %s - %.1f %s", snr, linkUnits, distance, distanceUnit)
+}
 
 fun MapView.drawLine(
     context: Context,
@@ -61,6 +66,8 @@ fun MapView.drawLine(
     lineColor: Int,
     snr: Int,
     linkUnits: String,
+    distance: Double,
+    distanceUnit: String,
     mapGroup: MapGroup?,
     markerLinkList: ArrayList<LinkDataModel>,
     handleVisibility: () -> Unit
@@ -75,10 +82,12 @@ fun MapView.drawLine(
     val dsUid = UUID.randomUUID().toString()
     val ds = DrawingShape(mapView, dsUid)
 
+    val label = linkLabel(snr, linkUnits, distance, distanceUnit)
+
     ds.strokeColor = lineColor
     ds.points = arrayOf(startPoint, endPoint)
     ds.hideLabels(false)
-    ds.lineLabel = "${snr} ${linkUnits}" // is either dB or dBm
+    ds.lineLabel = label
     ds.remarks = "SOOTHSAYER" // used for id for removal later
     dslist.add(ds)
 
@@ -87,8 +96,8 @@ fun MapView.drawLine(
 
     lineGroup?.addItem(mp)
     mp.movable = true
-    mp.title = "${snr} ${linkUnits}"
-    mp.lineLabel = "${snr} ${linkUnits}"
+    mp.title = label
+    mp.lineLabel = label
     mp.hideLabels(false)
     mp.toggleMetaData("labels_on", true)
     links.add(Link(lineUid, startPoint, endPoint))
@@ -483,6 +492,7 @@ fun MapView.drawLinksForResponse(
     transmitter: Transmitter?,
     linkResponse: LinkResponse?,
     linkUnits: String,
+    distanceUnit: String,
     lineGroup: MapGroup?,
     linksList: ArrayList<Link>,
     markerLinkList: ArrayList<LinkDataModel>,
@@ -495,6 +505,10 @@ fun MapView.drawLinksForResponse(
                 var powerLevel = data.signalToNoiseRatioDB
                 if (linkUnits == "dBm") {
                     powerLevel = data.signalPowerAtReceiverDBm
+                }
+                var distance = data.distanceToReceiverKm
+                if (distanceUnit == "miles") {
+                    distance = data.distanceToReceiverKm / 1.602
                 }
                 getLineColour(powerLevel)?.let { color ->
                     this.drawLine(
@@ -510,6 +524,8 @@ fun MapView.drawLinksForResponse(
                         color,
                         powerLevel.toInt(),
                         linkUnits,
+                        distance,
+                        distanceUnit,
                         lineGroup, markerLinkList = markerLinkList
                     ) {
                         handleLinkLineVisibility()

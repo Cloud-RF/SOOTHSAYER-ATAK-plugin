@@ -53,14 +53,30 @@
             android:layout_height="match_parent"
             android:layout_weight="1" />
 
-        <Switch
-            android:id="@+id/optionsUnitSwitch"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:text="Units"
-            android:textOff="dB"
-            android:textOn="dBm" />
+            android:orientation="vertical">
+
+            <Switch
+                android:id="@+id/optionsUnitSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="Units"
+                android:textOff="dB"
+                android:textOn="dBm" />
+
+            <Switch
+                android:id="@+id/optionsDistanceUnitSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="        "
+                android:textOff="km"
+                android:textOn="miles" />
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout

@@ -1146,6 +1146,7 @@ class PluginDropDownReceiver(
                             linkDataModel.linkRequest.transmitter,
                             linkDataModel.linkResponse,
                             settingsLinksController?.linkUnits ?: "dB",
+                            settingsLinksController?.distanceUnit ?: "km",
                             lineGroup,
                             linkDataModel.links,
                             markerLinkList,

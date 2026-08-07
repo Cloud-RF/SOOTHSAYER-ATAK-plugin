@@ -29,6 +29,7 @@ class SettingsLinksController(
 
     private var colourPickerCurId = 0
     var linkUnits = "dB"
+    var distanceUnit = "km"
 
     private val optionsColour1 = ColourRef(0xFF00FF00.toInt())
     private val optionsColour2 = ColourRef(0xFFFFb600.toInt())
@@ -46,6 +47,7 @@ class SettingsLinksController(
     private val btnOptionsColour4: Button = settingsOptionsView.findViewById(R.id.btnOptionsColour4)
 
     private val optionsUnitSwitch: Switch = settingsOptionsView.findViewById(R.id.optionsUnitSwitch)
+    private val optionsDistanceUnitSwitch: Switch = settingsOptionsView.findViewById(R.id.optionsDistanceUnitSwitch)
     private val optionsUnitViews = listOf<TextView>(
         settingsOptionsView.findViewById(R.id.optionsUnit1),
         settingsOptionsView.findViewById(R.id.optionsUnit2),
@@ -128,6 +130,10 @@ class SettingsLinksController(
             optionsUnitViews.forEach { it.text = linkUnits }
             val defaults = if (checked) listOf("-80","-90","-100","-105") else listOf("25","15","5","0")
             dbEdits.forEachIndexed { i, e -> e.setText(defaults[i]) }
+        }
+
+        optionsDistanceUnitSwitch.setOnCheckedChangeListener { _, checked ->
+            distanceUnit = if (checked) "mi" else "km"
         }
     }
 

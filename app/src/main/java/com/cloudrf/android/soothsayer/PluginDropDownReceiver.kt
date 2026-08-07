@@ -617,7 +617,7 @@ class PluginDropDownReceiver(
         spinner.onItemSelectedListener = object : SimpleItemSelectedListener() {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
-                view: View,
+                view: View?,
                 position: Int, id: Long
             ) {
                 selectedMarkerType = templateItems[position]
@@ -1157,7 +1157,7 @@ class PluginDropDownReceiver(
 
                     override fun onFailed(error: String?, responseCode: Int?) {
                         //stopTrackingLoop()
-                        pluginContext.toast("Link error: $error")
+                        mapView.context.showAlert("Link error", error, positiveText = pluginContext.getString(R.string.ok_txt))
                     }
 
                 })
@@ -1943,7 +1943,7 @@ class PluginDropDownReceiver(
         resSpinner.onItemSelectedListener = object : SimpleItemSelectedListener() {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
-                view: View,
+                view: View?,
                 position: Int, id: Long
             ) {
                 satelliteResolution = satelliteResolutionValues[position]

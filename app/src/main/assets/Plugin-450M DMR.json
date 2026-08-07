@@ -4,7 +4,7 @@
     "ant": 1,
     "azi": "0",
     "fbr": 1.0,
-    "hbw": 0,
+    "hbw": 1,
     "mode": "template",
     "pol": "v",
     "tlt": 0,
@@ -30,7 +30,7 @@
     "ked": 2,
     "pe": 2,
     "pm": 4,
-    "rel": 50
+    "rel": 70
   },
   "network": "ATAK",
   "output": {
